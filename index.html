@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Legend - A Karrier</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap');
+        @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css");
+
+        :root { 
+            --primary-color: #007bff; 
+            --success-color: #28a745; 
+            --dark-bg: #1a1a1a;
+            --text-light: #f0f2f5;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.2);
+            --diamond-color: #3498db;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            background-image: url('https://images.pexels.com/photos/270085/pexels-photo-270085.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            color: var(--text-light);
+        }
+
+        /* --- ÁLTALÁNOS SEGÉDOSZTÁLYOK --- */
+        .hidden { display: none !important; }
+
+        /* --- BETÖLTŐ --- */
+        .loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999;
+            background: #111; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.5s ease-out;
+        }
+        .loading-screen.fade-out { opacity: 0; pointer-events: none; }
+        .football-icon { width: 80px; animation: spin 2s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* --- KARAKTERKÉSZÍTŐ --- */
+        .container {
+            background-color: rgba(255, 255, 255, 0.98); border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.25); width: 100%; max-width: 500px;
+            color: #333;
+            overflow: hidden;
+        }
+        .form-carousel { display: flex; transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1); }
+        .form-step { flex: 0 0 100%; padding: 30px 40px; box-sizing: border-box; }
+        input[type="text"].invalid { border-color: red; animation: shake 0.3s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .button { padding: 12px 25px; border: none; color: white; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .button:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .next-btn { background-color: var(--primary-color); }
+        .prev-btn { background-color: #6c757d; }
+        .submit-btn { background: linear-gradient(45deg, var(--success-color), #218838); width: 100%; }
+        .navigation-buttons { display: flex; justify-content: space-between; margin-top: 20px; }
+        .custom-select-wrapper { position: relative; }
+        .select-button { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; background-color: white; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+        .selected-option img, .option img { width: 24px; margin-right: 10px; border-radius: 3px; }
+        .select-options { position: absolute; top: 105%; left: 0; width: 100%; background: white; border-radius: 8px; border: 1px solid #ccc; max-height: 150px; overflow-y: auto; z-index: 10; display: none; }
+        .select-options.active { display: block; } .option { padding: 10px; display: flex; align-items: center; cursor: pointer; } .option:hover { background-color: #f0f2f5; }
+        .slider-group { text-align: center; } .slider-value { font-size: 1.5em; font-weight: bold; color: var(--primary-color); } input[type="range"] { width: 100%; }
+        .formation-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .formation-card { padding: 15px; border: 2px solid #ddd; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        .formation-card.selected { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
+
+
+        /* --- OVERLAY JELENETEK --- */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--dark-bg);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 10000; opacity: 0; transition: opacity 0.5s ease-in; pointer-events: none;
+        }
+        .overlay.active { opacity: 1; pointer-events: auto; }
+        .scene-container { width: 90%; max-width: 800px; position: absolute; }
+        #desk, #character-signing-group, #jersey-group { opacity: 0; transition: opacity 0.5s ease-in-out, transform 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
+        #character-signing-group { transform: translateY(50px); }
+        #signature-path { stroke-dasharray: 100; stroke-dashoffset: 100; }
+        #jersey-group { transform: translateY(20px); }
+        #flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: white; opacity: 0; pointer-events: none; }
+        .flashing { animation: flash 0.3s 3; }
+        @keyframes flash { 0%, 100% { opacity: 0; } 50% { opacity: 0.8; } }
+        .final-message { position: absolute; text-align: center; color: white; opacity: 0; transform: translateY(20px); transition: opacity 0.5s, transform 0.5s; }
+        .final-message.active { opacity: 1; transform: translateY(0); }
+        #pressConferenceOverlay { align-items: flex-end; }
+        .press-conference-ui { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; color: var(--text-light); width: 100%; max-width: 700px; text-align: center; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); border-radius: 15px 15px 0 0; padding: 20px; opacity: 0; transform: translateY(100%); transition: opacity 0.5s ease-out, transform 0.5s ease-out; box-sizing: border-box; }
+        .press-conference-ui.visible { opacity: 1; transform: translateY(0); }
+        #press-conference-svg g { opacity: 0; transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        #player-character-press { transform: translateY(30px); }
+        #journalist-question { font-size: 1.5em; font-weight: 700; margin-bottom: 20px; border-left: 4px solid var(--primary-color); padding-left: 15px; text-align: left; overflow-wrap: break-word; }
+        .answers-grid { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
+        .answer-btn { background-color: #34495e; color: var(--text-light); padding: 15px; border: 1px solid #7f8c8d; border-radius: 8px; font-size: 1em; cursor: pointer; transition: all 0.2s; }
+        .answer-btn:hover { background-color: #4a627a; border-color: var(--primary-color); }
+        .continue-btn { margin-top: 20px; background-color: var(--success-color); padding: 12px 35px; }
+
+
+        /* --- MECCS EREDMÉNY KÉPERNYŐ --- */
+        #matchResultOverlay .card {
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px 40px;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        .match-result-header {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .match-result-team {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .match-result-team img { width: 80px; }
+        .match-result-team h3 { margin: 0; font-size: 1.5em; }
+        .match-result-score { font-size: 4em; font-weight: 900; }
+        .match-summary h4 { font-size: 1.5em; color: var(--primary-color); margin-bottom: 10px; }
+        .match-summary p { margin: 5px 0; font-size: 1.1em; }
+
+
+        /* --- FŐ IRÁNYÍTÓPULT --- */
+        .main-hub {
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(15px);
+            display: flex;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 80px; background: rgba(0,0,0,0.3);
+            display: flex; flex-direction: column; align-items: center;
+            padding-top: 20px; gap: 15px; border-right: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .nav-btn {
+            background: none; border: none; color: var(--text-light);
+            font-size: 24px; cursor: pointer; padding: 15px; width: 100%;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .nav-btn:hover, .nav-btn.active { background-color: var(--primary-color); color: white; }
+        
+        .hub-content-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .profile-btn {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            color: var(--text-light); padding: 8px 15px; border-radius: 20px;
+            font-size: 1em; font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; gap: 10px; transition: background-color 0.2s;
+        }
+        .profile-btn:hover { background-color: rgba(255,255,255,0.1); }
+        
+        .currency-display { display: flex; gap: 15px; }
+        .currency-item {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            padding: 8px 15px; border-radius: 20px; display: flex;
+            align-items: center; gap: 8px; font-weight: bold; cursor: pointer;
+        }
+        .currency-item i.fa-coins { color: #f1c40f; }
+        .currency-item i.fa-gem { color: var(--diamond-color); }
+        .plus-icon {
+            background: var(--success-color); color: white;
+            border-radius: 50%; width: 20px; height: 20px;
+            display: inline-flex; justify-content: center; align-items: center;
+            font-weight: bold; margin-left: 5px; transition: transform 0.2s;
+        }
+        .currency-item:hover .plus-icon { transform: scale(1.1); }
+        
+        .main-content {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .screen { padding: 20px; }
+        
+        /* Dashboard Grid & Kártyák */
+        .dashboard-grid, .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .dashboard-card, .stat-card, .store-package {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .card-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+        .card-header i { font-size: 24px; color: var(--primary-color); }
+        .card-header h3 { margin: 0; font-weight: 700; }
+        .player-profile-card .team-logo { width: 60px; height: 60px; }
+        .player-info h4 { margin: 0 0 5px 0; }
+        .player-info p { margin: 0; color: #ccc; }
+
+        /* Store Képernyő */
+        .store-screen h2 { text-align: center; font-size: 2em; margin-bottom: 30px; }
+        .store-package { text-align: center; }
+        .store-package .icon { font-size: 3em; }
+        .store-package h3 { margin: 15px 0 5px 0; }
+        .store-package p { margin: 0 0 15px 0; color: #ccc; }
+        .buy-btn { width: 100%; padding: 12px; font-size: 1.1em; }
+
+        /* Profil Képernyő */
+        .profile-screen h2 { text-align: center; font-size: 2em; margin-bottom: 30px; }
+        .stat-card { text-align: center; }
+        .stat-card .stat-value { font-size: 2.5em; font-weight: 900; color: var(--primary-color); }
+        .stat-card .stat-label { font-size: 1em; color: #ccc; margin-top: 5px; }
+        
+        /* Bajnoki Táblázat */
+        .league-table-container h2 { text-align: center; font-size: 2em; margin-bottom: 20px; }
+        .league-table { width: 100%; border-collapse: collapse; }
+        .league-table th, .league-table td { padding: 12px 15px; text-align: left; }
+        .league-table thead { background-color: rgba(0,0,0,0.5); }
+        .league-table tbody tr { border-bottom: 1px solid var(--border-color); }
+        .league-table tbody tr:last-child { border-bottom: none; }
+        .league-table .player-team { background-color: rgba(0, 123, 255, 0.2); font-weight: bold; }
+        
+    </style>
+</head>
+<body>
+
+    <div class="loading-screen" id="loadingScreen">
+        <svg class="football-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#ffffff" d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM152 352h32v32c0 17.7-14.3 32-32 32s-32-14.3-32-32V320c0-17.7 14.3-32 32-32h64c17.7 0 32 14.3 32 32v64c0 17.7-14.3 32-32 32s-32-14.3-32-32V352H152zM280 288c-17.7 0-32 14.3-32 32v96c0 17.7 14.3 32 32 32h96c17.7 0 32-14.3 32-32V320c0-17.7-14.3-32-32-32H280zm64-224c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32h64c17.7 0 32-14.3 32-32V96c0-17.7-14.3-32-32-32H344zM120 96c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32s32-14.3 32-32V128c0-17.7-14.3-32-32-32zm88 64c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32h64c17.7 0 32-14.3 32-32V192c0-17.7-14.3-32-32-32H208z"/></svg>
+        <h1 class="loading-title">Football Legend</h1>
+    </div>
+
+    <div class="container hidden" id="characterCreator">
+        <div class="form-carousel" id="formCarousel">
+             <div class="form-step">
+                <h2>Add meg a neved</h2>
+                <input type="text" id="playerName" placeholder="pl. Minta János" required>
+                <div class="navigation-buttons" style="justify-content: flex-end;"><button class="button next-btn">Tovább &rarr;</button></div>
+            </div>
+            <div class="form-step">
+                <h2>Válaszd ki a nemzetiséged</h2>
+                <div class="custom-select-wrapper">
+                    <div class="select-button" id="nationalitySelect">
+                        <div class="selected-option" data-value="hu"><img src="https://flagcdn.com/w40/hu.png"><span>Magyar</span></div><span>&#9660;</span>
+                    </div>
+                    <div class="select-options">
+                        <div class="option" data-value="hu" data-name="Magyar"><img src="https://flagcdn.com/w40/hu.png">Magyar</div>
+                        <div class="option" data-value="gb-eng" data-name="Angol"><img src="https://flagcdn.com/w40/gb-eng.png">Angol</div>
+                        <div class="option" data-value="de" data-name="Német"><img src="https://flagcdn.com/w40/de.png">Német</div>
+                    </div>
+                </div>
+                <div class="navigation-buttons"><button class="button prev-btn">&larr; Vissza</button><button class="button next-btn">Tovább &rarr;</button></div>
+            </div>
+            <div class="form-step">
+                <h2>Állítsd be a kezdő erőnléted</h2>
+                <div class="slider-group">
+                    <div id="sliderValue" class="slider-value">60</div>
+                    <input type="range" id="potentialSlider" min="20" max="100" value="60">
+                </div>
+                <div class="navigation-buttons"><button class="button prev-btn">&larr; Vissza</button><button class="button next-btn">Tovább &rarr;</button></div>
+            </div>
+            <div class="form-step">
+                <h2>Mi a kedvenc formációd?</h2>
+                <div class="formation-grid" id="formationGrid">
+                    <div class="formation-card">4-4-2</div><div class="formation-card">4-3-3</div><div class="formation-card">3-5-2</div>
+                </div>
+                <div class="navigation-buttons"><button class="button prev-btn">&larr; Vissza</button><button class="button next-btn">Tovább &rarr;</button></div>
+            </div>
+            <div class="form-step">
+                <h2>Készen állsz a nagy lépésre?</h2>
+                <p style="text-align: center; color: #555;">Egy top csapat szerződést ajánl. Fogadd el, hogy elindítsd a karriered!</p>
+                <div class="navigation-buttons">
+                    <button class="button prev-btn">&larr; Vissza</button>
+                    <button class="button submit-btn" id="startGameButton">Szerződés Aláírása</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="animationOverlay">
+        <div class="scene-container">
+            <svg id="animation-svg" viewBox="0 0 800 450">
+                <rect width="800" height="450" fill="#1a1a1a"/>
+                <g id="desk">
+                    <rect x="150" y="300" width="500" height="150" fill="#4a3f35"/>
+                    <rect x="150" y="295" width="500" height="10" fill="#6b5b4f"/>
+                    <text x="400" y="350" font-family="Roboto" font-size="20" fill="#fff" text-anchor="middle" id="team-name-on-desk"></text>
+                </g>
+                <g id="character-signing-group">
+                    <path d="M 370 230 C 370 200, 430 200, 430 230 L 440 320 L 360 320 Z" fill="#34495e" />
+                    <path d="M 390 230 L 400 245 L 410 230 Z" fill="#ffffff"/>
+                    <rect x="380" y="175" width="40" height="40" rx="20" fill="#f0c2a2"/>
+                    <path d="M 380 175 A 20 20 0 0 1 420 175 L 420 185 L 380 185 Z" fill="#4a3f35"/>
+                    <circle cx="380" cy="280" r="8" fill="#f0c2a2" />
+                    <rect x="385" y="278" width="15" height="4" fill="#2c3f50" transform="rotate(-20 385 280)"/>
+                </g>
+                <g id="contract-group">
+                    <rect x="325" y="270" width="150" height="30" fill="white" transform="rotate(-5 400 285)"/>
+                    <path id="signature-path" d="M350,280 C370,270 390,270 410,280" stroke="black" stroke-width="2" fill="none"/>
+                </g>
+                <g id="jersey-group">
+                    <rect x="325" y="150" width="150" height="150" fill="red" id="jersey-color" rx="10"/>
+                    <image id="jersey-logo" x="362.5" y="160" width="75" height="75" href=""/>
+                    <text id="jersey-name" x="400" y="265" font-family="Roboto" font-weight="900" font-size="24" fill="white" text-anchor="middle"></text>
+                </g>
+            </svg>
+        </div>
+        <div id="flash-overlay"></div>
+        <div class="final-message" id="finalMessage">
+            <h1 id="final-team-name"></h1>
+            <p>Üdv a csapatban!</p>
+        </div>
+    </div>
+    
+    <div class="overlay" id="pressConferenceOverlay">
+        <div class="scene-container press-conference-scene">
+            <svg id="press-conference-svg" viewBox="0 0 800 450">
+                <g id="press-backdrop">
+                    <rect x="50" y="50" width="700" height="300" fill="#2c3e50" rx="10" />
+                    <rect x="50" y="50" width="700" height="300" id="backdrop-color" fill-opacity="0.8" rx="10"/>
+                    <image id="backdrop-logo" x="350" y="100" width="100" height="100" href=""/>
+                </g>
+                <g id="press-table">
+                    <rect x="0" y="350" width="800" height="100" fill="#4a3f35" />
+                    <rect x="0" y="345" width="800" height="10" fill="#6b5b4f"/>
+                    <circle cx="280" cy="340" r="10" fill="#111"/> <rect x="278" y="310" width="4" height="30" fill="#555"/>
+                    <circle cx="400" cy="340" r="10" fill="#111"/> <rect x="398" y="310" width="4" height="30" fill="#555"/>
+                    <circle cx="520" cy="340" r="10" fill="#111"/> <rect x="518" y="310" width="4" height="30" fill="#555"/>
+                </g>
+                <g id="manager-character">
+                    <path d="M 170 260 C 170 230, 230 230, 230 260 L 240 350 L 160 350 Z" fill="#2c3e50" />
+                    <path d="M 190 260 L 200 280 L 210 260 Z" fill="#ffffff"/>
+                    <path d="M 198 260 L 200 290 L 202 260 Z" fill="#c0392b" />
+                    <rect x="180" y="205" width="40" height="40" rx="20" fill="#e0b395"/>
+                    <path d="M 180 205 A 20 20 0 0 1 220 205 L 215 215 L 185 215 Z" fill="#333333"/>
+                    <circle cx="180" cy="345" r="10" fill="#e0b395" /> <circle cx="220" cy="345" r="10" fill="#e0b395" />
+                </g>
+                <g id="coach-character">
+                    <path d="M 570 260 C 570 230, 630 230, 630 260 L 640 350 L 560 350 Z" id="coach-tracksuit" fill="#DA291C" />
+                    <rect x="598" y="260" width="4" height="90" fill="rgba(255,255,255,0.5)"/>
+                    <rect x="580" y="205" width="40" height="40" rx="20" fill="#f0c2a2"/>
+                    <circle cx="600" cy="205" r="20" fill="#a9a9a9"/>
+                    <circle cx="580" cy="345" r="10" fill="#f0c2a2" /> <circle cx="620" cy="345" r="10" fill="#f0c2a2" />
+                </g>
+                <g id="player-character-press">
+                    <path d="M 370 260 C 370 230, 430 230, 430 260 L 440 350 L 360 350 Z" fill="#34495e" />
+                    <path d="M 390 260 L 400 280 L 410 260 Z" fill="#ffffff"/>
+                    <path d="M 398 260 L 400 290 L 402 260 Z" fill="#007bff" />
+                    <rect x="380" y="205" width="40" height="40" rx="20" fill="#f0c2a2"/>
+                    <path d="M 380 205 A 20 20 0 0 1 420 205 L 420 215 L 380 215 Z" fill="#4a3f35"/>
+                    <circle cx="380" cy="345" r="10" fill="#f0c2a2" /> <circle cx="420" cy="345" r="10" fill="#f0c2a2" />
+                </g>
+            </svg>
+        </div>
+        <div class="press-conference-ui" id="pressConferenceUI">
+            <h2 id="journalist-question">A kérdés helye...</h2>
+            <div class="answers-grid" id="answersGrid"></div>
+            <div id="pressSummary" style="display: none;">
+                 <button class="button continue-btn" id="continueBtn">Karrier Folytatása</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="overlay" id="matchResultOverlay">
+        <div class="card">
+            <div class="match-result-header">
+                <div class="match-result-team">
+                    <img id="resultHomeLogo" src="">
+                    <h3 id="resultHomeName">Hazai</h3>
+                </div>
+                <div class="match-result-score" id="resultScore">0 - 0</div>
+                <div class="match-result-team">
+                    <img id="resultAwayLogo" src="">
+                    <h3 id="resultAwayName">Vendég</h3>
+                </div>
+            </div>
+            <div class="match-summary">
+                <h4>Teljesítményed</h4>
+                <p id="resultPlayerPerformance">Gólok: 0, Gólpasszok: 0</p>
+                <h4>Jutalom</h4>
+                <p id="resultEarnings">Fizetés: €0, Bónusz: €0</p>
+            </div>
+            <button class="button continue-btn" id="matchResultContinueBtn">Tovább</button>
+        </div>
+    </div>
+
+
+    <!-- Fő Játék Képernyő -->
+    <div class="main-hub hidden" id="mainHub">
+        <nav class="sidebar">
+            <button class="nav-btn active" data-screen="dashboardScreen"><i class="fas fa-tachometer-alt"></i></button>
+            <button class="nav-btn" data-screen="leagueScreen"><i class="fas fa-trophy"></i></button>
+            <button class="nav-btn" data-screen="trophyRoomScreen"><i class="fas fa-award"></i></button>
+            <button class="nav-btn" data-screen="nationalTeamScreen"><i class="fas fa-flag"></i></button>
+        </nav>
+        <div class="hub-content-wrapper">
+            <header class="top-bar">
+                <button id="profileBtn" class="profile-btn">
+                    <i class="fas fa-user"></i> 
+                    <span id="headerPlayerName">Játékos Neve</span>
+                </button>
+                <div class="currency-display">
+                    <div class="currency-item" id="coinStoreBtn">
+                        <i class="fas fa-coins"></i>
+                        <span id="headerPlayerBalance">0</span>
+                        <span class="plus-icon">+</span>
+                    </div>
+                    <div class="currency-item" id="diamondStoreBtn">
+                        <i class="fas fa-gem"></i>
+                        <span id="headerPlayerDiamonds">0</span>
+                        <span class="plus-icon">+</span>
+                    </div>
+                </div>
+            </header>
+            <main class="main-content">
+                <div id="dashboardScreen" class="screen">
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card player-profile-card">
+                            <div class="card-header">
+                                <img id="hubPlayerTeamLogo" class="team-logo" src="" alt="Team Logo">
+                                <div class="player-info">
+                                    <h4 id="hubPlayerName">Játékos Neve</h4>
+                                    <p id="hubPlayerTeamName">Csapat Neve</p>
+                                </div>
+                            </div>
+                            <p><strong>Értékelés:</strong> <span id="hubPlayerRating">85</span></p>
+                            <p><strong>Nemzetiség:</strong> <span id="hubPlayerNationality">Magyar</span></p>
+                        </div>
+                         <div class="dashboard-card">
+                            <div class="card-header">
+                                <i class="fas fa-dollar-sign"></i>
+                                <h3>Pénzügyek</h3>
+                            </div>
+                            <p><strong>Egyenleg:</strong> €<span id="hubPlayerBalance">1,250,000</span></p>
+                            <p><strong>Heti Fizetés:</strong> €<span id="hubPlayerSalary">50,000</span></p>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <i class="fas fa-calendar-alt"></i>
+                                <h3>Következő Meccs</h3>
+                            </div>
+                            <p><strong>Ellenfél:</strong> <span id="hubNextOpponent">Nincs sorsolás</span></p>
+                            <button class="button next-btn" style="width: 100%; margin-top: 10px;" id="playMatchBtn">Meccs Indítása</button>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <i class="fas fa-list-ol"></i>
+                                <h3>Bajnokság</h3>
+                            </div>
+                            <p><strong>Helyezés:</strong> <span id="hubLeaguePosition">-.</span></p>
+                            <p><strong>Forduló:</strong> <span id="hubMatchday">0 / 14</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div id="leagueScreen" class="screen hidden">
+                    <div class="league-table-container">
+                        <h2>Bajnoki Tabella</h2>
+                        <table class="league-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Csapat</th>
+                                    <th>M</th>
+                                    <th>Gy</th>
+                                    <th>D</th>
+                                    <th>V</th>
+                                    <th>GK</th>
+                                    <th>P</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leagueTableBody">
+                                <!-- JS tölti fel -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="trophyRoomScreen" class="screen hidden">
+                    <h2>Trófea Szoba</h2>
+                </div>
+                <div id="nationalTeamScreen" class="screen hidden">
+                    <h2>Nemzeti Válogatott</h2>
+                </div>
+                <div id="profileScreen" class="screen hidden profile-screen">
+                    <h2 id="profilePlayerName">Játékos Profilja</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card"><div class="stat-value" id="profileGoals">0</div><div class="stat-label">Gólok</div></div>
+                        <div class="stat-card"><div class="stat-value" id="profileAssists">0</div><div class="stat-label">Gólpasszok</div></div>
+                        <div class="stat-card"><div class="stat-value" id="profileMatches">0</div><div class="stat-label">Játszott Meccsek</div></div>
+                        <div class="stat-card"><div class="stat-value" id="profileTrophies">0</div><div class="stat-label">Trófeák</div></div>
+                    </div>
+                    <!-- Klubtörténet és egyéb adatok jönnek ide -->
+                </div>
+                <div id="coinStoreScreen" class="screen hidden store-screen">
+                     <h2>Coin Bolt</h2>
+                     <div class="dashboard-grid">
+                        <div class="store-package">
+                           <div class="icon"><i class="fas fa-coins" style="color: #f1c40f;"></i></div>
+                           <h3>100,000 Coin</h3> <p>Kezdő csomag</p>
+                           <button class="button buy-btn" style="background-color: var(--success-color);">€ 0.99</button>
+                        </div>
+                     </div>
+                </div>
+                <div id="diamondStoreScreen" class="screen hidden store-screen">
+                    <h2>Gyémánt Bolt</h2>
+                    <div class="dashboard-grid">
+                        <div class="store-package">
+                           <div class="icon"><i class="fas fa-gem" style="color: var(--diamond-color);"></i></div>
+                           <h3>100 Gyémánt</h3> <p>Kis csomag</p>
+                           <button class="button buy-btn" style="background-color: var(--diamond-color)">200 Ft</button>
+                        </div>
+                         <div class="store-package">
+                           <div class="icon"><i class="fas fa-gem" style="color: var(--diamond-color);"></i></div>
+                           <h3>550 Gyémánt</h3> <p>Népszerű csomag</p>
+                           <button class="button buy-btn" style="background-color: var(--diamond-color)">900 Ft</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        
+        const firebaseConfig = typeof __firebase_config__ !== 'undefined'
+            ? JSON.parse(__firebase_config__)
+            : {
+                apiKey: "AIza...",
+                authDomain: "PROJECT_ID.firebaseapp.com",
+                projectId: "PROJECT_ID",
+                storageBucket: "PROJECT_ID.appspot.com",
+                messagingSenderId: "...",
+                appId: "..."
+            };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let userId;
+        let gameState = {};
+        
+        const pressConferenceUI = document.getElementById('pressConferenceUI');
+        const questionEl = document.getElementById('journalist-question');
+        const answersGridEl = document.getElementById('answersGrid');
+        const pressSummaryEl = document.getElementById('pressSummary');
+        const questions = [
+            {
+                question: `Üdv a {teamName}-nél! Mik a közvetlen céljaid a klubnál?`,
+                answers: [
+                    { text: "Keményen dolgozni, tanulni és segíteni a csapatot, ahol csak tudom.", trait: 'humble' },
+                    { text: "Minden trófeát megnyerni. Ezért jöttem.", trait: 'arrogant' },
+                    { text: "A legjobbamat nyújtani minden edzésen és meccsen.", trait: 'professional' }
+                ]
+            },
+            {
+                question: "Sokan kételkednek benned. Érzed a nyomást?",
+                answers: [
+                    { text: "A nyomás egy kiválág. Alig várom, hogy bizonyítsak.", trait: 'arrogant' },
+                    { text: "Csak a játékomra koncentrálok, a külső zaj nem érdekel.", trait: 'professional' },
+                    { text: "Természetes, hogy van rajtam nyomás, de bízom a képességeimben.", trait: 'humble' }
+                ]
+            }
+        ];
+        let currentQuestionIndex = 0;
+        const reputation = { humble: 0, arrogant: 0, professional: 0 };
+
+        const TEAMS = [
+            { name: 'Real Madrid', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/1200px-Real_Madrid_CF.svg.png', color: '#FEBE10', strength: 90 },
+            { name: 'FC Barcelona', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/1200px-FC_Barcelona_%28crest%29.svg.png', color: '#A50044', strength: 88 },
+            { name: 'Manchester Utd', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/7/7a/Manchester_United_FC_crest.svg/1200px-Manchester_United_FC_crest.svg.png', color: '#DA291C', strength: 85 },
+            { name: 'Bayern München', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg/1200px-FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg.png', color: '#DC052D', strength: 92 },
+            { name: 'Liverpool', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/0/0c/Liverpool_FC.svg/1200px-Liverpool_FC.svg.png', color: '#C8102E', strength: 87 },
+            { name: 'PSG', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a7/Paris_Saint-Germain_F.C..svg/1200px-Paris_Saint-Germain_F.C..svg.png', color: '#004171', strength: 89 },
+            { name: 'Juventus', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Juventus_FC_2017_logo.svg/1200px-Juventus_FC_2017_logo.svg.png', color: '#000000', strength: 84 },
+            { name: 'AC Milan', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/1200px-Logo_of_AC_Milan.svg.png', color: '#FB090B', strength: 86 },
+        ];
+        
+        // --- FŐ INICIALIZÁLÁS ---
+        async function main() {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    const loadedData = await loadGame(userId);
+                    if (loadedData && loadedData.playerName) {
+                        const defaultState = {
+                            money: 0, diamonds: 0, goals: 0, assists: 0,
+                            matchesPlayed: 0, trophies: [], clubHistory: [], currentMatchday: 0, schedule: []
+                        };
+                        gameState = { ...defaultState, ...loadedData };
+                        if (!gameState.schedule || gameState.schedule.length === 0 || gameState.currentMatchday >= gameState.schedule.length) {
+                            gameState.schedule = generateSchedule(TEAMS.map(t => t.name));
+                            gameState.currentMatchday = 0;
+                            gameState.league.forEach(team => {
+                                team.played = 0; team.wins = 0; team.draws = 0; team.losses = 0;
+                                team.gf = 0; team.ga = 0; team.gd = 0; team.points = 0;
+                            });
+                            await saveGame(userId, gameState);
+                        }
+                        showMainHub();
+                    } else {
+                        initializeCharacterCreator();
+                        document.getElementById('characterCreator').classList.remove('hidden');
+                    }
+                } else {
+                    // Itt nem csinálunk semmit, megvárjuk, amíg a signInAnonymously lefut
+                }
+                document.getElementById('loadingScreen').classList.add('fade-out');
+            });
+            
+            try {
+                await signInAnonymously(auth);
+            } catch (err) {
+                console.error("Anonim bejelentkezés sikertelen:", err);
+                if (err.code === 'auth/api-key-not-valid') {
+                    document.body.innerHTML = `
+                        <div style="color: white; text-align: center; padding: 50px; font-size: 1.5em; background: #111; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                            <h1>Hiba a Csatlakozás Során</h1>
+                            <p>A játék nem tud csatlakozni az adatbázishoz, mert a Firebase API kulcs érvénytelen.</p>
+                            <p style="font-size: 0.8em; color: #ccc;">Kérjük, győződj meg róla, hogy a futtató környezet megfelelően van konfigurálva.</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        async function saveGame(uid, data) {
+            try {
+                const gameDocRef = doc(db, "playerSaves", uid);
+                await setDoc(gameDocRef, data);
+            } catch (e) { console.error("Hiba a mentés során: ", e); }
+        }
+
+        async function loadGame(uid) {
+            const gameDocRef = doc(db, "playerSaves", uid);
+            const docSnap = await getDoc(gameDocRef);
+            return docSnap.exists() ? docSnap.data() : null;
+        }
+
+        function initializeCharacterCreator() {
+            const formCarousel = document.getElementById('formCarousel');
+            const totalSteps = formCarousel.children.length;
+            let currentStep = 0;
+            const playerNameInput = document.getElementById('playerName');
+            function updateCarousel() { formCarousel.style.transform = `translateX(-${currentStep * 100}%)`; }
+            document.querySelectorAll('.next-btn').forEach(btn => btn.addEventListener('click', () => {
+                if (currentStep === 0 && playerNameInput.value.trim() === "") {
+                    playerNameInput.classList.add('invalid');
+                    setTimeout(() => playerNameInput.classList.remove('invalid'), 300);
+                    return;
+                }
+                if (currentStep < totalSteps - 1) { currentStep++; updateCarousel(); }
+            }));
+            document.querySelectorAll('.prev-btn').forEach(btn => btn.addEventListener('click', () => {
+                if (currentStep > 0) { currentStep--; updateCarousel(); }
+            }));
+            const selectButton = document.getElementById('nationalitySelect');
+            const selectOptions = document.querySelector('.select-options');
+            selectButton.addEventListener('click', () => selectOptions.classList.toggle('active'));
+            document.addEventListener('click', (e) => { if (selectButton && !selectButton.contains(e.target)) { selectOptions.classList.remove('active'); } });
+            selectOptions.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', () => {
+                    selectButton.querySelector('.selected-option').innerHTML = option.innerHTML;
+                    selectButton.querySelector('.selected-option').dataset.value = option.dataset.name;
+                    selectOptions.classList.remove('active');
+                });
+            });
+            document.getElementById('potentialSlider').addEventListener('input', (e) => { document.getElementById('sliderValue').textContent = e.target.value; });
+            document.querySelectorAll('.formation-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    document.querySelector('.formation-card.selected')?.classList.remove('selected');
+                    card.classList.add('selected');
+                });
+            });
+            document.getElementById('startGameButton').addEventListener('click', startNewGame);
+        }
+
+        async function startNewGame() {
+            const chosenTeam = TEAMS[Math.floor(Math.random() * TEAMS.length)];
+            const leagueTeams = TEAMS.map(t => ({ name: t.name, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0 }));
+            gameState = {
+                playerName: document.getElementById('playerName').value,
+                nationality: document.querySelector('.selected-option').dataset.value || 'Magyar',
+                rating: document.getElementById('potentialSlider').value,
+                team: chosenTeam,
+                money: 250000,
+                salary: 15000,
+                diamonds: 10,
+                goals: 0,
+                assists: 0,
+                matchesPlayed: 0,
+                trophies: [],
+                clubHistory: [chosenTeam.name],
+                league: leagueTeams,
+                currentMatchday: 0,
+                schedule: generateSchedule(TEAMS.map(t => t.name))
+            };
+            await saveGame(userId, gameState);
+            triggerCinematics();
+        }
+
+        function generateSchedule(teamNames) {
+            const schedule = [];
+            const teams = [...teamNames];
+            if (teams.length % 2 !== 0) { teams.push(null); }
+            const numRounds = teams.length - 1;
+            const numMatchesPerRound = teams.length / 2;
+            for (let round = 0; round < numRounds; round++) {
+                const roundMatches = [];
+                for (let i = 0; i < numMatchesPerRound; i++) {
+                    const home = teams[i];
+                    const away = teams[teams.length - 1 - i];
+                    if (home && away) { roundMatches.push({ home, away }); }
+                }
+                schedule.push(roundMatches);
+                const lastTeam = teams.pop();
+                teams.splice(1, 0, lastTeam);
+            }
+            const secondHalf = schedule.map(round => round.map(({ home, away }) => ({ home: away, away: home })));
+            return [...schedule, ...secondHalf];
+        }
+        
+        async function playNextMatch() {
+            if (gameState.currentMatchday >= gameState.schedule.length) {
+                alert("A szezon véget ért! Új szezon kezdődik.");
+                 gameState.schedule = generateSchedule(TEAMS.map(t => t.name));
+                 gameState.currentMatchday = 0;
+                 gameState.league.forEach(team => {
+                     team.played = 0; team.wins = 0; team.draws = 0; team.losses = 0;
+                     team.gf = 0; team.ga = 0; team.gd = 0; team.points = 0;
+                 });
+                 await saveGame(userId, gameState);
+                 updateUI();
+                return;
+            }
+            const roundFixtures = gameState.schedule[gameState.currentMatchday];
+            let playerMatch;
+            const otherFixtures = [];
+            roundFixtures.forEach(fixture => {
+                if (fixture.home === gameState.team.name || fixture.away === gameState.team.name) playerMatch = fixture;
+                else otherFixtures.push(fixture);
+            });
+            const playerResult = simulateMatch(playerMatch.home, playerMatch.away, true);
+            processMatchResult(playerResult);
+            otherFixtures.forEach(fixture => {
+                const otherResult = simulateMatch(fixture.home, fixture.away, false);
+                processMatchResult(otherResult);
+            });
+            gameState.currentMatchday++;
+            await saveGame(userId, gameState);
+            showMatchResult(playerResult);
+        }
+
+        function simulateMatch(homeName, awayName, isPlayerMatch) {
+            const homeTeamDetails = TEAMS.find(t => t.name === homeName);
+            const awayTeamDetails = TEAMS.find(t => t.name === awayName);
+            let homeStrength = homeTeamDetails.strength;
+            let awayStrength = awayTeamDetails.strength;
+            if (isPlayerMatch) {
+                if (gameState.team.name === homeName) homeStrength += parseInt(gameState.rating) / 5;
+                else awayStrength += parseInt(gameState.rating) / 5;
+            }
+            let homeScore = Math.floor(Math.random() * (homeStrength / 20));
+            let awayScore = Math.floor(Math.random() * (awayStrength / 20));
+            let playerGoals = 0, playerAssists = 0;
+            if (isPlayerMatch) {
+                const playerTeamScore = gameState.team.name === homeName ? homeScore : awayScore;
+                for(let i=0; i<playerTeamScore; i++){
+                    if(Math.random() < (parseInt(gameState.rating) / 150)) playerGoals++;
+                    else if (Math.random() < (parseInt(gameState.rating) / 100)) playerAssists++;
+                }
+            }
+            return { homeName, awayName, homeScore, awayScore, playerGoals, playerAssists };
+        }
+
+        function processMatchResult(result) {
+            const homeTeam = gameState.league.find(t => t.name === result.homeName);
+            const awayTeam = gameState.league.find(t => t.name === result.awayName);
+            homeTeam.played++; awayTeam.played++;
+            homeTeam.gf += result.homeScore; homeTeam.ga += result.awayScore;
+            awayTeam.gf += result.awayScore; awayTeam.ga += result.homeScore;
+            homeTeam.gd = homeTeam.gf - homeTeam.ga;
+            awayTeam.gd = awayTeam.gf - awayTeam.ga;
+            if (result.homeScore > result.awayScore) {
+                homeTeam.wins++; awayTeam.losses++; homeTeam.points += 3;
+            } else if (result.awayScore > result.homeScore) {
+                awayTeam.wins++; homeTeam.losses++; awayTeam.points += 3;
+            } else {
+                homeTeam.draws++; awayTeam.draws++;
+                homeTeam.points += 1; awayTeam.points += 1;
+            }
+        }
+        
+        function showMatchResult(result) {
+            const homeTeamDetails = TEAMS.find(t => t.name === result.homeName);
+            const awayTeamDetails = TEAMS.find(t => t.name === result.awayName);
+            document.getElementById('resultHomeLogo').src = homeTeamDetails.logo;
+            document.getElementById('resultHomeName').textContent = homeTeamDetails.name;
+            document.getElementById('resultAwayLogo').src = awayTeamDetails.logo;
+            document.getElementById('resultAwayName').textContent = awayTeamDetails.name;
+            document.getElementById('resultScore').textContent = `${result.homeScore} - ${result.awayScore}`;
+            let bonus = 0;
+            const playerTeamWon = (gameState.team.name === result.homeName && result.homeScore > result.awayScore) || (gameState.team.name === result.awayName && result.awayScore > result.homeScore);
+            const isDraw = result.homeScore === result.awayScore;
+            if (playerTeamWon) bonus += 20000;
+            if (isDraw) bonus += 5000;
+            bonus += result.playerGoals * 10000;
+            bonus += result.playerAssists * 5000;
+            gameState.money += gameState.salary + bonus;
+            gameState.goals += result.playerGoals;
+            gameState.assists += result.playerAssists;
+            gameState.matchesPlayed++;
+            document.getElementById('resultPlayerPerformance').textContent = `Gólok: ${result.playerGoals}, Gólpasszok: ${result.playerAssists}`;
+            document.getElementById('resultEarnings').textContent = `Fizetés: €${gameState.salary.toLocaleString()}, Bónusz: €${bonus.toLocaleString()}`;
+            document.getElementById('matchResultOverlay').classList.add('active');
+        }
+
+        function triggerCinematics() {
+            const animationOverlay = document.getElementById('animationOverlay');
+            const pressConferenceOverlay = document.getElementById('pressConferenceOverlay');
+            document.getElementById('characterCreator').classList.add('hidden');
+            animationOverlay.classList.add('active');
+            document.getElementById('team-name-on-desk').textContent = gameState.team.name;
+            document.getElementById('jersey-color').style.fill = gameState.team.color;
+            document.getElementById('jersey-logo').setAttribute('href', gameState.team.logo);
+            document.getElementById('jersey-name').textContent = gameState.playerName.split(' ').pop().toUpperCase();
+            document.getElementById('final-team-name').textContent = gameState.team.name;
+            const desk = document.getElementById('desk'), character = document.getElementById('character-signing-group'), contract = document.getElementById('contract-group'), signaturePath = document.getElementById('signature-path'), jerseyGroup = document.getElementById('jersey-group');
+            setTimeout(() => { desk.style.opacity = 1; character.style.opacity = 1; character.style.transform = 'translateY(0)'; }, 500);
+            setTimeout(() => { signaturePath.style.transition = 'stroke-dashoffset 1.5s ease-out'; signaturePath.style.strokeDashoffset = 0; }, 1500);
+            setTimeout(() => {
+                contract.style.transition = 'opacity 0.5s'; contract.style.opacity = 0;
+                character.style.transform = 'translateY(-20px)';
+                jerseyGroup.style.opacity = 1; jerseyGroup.style.transform = 'translateY(0)';
+            }, 3500);
+            setTimeout(() => { document.getElementById('flash-overlay').classList.add('flashing'); }, 4500);
+            setTimeout(() => { document.getElementById('finalMessage').classList.add('active'); }, 5000);
+            setTimeout(() => {
+                animationOverlay.classList.remove('active');
+                pressConferenceOverlay.classList.add('active');
+                startPressConference();
+            }, 6500);
+        }
+        function startPressConference() {
+            questionEl.style.display = 'block';
+            answersGridEl.style.display = 'grid';
+            pressSummaryEl.style.display = 'none';
+            const existingSummary = pressSummaryEl.querySelector('p');
+            if (existingSummary) existingSummary.remove();
+            document.getElementById('continueBtn').onclick = showMainHub;
+            document.getElementById('backdrop-logo').setAttribute('href', gameState.team.logo);
+            document.getElementById('backdrop-color').style.fill = gameState.team.color;
+            document.getElementById('coach-tracksuit').style.fill = gameState.team.color;
+            setTimeout(() => { document.getElementById('press-backdrop').style.opacity = 1; document.getElementById('press-table').style.opacity = 1; }, 200);
+            setTimeout(() => { document.getElementById('manager-character').style.opacity = 1; document.getElementById('coach-character').style.opacity = 1; }, 600);
+            setTimeout(() => {
+                const player = document.getElementById('player-character-press');
+                player.style.opacity = 1; player.style.transform = 'translateY(0)';
+            }, 1000);
+            setTimeout(() => { 
+                document.getElementById('pressConferenceUI').classList.add('visible');
+                displayQuestion();
+            }, 1500);
+        }
+        
+        function displayQuestion() {
+            if (currentQuestionIndex >= questions.length) { showSummary(); return; }
+            const qData = questions[currentQuestionIndex];
+            questionEl.textContent = qData.question.replace('{teamName}', gameState.team.name);
+            answersGridEl.innerHTML = '';
+            qData.answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.classList.add('button', 'answer-btn');
+                button.textContent = answer.text;
+                button.onclick = () => selectAnswer(answer.trait);
+                answersGridEl.appendChild(button);
+            });
+        }
+        function selectAnswer(trait) { reputation[trait]++; currentQuestionIndex++; displayQuestion(); }
+        function showSummary() {
+            questionEl.style.display = 'none';
+            answersGridEl.style.display = 'none';
+            pressSummaryEl.style.display = 'block';
+            let summaryText = "";
+            const maxRep = Object.keys(reputation).reduce((a, b) => reputation[a] > reputation[b] ? a : b);
+            if(maxRep === 'humble') { summaryText = "A szurkolók értékelik a szerénységedet!"; }
+            else if (maxRep === 'arrogant') { summaryText = "A magabiztos szavaid felkapták a sajtó figyelmét!"; }
+            else { summaryText = "A profi válaszaid pozitív benyomást tettek a klub vezetésére."; }
+            const summaryP = document.createElement('p');
+            summaryP.textContent = summaryText;
+            pressSummaryEl.prepend(summaryP);
+            currentQuestionIndex = 0; reputation.humble = 0; reputation.arrogant = 0; reputation.professional = 0;
+        }
+
+        function showMainHub() {
+            document.getElementById('characterCreator').classList.add('hidden');
+            document.getElementById('animationOverlay').classList.remove('active');
+            document.getElementById('pressConferenceOverlay').classList.remove('active');
+            document.getElementById('mainHub').classList.remove('hidden');
+            updateUI();
+        }
+        
+        function updateUI() {
+            updateHeaderUI();
+            updateDashboardUI();
+            updateLeagueTable();
+            updateProfileUI();
+        }
+        function updateHeaderUI() {
+            document.getElementById('headerPlayerName').textContent = gameState.playerName;
+            document.getElementById('headerPlayerBalance').textContent = (gameState.money || 0).toLocaleString();
+            document.getElementById('headerPlayerDiamonds').textContent = (gameState.diamonds || 0).toLocaleString();
+        }
+        function updateDashboardUI() {
+            document.getElementById('hubPlayerName').textContent = gameState.playerName;
+            document.getElementById('hubPlayerTeamName').textContent = gameState.team.name;
+            document.getElementById('hubPlayerTeamLogo').src = gameState.team.logo;
+            document.getElementById('hubPlayerRating').textContent = gameState.rating;
+            document.getElementById('hubPlayerNationality').textContent = gameState.nationality;
+            const balanceSpan = document.querySelector('#dashboardScreen #hubPlayerBalance');
+            if (balanceSpan) balanceSpan.textContent = (gameState.money || 0).toLocaleString();
+            const salarySpan = document.querySelector('#dashboardScreen #hubPlayerSalary');
+            if(salarySpan) salarySpan.textContent = (gameState.salary || 0).toLocaleString();
+            
+            if(gameState.schedule && gameState.currentMatchday < gameState.schedule.length){
+                const nextFixture = gameState.schedule[gameState.currentMatchday].find(f => f.home === gameState.team.name || f.away === gameState.team.name);
+                const opponentName = nextFixture.home === gameState.team.name ? nextFixture.away : nextFixture.home;
+                document.getElementById('hubNextOpponent').textContent = opponentName;
+                document.getElementById('playMatchBtn').disabled = false;
+            } else {
+                document.getElementById('hubNextOpponent').textContent = "Szezon vége";
+                document.getElementById('playMatchBtn').disabled = false; 
+            }
+
+            const leagueClone = [...(gameState.league || [])];
+            const position = leagueClone.sort((a, b) => b.points - a.points || (b.gd - a.gd)).findIndex(t => t.name === gameState.team.name) + 1;
+            document.getElementById('hubLeaguePosition').textContent = `${position > 0 ? position : '-'}.`;
+            document.getElementById('hubMatchday').textContent = `${gameState.currentMatchday} / ${gameState.schedule.length}`;
+        }
+        function updateLeagueTable() {
+            const tableBody = document.getElementById('leagueTableBody');
+            if(!tableBody) return;
+            tableBody.innerHTML = '';
+            const leagueClone = [...(gameState.league || [])];
+            leagueClone.sort((a, b) => b.points - a.points || (b.gd - a.gd));
+            leagueClone.forEach((team, index) => {
+                const row = document.createElement('tr');
+                if(team.name === gameState.team.name) row.classList.add('player-team');
+                row.innerHTML = `<td>${index + 1}</td><td>${team.name}</td><td>${team.played}</td><td>${team.wins}</td><td>${team.draws}</td><td>${team.losses}</td><td>${team.gd}</td><td><strong>${team.points}</strong></td>`;
+                tableBody.appendChild(row);
+            });
+        }
+        function updateProfileUI() {
+            document.getElementById('profilePlayerName').textContent = `${gameState.playerName} Profilja`;
+            document.getElementById('profileGoals').textContent = gameState.goals || 0;
+            document.getElementById('profileAssists').textContent = gameState.assists || 0;
+            document.getElementById('profileMatches').textContent = gameState.matchesPlayed || 0;
+            document.getElementById('profileTrophies').textContent = (gameState.trophies || []).length;
+        }
+        
+        const allScreens = document.querySelectorAll('.screen');
+        const navButtons = document.querySelectorAll('.nav-btn');
+        function showScreen(targetScreenId) {
+            allScreens.forEach(screen => screen.classList.add('hidden'));
+            document.getElementById(targetScreenId)?.classList.remove('hidden');
+            navButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.screen === targetScreenId));
+        }
+        navButtons.forEach(button => button.addEventListener('click', () => showScreen(button.dataset.screen)));
+        document.getElementById('profileBtn').addEventListener('click', () => showScreen('profileScreen'));
+        document.getElementById('coinStoreBtn').addEventListener('click', () => showScreen('coinStoreScreen'));
+        document.getElementById('diamondStoreBtn').addEventListener('click', () => showScreen('diamondStoreScreen'));
+        document.getElementById('playMatchBtn').addEventListener('click', playNextMatch);
+        document.getElementById('matchResultContinueBtn').addEventListener('click', () => {
+            document.getElementById('matchResultOverlay').classList.remove('active');
+            updateUI();
+        });
+        
+        main();
+    </script>
+</body>
+</html>
+
