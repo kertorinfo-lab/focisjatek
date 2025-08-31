@@ -2,10 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const SAVE_KEY = 'footballLegendSave';
     let gameState = {};
 
-    // --- FRISSÍTVE: Új, részletesebb Pixel Art Sprite betöltése ---
+    // --- JAVÍTVA: Működő link a részletesebb Pixel Art Sprite-hoz ---
     const playerSpriteSheet = new Image();
     // Forrás: https://chierit.itch.io/soccer-players-spritesheet (CC0 License)
-    playerSpriteSheet.src = 'https://i.ibb.co/TqZ7zY9/soccer-players-spritesheet.png';
+    playerSpriteSheet.src = 'https://i.ibb.co/yqY6r0d/soccer-players-spritesheet.png';
     let spriteSheetLoaded = false;
     playerSpriteSheet.onload = () => {
         spriteSheetLoaded = true;
