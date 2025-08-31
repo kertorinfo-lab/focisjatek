@@ -2,15 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const SAVE_KEY = 'footballLegendSave';
     let gameState = {};
 
-    // --- JAVÍTVA: A grafika Base64 kódként beágyazva a 100%-os megbízhatóságért ---
-    const playerSpriteSheet = new Image();
-    // A kép most már a kód része, nem egy külső link, így sosem fog eltűnni.
-    playerSpriteSheet.src = 'data:image/png;base64,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';
-    let spriteSheetLoaded = false;
-    playerSpriteSheet.onload = () => {
-        spriteSheetLoaded = true;
-    };
-
+    // A karakterek kirajzolása már nem képfájlból, hanem közvetlenül kóddal történik,
+    // így nincs szükség a playerSpriteSheet változóra.
 
     // --- SAJTÓTÁJÉKOZTATÓ VÁLTOZÓK ---
     const pressConferenceUI = document.getElementById('pressConferenceUI');
@@ -225,7 +218,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let awayScore = 0;
 
         if (isPlayerMatch) {
-            // A játékos csapata a játékos góljaival indul
             if (gameState.team.name === homeName) {
                 homeScore = playerGoals;
                 awayScore = Math.floor(Math.random() * (awayStrength / 25));
@@ -234,12 +226,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 homeScore = Math.floor(Math.random() * (homeStrength / 25));
             }
         } else {
-            // NPC vs NPC meccs szimuláció
             homeScore = Math.floor(Math.random() * (homeStrength / 20));
             awayScore = Math.floor(Math.random() * (awayStrength / 20));
         }
 
-        return { homeName, awayName, homeScore, awayScore, playerGoals: playerGoals, playerAssists: 0 }; // Gólpassz most nincs a minijátékban
+        return { homeName, awayName, homeScore, awayScore, playerGoals: playerGoals, playerAssists: 0 };
     }
 
     function processMatchResult(result) {
@@ -327,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const desk = document.getElementById('desk'), character = document.getElementById('character-signing-group'), contract = document.getElementById('contract-group'), signaturePath = document.getElementById('signature-path'), jerseyGroup = document.getElementById('jersey-group');
         setTimeout(() => { desk.style.opacity = 1; character.style.opacity = 1; character.style.transform = 'translateY(0)'; }, 500);
-        setTimeout(() => { signaturePath.style.transition = 'stroke-dashoffset 1.5s ease-out'; signaturePath.style.strokeDashoffset = 0; }, 1500);
+        setTimeout(() => { signaturePath.style.transition = 'stroke-dashoffset 1.s ease-out'; signaturePath.style.strokeDashoffset = 0; }, 1500);
         setTimeout(() => {
             contract.style.transition = 'opacity 0.5s'; contract.style.opacity = 0;
             character.style.transform = 'translateY(-20px)';
@@ -536,25 +527,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, Space: false };
         
-        // ÚJ: Véletlenszerű mez választása a csapatoknak
-        const playerTeamSpriteRow = Math.floor(Math.random() * 4);
-        let opponentTeamSpriteRow = Math.floor(Math.random() * 4);
-        while (opponentTeamSpriteRow === playerTeamSpriteRow) {
-            opponentTeamSpriteRow = Math.floor(Math.random() * 4); // Biztosítjuk, hogy ne legyen ugyanaz a mez
+        // --- MÓDOSÍTÁS: Kép helyett színeket adunk meg ---
+        const playerColor = gameState.team.color || '#00FF00'; // A játékos csapatának színe, vagy zöld
+        let opponentColor = '#FF0000'; // Az ellenfél piros
+        if (playerColor === opponentColor) {
+            opponentColor = '#FFA500'; // Ha a játékos is piros, az ellenfél legyen narancs
         }
 
         player = {
             x: canvas.width * 0.25, y: canvas.height / 2,
             speed: 3, hasBall: true, isPlayer: true,
-            spriteWidth: 32, spriteHeight: 32, frameX: 0, frameCount: 8,
-            frameSpeed: 5, gameFrame: 0, moving: false,
-            spriteRow: playerTeamSpriteRow // Hozzárendeljük a játékoshoz a mez sorát
+            color: playerColor // Szín hozzáadva
         };
         ball = { x: player.x, y: player.y, radius: 5, speedX: 0, speedY: 0, friction: 0.98 };
         
         opponents = [
-            { x: canvas.width * 0.75, y: canvas.height * 0.3, speed: 1.5, spriteWidth: 32, spriteHeight: 32, frameX: 0, frameCount: 8, frameSpeed: 7, gameFrame: 0, moving: true, spriteRow: opponentTeamSpriteRow },
-            { x: canvas.width * 0.75, y: canvas.height * 0.7, speed: 1.5, spriteWidth: 32, spriteHeight: 32, frameX: 0, frameCount: 8, frameSpeed: 7, gameFrame: 0, moving: true, spriteRow: opponentTeamSpriteRow }
+            { x: canvas.width * 0.75, y: canvas.height * 0.3, speed: 1.5, color: opponentColor }, // Szín hozzáadva
+            { x: canvas.width * 0.75, y: canvas.height * 0.7, speed: 1.5, color: opponentColor }  // Szín hozzáadva
         ];
 
         homeGoal = { x: canvas.width - 20, y: canvas.height / 2, width: 20, height: 100 };
@@ -563,7 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('keydown', handleKeyDown);
         document.addEventListener('keyup', handleKeyUp);
         
-        let gameTime = 90 * 60; // 90 perc másodpercben
+        let gameTime = 90 * 60; 
         const timerInterval = setInterval(() => {
             gameTime -= 60;
             const minutes = Math.floor(gameTime / 60);
@@ -614,8 +603,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (keys.ArrowLeft) player.x -= player.speed;
         if (keys.ArrowRight) player.x += player.speed;
         
-        player.x = Math.max(player.spriteWidth / 2, Math.min(canvas.width - player.spriteWidth / 2, player.x));
-        player.y = Math.max(player.spriteHeight / 2, Math.min(canvas.height - player.spriteHeight / 2, player.y));
+        player.x = Math.max(15, Math.min(canvas.width - 15, player.x));
+        player.y = Math.max(15, Math.min(canvas.height - 15, player.y));
 
         if (player.hasBall) {
             ball.x = player.x + 15;
@@ -643,7 +632,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const playerDist = Math.sqrt(Math.pow(player.x - opp.x, 2) + Math.pow(player.y - opp.y, 2));
-            if (playerDist < 20) { 
+            if (playerDist < 30) { 
                 if(player.hasBall) {
                     player.hasBall = false;
                     ball.speedX = (Math.random() - 0.5) * 10;
@@ -707,35 +696,22 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fill();
     }
     
-    // --- FRISSÍTVE: Pixel Art kirajzoló függvény a csapatmezekhez ---
     function drawPlayerSprite(entity) {
-        if (!spriteSheetLoaded) return;
-
-        if (entity.moving) {
-            if (entity.gameFrame % entity.frameSpeed === 0) {
-                entity.frameX = (entity.frameX + 1) % entity.frameCount;
-            }
-        } else {
-            entity.frameX = 0;
-        }
-        entity.gameFrame++;
-
-        // Kép kirajzolása a sprite sheet-ből, a megfelelő sor kiválasztásával
-        ctx.drawImage(
-            playerSpriteSheet,
-            entity.frameX * entity.spriteWidth, entity.spriteRow * entity.spriteHeight, // Forrás X és Y (a mez sorával)
-            entity.spriteWidth, entity.spriteHeight,
-            entity.x - (entity.spriteWidth * 1.5) / 2, entity.y - (entity.spriteHeight * 1.5) / 2, // Nagyobb méret középre igazítása
-            entity.spriteWidth * 1.5, entity.spriteHeight * 1.5 // A karakterek nagyítása a jobb láthatóságért
-        );
+        // A bonyolult képkirajzolás helyett egy egyszerű kört rajzolunk.
+        ctx.beginPath();
+        ctx.arc(entity.x, entity.y, 15, 0, Math.PI * 2); // 15 pixel sugarú kör
+        ctx.fillStyle = entity.color; // A játékoshoz rendelt szín
+        ctx.fill();
+        ctx.closePath();
         
+        // A játékost jelölő sárga háromszög megmarad, hogy könnyű legyen követni.
         if (entity.isPlayer) {
             ctx.fillStyle = 'yellow';
             ctx.beginPath();
-            const markerY = entity.y - (entity.spriteHeight * 1.5) / 2 - 10;
+            const markerY = entity.y - 15 - 5; // A kör fölé igazítva
             ctx.moveTo(entity.x, markerY);
-            ctx.lineTo(entity.x - 5, markerY + 5);
-            ctx.lineTo(entity.x + 5, markerY + 5);
+            ctx.lineTo(entity.x - 5, markerY - 5);
+            ctx.lineTo(entity.x + 5, markerY - 5);
             ctx.closePath();
             ctx.fill();
         }
