@@ -289,16 +289,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 <text x="400" y="350" font-family="Roboto" font-size="20" fill="#fff" text-anchor="middle" id="team-name-on-desk"></text>
             </g>
             <g id="character-signing-group">
-                <path d="M 370 230 C 370 200, 430 200, 430 230 L 440 320 L 360 320 Z" fill="#34495e" />
-                <path d="M 390 230 L 400 245 L 410 230 Z" fill="#ffffff"/>
-                <rect x="380" y="175" width="40" height="40" rx="20" fill="#f0c2a2"/>
-                <path d="M 380 175 A 20 20 0 0 1 420 175 L 420 185 L 380 185 Z" fill="#4a3f35"/>
-                <circle cx="380" cy="280" r="8" fill="#f0c2a2" />
-                <rect x="385" y="278" width="15" height="4" fill="#2c3f50" transform="rotate(-20 385 280)"/>
+                 <path d="M 400 310 L 420 235 L 380 235 Z" fill="#34495e" />
+                <circle cx="400" cy="200" r="35" fill="#f0c2a2"/>
+                <circle cx="390" cy="195" r="3" fill="black"/>
+                <circle cx="410" cy="195" r="3" fill="black"/>
+                <path d="M 390 210 Q 400 215 410 210" stroke="black" stroke-width="2" fill="none"/>
+                <path d="M 380 180 A 40 40 0 0 1 420 180" fill="#4a3f35"/>
+                <path d="M 400 275 L 435 300 L 400 300 Z" fill="#34495e"/>
+                <path d="M 400 275 L 365 300 L 400 300 Z" fill="#34495e"/>
+                <circle cx="380" cy="280" r="10" fill="#f0c2a2" />
             </g>
             <g id="contract-group">
                 <rect x="325" y="270" width="150" height="30" fill="white" transform="rotate(-5 400 285)"/>
-                <path id="signature-path" d="M350,280 C370,270 390,270 410,280" stroke="black" stroke-width="2" fill="none"/>
+                <path id="signature-path" d="M 350 285 C 375 270, 385 290, 410 280" stroke="black" stroke-width="2" fill="none"/>
             </g>
             <g id="jersey-group">
                 <rect x="325" y="150" width="150" height="150" fill="red" id="jersey-color" rx="10"/>
@@ -344,27 +347,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     <circle cx="520" cy="340" r="10" fill="#111"/> <rect x="518" y="310" width="4" height="30" fill="#555"/>
                 </g>
                 <g id="manager-character">
-                    <path d="M 170 260 C 170 230, 230 230, 230 260 L 240 350 L 160 350 Z" fill="#2c3e50" />
-                    <path d="M 190 260 L 200 280 L 210 260 Z" fill="#ffffff"/>
-                    <path d="M 198 260 L 200 290 L 202 260 Z" fill="#c0392b" />
-                    <rect x="180" y="205" width="40" height="40" rx="20" fill="#e0b395"/>
-                    <path d="M 180 205 A 20 20 0 0 1 220 205 L 215 215 L 185 215 Z" fill="#333333"/>
-                    <circle cx="180" cy="345" r="10" fill="#e0b395" /> <circle cx="220" cy="345" r="10" fill="#e0b395" />
+                    <path d="M 200 350 L 220 270 L 180 270 Z" fill="#2c3e50" />
+                    <circle cx="200" cy="240" r="30" fill="#e0b395"/>
+                    <path d="M 180 225 A 30 30 0 0 1 220 225" fill="#333333"/>
                 </g>
                 <g id="coach-character">
-                    <path d="M 570 260 C 570 230, 630 230, 630 260 L 640 350 L 560 350 Z" id="coach-tracksuit" fill="#DA291C" />
-                    <rect x="598" y="260" width="4" height="90" fill="rgba(255,255,255,0.5)"/>
-                    <rect x="580" y="205" width="40" height="40" rx="20" fill="#f0c2a2"/>
-                    <circle cx="600" cy="205" r="20" fill="#a9a9a9"/>
-                    <circle cx="580" cy="345" r="10" fill="#f0c2a2" /> <circle cx="620" cy="345" r="10" fill="#f0c2a2" />
+                     <path d="M 600 350 L 620 270 L 580 270 Z" id="coach-tracksuit" fill="#DA291C" />
+                    <circle cx="600" cy="240" r="30" fill="#f0c2a2"/>
+                     <path d="M 580 225 A 30 30 0 0 1 620 225" fill="#a9a9a9"/>
                 </g>
                 <g id="player-character-press">
-                    <path d="M 370 260 C 370 230, 430 230, 430 260 L 440 350 L 360 350 Z" fill="#34495e" />
-                    <path d="M 390 260 L 400 280 L 410 260 Z" fill="#ffffff"/>
-                    <path d="M 398 260 L 400 290 L 402 260 Z" fill="#007bff" />
-                    <rect x="380" y="205" width="40" height="40" rx="20" fill="#f0c2a2"/>
-                    <path d="M 380 205 A 20 20 0 0 1 420 205 L 420 215 L 380 215 Z" fill="#4a3f35"/>
-                    <circle cx="380" cy="345" r="10" fill="#f0c2a2" /> <circle cx="420" cy="345" r="10" fill="#f0c2a2" />
+                    <path d="M 400 350 L 420 270 L 380 270 Z" fill="#34495e" />
+                    <circle cx="400" cy="240" r="30" fill="#f0c2a2"/>
+                    <path d="M 380 225 A 30 30 0 0 1 420 225" fill="#4a3f35"/>
                 </g>
         `;
         questionEl.style.display = 'block';
@@ -483,6 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('profileTrophies').textContent = (gameState.trophies || []).length;
     }
     
+    // --- NAVIGÁCIÓ ---
     const allScreens = document.querySelectorAll('.screen');
     const navButtons = document.querySelectorAll('.nav-btn');
     function showScreen(targetScreenId) {
@@ -643,12 +639,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Gól ellenőrzés
         if (ball.x > homeGoal.x && ball.y > homeGoal.y - homeGoal.height/2 && ball.y < homeGoal.y + homeGoal.height/2) {
             homeScore++;
-            document.getElementById('gameHomeInfo').textContent = `${gameState.schedule[gameState.currentMatchday][0].home} ${homeScore}`;
+            document.getElementById('gameHomeInfo').textContent = `${gameState.schedule[gameState.currentMatchday].find(f => f.home === gameState.team.name || f.away === gameState.team.name).home} ${homeScore}`;
             resetPositions();
         }
         if (ball.x < awayGoal.x + awayGoal.width && ball.y > awayGoal.y - awayGoal.height/2 && ball.y < awayGoal.y + awayGoal.height/2) {
             awayScore++;
-             document.getElementById('gameAwayInfo').textContent = `${gameState.schedule[gameState.currentMatchday][0].away} ${awayScore}`;
+            document.getElementById('gameAwayInfo').textContent = `${gameState.schedule[gameState.currentMatchday].find(f => f.home === gameState.team.name || f.away === gameState.team.name).away} ${awayScore}`;
             resetPositions();
         }
 
@@ -686,8 +682,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         // Játékosok és labda
-        drawPlayerSprite(ctx, player.x, player.y, player.color);
-        opponents.forEach(opp => drawPlayerSprite(ctx, opp.x, opp.y, opp.color));
+        drawPlayerSprite(ctx, player.x, player.y, player.color, true);
+        opponents.forEach(opp => drawPlayerSprite(ctx, opp.x, opp.y, opp.color, false));
 
         ctx.fillStyle = 'white';
         ctx.beginPath();
@@ -695,17 +691,32 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fill();
     }
     
-    function drawPlayerSprite(ctx, x, y, color) {
-        // Body
+    function drawPlayerSprite(ctx, x, y, color, isPlayer) {
+        // Test
         ctx.fillStyle = color;
         ctx.beginPath();
-        ctx.arc(x, y, 10, 0, Math.PI * 2);
+        ctx.moveTo(x, y + 15);
+        ctx.lineTo(x - 7, y - 10);
+        ctx.lineTo(x + 7, y - 10);
+        ctx.closePath();
         ctx.fill();
-        // Head
-        ctx.fillStyle = '#f0c2a2'; // Skin color
+
+        // Fej
+        ctx.fillStyle = '#f0c2a2'; // Bőrszín
         ctx.beginPath();
-        ctx.arc(x, y - 8, 6, 0, Math.PI * 2);
+        ctx.arc(x, y - 15, 8, 0, Math.PI * 2);
         ctx.fill();
+        
+        // Jelző a játékos felett
+        if (isPlayer) {
+            ctx.fillStyle = 'yellow';
+            ctx.beginPath();
+            ctx.moveTo(x, y - 30);
+            ctx.lineTo(x - 5, y - 25);
+            ctx.lineTo(x + 5, y - 25);
+            ctx.closePath();
+            ctx.fill();
+        }
     }
     
     function resizeCanvas() {
@@ -820,3 +831,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
