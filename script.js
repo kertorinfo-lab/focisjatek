@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- JÁTÉK ÁLLAPOT VÁLTOZÓK ---
     let gameLoop;
-    let player, ball, opponents, keys, homeGoal;
+    let player, ball, opponents, teammates, keys, homeGoal;
     let currentMatchData;
     let simulationInterval;
     let miniGameActive = false;
@@ -210,16 +210,21 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('gameScore').textContent = `${currentMatchData.homeScore} - ${currentMatchData.awayScore}`;
         document.getElementById('gameTime').textContent = `${String(Math.floor(currentMatchData.time)).padStart(2, '0')}:00`;
 
-        keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, ' ': false };
+        keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, ' ': false, 'c': false };
 
-        player = { x: canvas.width / 2, y: canvas.height * 0.85, speed: 4, hasBall: false, isPlayer: true, radius: 15, possessionRadius: 10 };
-        ball = { x: canvas.width / 2, y: canvas.height * 0.6, radius: 8, speedX: 0, speedY: 0, friction: 0.98 };
-        homeGoal = { x: canvas.width / 2, y: 0, width: 150, height: 30 };
+        player = { x: canvas.width / 2, y: canvas.height * 0.85, speed: 4, hasBall: false, isPlayer: true, radius: 15, possessionRadius: 20 };
+        ball = { x: canvas.width / 2, y: canvas.height * 0.6, radius: 8, speedX: 0, speedY: 0, friction: 0.98, controlledBy: null };
+        homeGoal = { x: canvas.width / 2, y: 20, width: 150, height: 30 };
         
+        teammates = [
+            { x: canvas.width * 0.25, y: canvas.height * 0.65, speed: 3, hasBall: false, radius: 15, jerseyNumber: 8, decisionTimeout: 0 },
+            { x: canvas.width * 0.75, y: canvas.height * 0.65, speed: 3, hasBall: false, radius: 15, jerseyNumber: 11, decisionTimeout: 0 }
+        ];
+
         opponents = [
-            { x: canvas.width / 2, y: 50, speed: 2, radius: 16, type: 'goalkeeper', jerseyNumber: 1 },
-            { x: canvas.width / 2 - 80, y: 180, speed: 2.2, radius: 15, type: 'defender', jerseyNumber: 4 },
-            { x: canvas.width / 2 + 80, y: 180, speed: 2.2, radius: 15, type: 'defender', jerseyNumber: 5 }
+            { x: canvas.width / 2, y: 70, speed: 2.2, radius: 16, type: 'goalkeeper', jerseyNumber: 1 },
+            { x: canvas.width / 2 - 80, y: 200, speed: 2.4, radius: 15, type: 'defender', jerseyNumber: 4 },
+            { x: canvas.width / 2 + 80, y: 200, speed: 2.4, radius: 15, type: 'defender', jerseyNumber: 5 }
         ];
         
         document.addEventListener('keydown', handleKeyDown);
@@ -331,6 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateGame() {
         if(!miniGameActive) return;
 
+        // Player movement
         if (keys.ArrowUp) player.y -= player.speed;
         if (keys.ArrowDown) player.y += player.speed;
         if (keys.ArrowLeft) player.x -= player.speed;
@@ -338,56 +344,94 @@ document.addEventListener('DOMContentLoaded', () => {
         player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x));
         player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
 
-        const distToBall = Math.hypot(player.x - ball.x, player.y - ball.y);
-        if (!player.hasBall && distToBall < player.radius + ball.radius + player.possessionRadius) {
-            player.hasBall = true;
+        // Ball possession and actions
+        if (ball.controlledBy === null) {
+            // Player attempts to take control
+            const distToPlayer = Math.hypot(player.x - ball.x, player.y - ball.y);
+            if (distToPlayer < player.radius + ball.radius + player.possessionRadius) {
+                ball.controlledBy = player;
+            }
+            // Teammates attempt to take control
+            teammates.forEach(tm => {
+                const distToTm = Math.hypot(tm.x - ball.x, tm.y - ball.y);
+                if (distToTm < tm.radius + ball.radius) {
+                    ball.controlledBy = tm;
+                    tm.decisionTimeout = 60; // 1 second to decide
+                }
+            });
         }
-
-        if (player.hasBall) {
-            const dribbleDist = player.radius + ball.radius + 2;
+        
+        if (ball.controlledBy === player) {
+            const dribbleDist = player.radius + ball.radius + 5;
             const angleToPlayer = Math.atan2(player.y - ball.y, player.x - ball.x);
-            ball.speedX = Math.cos(angleToPlayer) * player.speed * 1.1;
-            ball.speedY = Math.sin(angleToPlayer) * player.speed * 1.1;
+            ball.x += Math.cos(angleToPlayer) * player.speed;
+            ball.y += Math.sin(angleToPlayer) * player.speed;
 
-            if (keys[' ']) {
-                player.hasBall = false;
+            if (keys[' ']) { // SHOOT
+                ball.controlledBy = null;
                 const angle = Math.atan2((homeGoal.y + homeGoal.height / 2) - player.y, homeGoal.x - player.x);
                 ball.speedX = Math.cos(angle) * 20;
                 ball.speedY = Math.sin(angle) * 20;
                 keys[' '] = false;
+            } else if (keys['c']) { // PASS
+                ball.controlledBy = null;
+                let closestTm = null, minDist = Infinity;
+                teammates.forEach(tm => {
+                    const dist = Math.hypot(player.x - tm.x, player.y - tm.y);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        closestTm = tm;
+                    }
+                });
+                if (closestTm) {
+                    const angle = Math.atan2(closestTm.y - player.y, closestTm.x - player.x);
+                    ball.speedX = Math.cos(angle) * 15;
+                    ball.speedY = Math.sin(angle) * 15;
+                }
+                keys['c'] = false;
             }
-        } 
+        } else if (ball.controlledBy && ball.controlledBy.isPlayer !== true) { // Teammate AI
+            let tm = ball.controlledBy;
+            tm.decisionTimeout--;
+            if (tm.decisionTimeout <= 0) {
+                ball.controlledBy = null;
+                if (Math.random() < 0.5) { // Shoot
+                    const angle = Math.atan2((homeGoal.y + homeGoal.height / 2) - tm.y, homeGoal.x - tm.x);
+                    ball.speedX = Math.cos(angle) * 18;
+                    ball.speedY = Math.sin(angle) * 18;
+                } else { // Pass back
+                    const angle = Math.atan2(player.y - tm.y, player.x - tm.x);
+                    ball.speedX = Math.cos(angle) * 15;
+                    ball.speedY = Math.sin(angle) * 15;
+                }
+            }
+        }
         
         ball.x += ball.speedX; ball.y += ball.speedY;
         ball.speedX *= ball.friction; ball.speedY *= ball.friction;
 
+        // Opponent AI and Collision
         opponents.forEach(opp => {
             if(opp.type === 'goalkeeper') {
                 opp.x += (ball.x - opp.x) * 0.08;
                 opp.x = Math.max(homeGoal.x - homeGoal.width / 2, Math.min(homeGoal.x + homeGoal.width / 2, opp.x));
             } else {
-                const angle = Math.atan2(ball.y - opp.y, ball.x - opp.x);
+                const target = ball.controlledBy === player ? player : ball;
+                const angle = Math.atan2(target.y - opp.y, target.x - opp.x);
                 opp.x += Math.cos(angle) * opp.speed;
                 opp.y += Math.sin(angle) * opp.speed;
             }
-
             const dist = Math.hypot(ball.x - opp.x, ball.y - opp.y);
             if (dist < ball.radius + opp.radius) {
                 endMatchAction(false);
             }
         });
         
-        if (ball.y < homeGoal.y + homeGoal.height && ball.x > homeGoal.x - homeGoal.width / 2 && ball.x < homeGoal.x + homeGoal.width / 2) { 
-            endMatchAction(true); 
-        }
-        
+        // Goal and Out of bounds detection
+        if (ball.y < homeGoal.y + homeGoal.height && ball.x > homeGoal.x - homeGoal.width / 2 && ball.x < homeGoal.x + homeGoal.width / 2) { endMatchAction(true); }
         const sidelineMargin = 10;
-        if (ball.x < sidelineMargin || ball.x > canvas.width - sidelineMargin || ball.y > canvas.height - sidelineMargin) { 
-            endMatchAction(false); 
-        }
-        if (ball.y < 0 && (ball.x < homeGoal.x - homeGoal.width / 2 || ball.x > homeGoal.x + homeGoal.width / 2)) { 
-            endMatchAction(false); 
-        }
+        if (ball.x < sidelineMargin || ball.x > canvas.width - sidelineMargin || ball.y > canvas.height - sidelineMargin) { endMatchAction(false); }
+        if (ball.y < 0 && (ball.x < homeGoal.x - homeGoal.width / 2 || ball.x > homeGoal.x + homeGoal.width / 2)) { endMatchAction(false); }
 
         draw();
         gameLoop = requestAnimationFrame(updateGame);
@@ -416,7 +460,9 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 1; i < 15; i++) { ctx.beginPath(); ctx.moveTo(goalX + (i * homeGoal.width / 15), goalY); ctx.lineTo(goalX + (i * homeGoal.width / 15), goalY + homeGoal.height); ctx.stroke(); }
         for (let i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(goalX, goalY + (i * homeGoal.height / 4)); ctx.lineTo(goalX + homeGoal.width, goalY + (i * homeGoal.height / 4)); ctx.stroke(); }
 
-        drawPlayer(player); opponents.forEach(drawPlayer);
+        drawPlayer(player);
+        teammates.forEach(tm => drawPlayer(tm));
+        opponents.forEach(drawPlayer);
         drawBall(ball);
     }
 
@@ -429,9 +475,16 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fill();
         ctx.fillStyle = 'black';
         for (let i = 0; i < 5; i++) {
-            const angle = (i / 5) * Math.PI * 2;
+            const angle = (i / 5) * Math.PI * 2 + Math.PI / 10;
             ctx.beginPath();
-            ctx.arc(b.radius * 0.5 * Math.cos(angle), b.radius * 0.5 * Math.sin(angle), b.radius * 0.3, 0, Math.PI * 2);
+            let x = b.radius * 0.5 * Math.cos(angle);
+            let y = b.radius * 0.5 * Math.sin(angle);
+            ctx.moveTo(x, y);
+            for(let j=1; j <= 5; j++) {
+                let a = angle + j * Math.PI * 2 / 5;
+                ctx.lineTo(x + b.radius * 0.3 * Math.cos(a), y + b.radius * 0.3 * Math.sin(a));
+            }
+            ctx.closePath();
             ctx.fill();
         }
         ctx.restore();
@@ -439,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function drawPlayer(entity) {
         let teamColor = '#e74c3c';
-        if (entity.isPlayer) { teamColor = gameState.team.color || '#3498db'; } 
+        if (entity.isPlayer || entity.jerseyNumber > 1) { teamColor = gameState.team.color || '#3498db'; } 
         else if (entity.type === 'goalkeeper') { teamColor = '#000000'; }
         
         ctx.fillStyle = teamColor;
@@ -457,7 +510,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fillText(entity.isPlayer ? gameState.jerseyNumber : entity.jerseyNumber, entity.x, entity.y);
 
         if(entity.isPlayer) {
-            if (!entity.hasBall) {
+            if (ball.controlledBy !== player) {
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
@@ -489,6 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const joystickZone = document.getElementById('joystick-zone');
     const joystickHandle = document.getElementById('joystick-handle');
     const shootBtn = document.getElementById('shoot-btn');
+    const passBtn = document.getElementById('pass-btn');
     let joystickStart = {};
 
     function handleJoystickStart(e) { e.preventDefault(); const touch = e.changedTouches[0]; joystickStart = { x: touch.clientX, y: touch.clientY }; }
@@ -507,12 +561,14 @@ document.addEventListener('DOMContentLoaded', () => {
         keys.ArrowLeft = dx < -deadZone; keys.ArrowRight = dx > deadZone;
     }
     const handleShoot = (e) => { e.preventDefault(); keys[' '] = true; setTimeout(() => keys[' '] = false, 100); };
+    const handlePass = (e) => { e.preventDefault(); keys['c'] = true; setTimeout(() => keys['c'] = false, 100); };
     
     function setupMobileControls() {
         joystickZone.addEventListener('touchstart', handleJoystickStart, {passive: false});
         joystickZone.addEventListener('touchmove', handleJoystickMove, {passive: false});
         joystickZone.addEventListener('touchend', handleJoystickEnd, {passive: false});
         shootBtn.addEventListener('touchstart', handleShoot, {passive: false});
+        passBtn.addEventListener('touchstart', handlePass, {passive: false});
     }
 
     function removeMobileControls() {
@@ -520,6 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
         joystickZone.removeEventListener('touchmove', handleJoystickMove);
         joystickZone.removeEventListener('touchend', handleJoystickEnd);
         shootBtn.removeEventListener('touchstart', handleShoot);
+        passBtn.removeEventListener('touchstart', handlePass);
     }
     
     // --- UI FÜGGVÉNYEK ÉS ESEMÉNYKEZELŐK ---
