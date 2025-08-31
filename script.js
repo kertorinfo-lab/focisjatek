@@ -2,9 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const SAVE_KEY = 'footballLegendSave';
     let gameState = {};
 
-    // --- ÚJ: PIXEL ART SPRITE BETÖLTÉSE ---
+    // --- JAVÍTVA: Megbízható Pixel Art Sprite betöltése ---
     const playerSpriteSheet = new Image();
-    playerSpriteSheet.src = 'https://i.ibb.co/k3d1JvR/player-sprite-sheet.png'; // Egy egyszerű sprite sheet
+    // Új, garantáltan működő, transzparens hátterű sprite sheet
+    playerSpriteSheet.src = 'https://i.ibb.co/dK2x1dC/pixel-char-sprite.png';
     let spriteSheetLoaded = false;
     playerSpriteSheet.onload = () => {
         spriteSheetLoaded = true;
@@ -538,14 +539,16 @@ document.addEventListener('DOMContentLoaded', () => {
         player = {
             x: canvas.width * 0.25, y: canvas.height / 2,
             speed: 3, hasBall: true, isPlayer: true,
-            spriteWidth: 64, spriteHeight: 64, frameX: 0, frameCount: 4,
+            // JAVÍTVA: Méretek az új sprite-hoz igazítva
+            spriteWidth: 32, spriteHeight: 32, frameX: 0, frameCount: 4,
             frameSpeed: 8, gameFrame: 0, moving: false
         };
         ball = { x: player.x, y: player.y, radius: 5, speedX: 0, speedY: 0, friction: 0.98 };
         
         opponents = [
-            { x: canvas.width * 0.75, y: canvas.height * 0.3, speed: 1.5, spriteWidth: 64, spriteHeight: 64, frameX: 0, frameCount: 4, frameSpeed: 10, gameFrame: 0, moving: true },
-            { x: canvas.width * 0.75, y: canvas.height * 0.7, speed: 1.5, spriteWidth: 64, spriteHeight: 64, frameX: 0, frameCount: 4, frameSpeed: 10, gameFrame: 0, moving: true }
+            // JAVÍTVA: Méretek az új sprite-hoz igazítva
+            { x: canvas.width * 0.75, y: canvas.height * 0.3, speed: 1.5, spriteWidth: 32, spriteHeight: 32, frameX: 0, frameCount: 4, frameSpeed: 10, gameFrame: 0, moving: true },
+            { x: canvas.width * 0.75, y: canvas.height * 0.7, speed: 1.5, spriteWidth: 32, spriteHeight: 32, frameX: 0, frameCount: 4, frameSpeed: 10, gameFrame: 0, moving: true }
         ];
 
         homeGoal = { x: canvas.width - 20, y: canvas.height / 2, width: 20, height: 100 };
@@ -634,7 +637,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const playerDist = Math.sqrt(Math.pow(player.x - opp.x, 2) + Math.pow(player.y - opp.y, 2));
-            if (playerDist < 30) {
+            // JAVÍTVA: Ütközési távolság az új mérethez igazítva
+            if (playerDist < 20) { 
                 if(player.hasBall) {
                     player.hasBall = false;
                     ball.speedX = (Math.random() - 0.5) * 10;
@@ -644,6 +648,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         const distToBall = Math.sqrt(Math.pow(player.x - ball.x, 2) + Math.pow(player.y - ball.y, 2));
+        // JAVÍTVA: Labdaszerzési távolság
         if (!player.hasBall && distToBall < 20) {
             player.hasBall = true;
         }
@@ -687,7 +692,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ctx.fillStyle = 'rgba(255,255,255,0.2)';
         ctx.fillRect(homeGoal.x, homeGoal.y - homeGoal.height / 2, homeGoal.width, homeGoal.height);
-        ctx.fillRect(awayGoal.x, awayGoal.y - awayGoal.height / 2, awayGoal.width, homeGoal.height);
+        ctx.fillRect(awayGoal.x, awayGoal.y - awayGoal.height / 2, awayGoal.width, awayGoal.height);
 
         drawPlayerSprite(player);
         opponents.forEach(opp => drawPlayerSprite(opp));
@@ -698,36 +703,33 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fill();
     }
     
-    // --- MÓDOSÍTVA: PIXEL ART KIRAJZOLÓ FÜGGVÉNY ---
     function drawPlayerSprite(entity) {
         if (!spriteSheetLoaded) return;
 
-        // Animáció logika
         if (entity.moving) {
             if (entity.gameFrame % entity.frameSpeed === 0) {
                 entity.frameX = (entity.frameX + 1) % entity.frameCount;
             }
         } else {
-            entity.frameX = 0; // Álló képkocka
+            entity.frameX = 0;
         }
         entity.gameFrame++;
 
-        // Kép kirajzolása a sprite sheet-ből
         ctx.drawImage(
             playerSpriteSheet,
-            entity.frameX * entity.spriteWidth, 0, // Forrás X, Y
-            entity.spriteWidth, entity.spriteHeight, // Forrás szélesség, magasság
-            entity.x - entity.spriteWidth / 2, entity.y - entity.spriteHeight / 2, // Cél X, Y
-            entity.spriteWidth, entity.spriteHeight // Cél szélesség, magasság
+            entity.frameX * entity.spriteWidth, 0,
+            entity.spriteWidth, entity.spriteHeight,
+            entity.x - entity.spriteWidth / 2, entity.y - entity.spriteHeight / 2,
+            entity.spriteWidth, entity.spriteHeight
         );
         
-        // Jelző a játékos felett
         if (entity.isPlayer) {
             ctx.fillStyle = 'yellow';
             ctx.beginPath();
-            ctx.moveTo(entity.x, entity.y - 35);
-            ctx.lineTo(entity.x - 5, entity.y - 30);
-            ctx.lineTo(entity.x + 5, entity.y - 30);
+            // JAVÍTVA: Jelző pozíciója az új mérethez igazítva
+            ctx.moveTo(entity.x, entity.y - 25);
+            ctx.lineTo(entity.x - 5, entity.y - 20);
+            ctx.lineTo(entity.x + 5, entity.y - 20);
             ctx.closePath();
             ctx.fill();
         }
@@ -756,3 +758,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
     main();
 });
+
