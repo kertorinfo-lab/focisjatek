@@ -542,29 +542,12 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        
-        const firebaseConfig = typeof __firebase_config__ !== 'undefined'
-            ? JSON.parse(__firebase_config__)
-            : {
-                apiKey: "AIza...",
-                authDomain: "PROJECT_ID.firebaseapp.com",
-                projectId: "PROJECT_ID",
-                storageBucket: "PROJECT_ID.appspot.com",
-                messagingSenderId: "...",
-                appId: "..."
-            };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let userId;
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const SAVE_KEY = 'footballLegendSave';
         let gameState = {};
-        
+
+        // --- SAJTÓTÁJÉKOZTATÓ VÁLTOZÓK ---
         const pressConferenceUI = document.getElementById('pressConferenceUI');
         const questionEl = document.getElementById('journalist-question');
         const answersGridEl = document.getElementById('answersGrid');
@@ -600,73 +583,66 @@
             { name: 'Juventus', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Juventus_FC_2017_logo.svg/1200px-Juventus_FC_2017_logo.svg.png', color: '#000000', strength: 84 },
             { name: 'AC Milan', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/1200px-Logo_of_AC_Milan.svg.png', color: '#FB090B', strength: 86 },
         ];
-        
-        // --- FŐ INICIALIZÁLÁS ---
-        async function main() {
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    userId = user.uid;
-                    const loadedData = await loadGame(userId);
-                    if (loadedData && loadedData.playerName) {
-                        const defaultState = {
-                            money: 0, diamonds: 0, goals: 0, assists: 0,
-                            matchesPlayed: 0, trophies: [], clubHistory: [], currentMatchday: 0, schedule: []
-                        };
-                        gameState = { ...defaultState, ...loadedData };
-                        if (!gameState.schedule || gameState.schedule.length === 0 || gameState.currentMatchday >= gameState.schedule.length) {
-                            gameState.schedule = generateSchedule(TEAMS.map(t => t.name));
-                            gameState.currentMatchday = 0;
-                            gameState.league.forEach(team => {
-                                team.played = 0; team.wins = 0; team.draws = 0; team.losses = 0;
-                                team.gf = 0; team.ga = 0; team.gd = 0; team.points = 0;
-                            });
-                            await saveGame(userId, gameState);
-                        }
-                        showMainHub();
-                    } else {
-                        initializeCharacterCreator();
-                        document.getElementById('characterCreator').classList.remove('hidden');
-                    }
-                } else {
-                    // Itt nem csinálunk semmit, megvárjuk, amíg a signInAnonymously lefut
-                }
-                document.getElementById('loadingScreen').classList.add('fade-out');
-            });
-            
+
+        // --- MENTÉS ÉS BETÖLTÉS (LocalStorage) ---
+        function saveGame(data) {
             try {
-                await signInAnonymously(auth);
-            } catch (err) {
-                console.error("Anonim bejelentkezés sikertelen:", err);
-                if (err.code === 'auth/api-key-not-valid') {
-                    document.body.innerHTML = `
-                        <div style="color: white; text-align: center; padding: 50px; font-size: 1.5em; background: #111; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                            <h1>Hiba a Csatlakozás Során</h1>
-                            <p>A játék nem tud csatlakozni az adatbázishoz, mert a Firebase API kulcs érvénytelen.</p>
-                            <p style="font-size: 0.8em; color: #ccc;">Kérjük, győződj meg róla, hogy a futtató környezet megfelelően van konfigurálva.</p>
-                        </div>
-                    `;
-                }
+                localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+            } catch (e) {
+                console.error("Hiba a mentés során: ", e);
             }
         }
 
-        async function saveGame(uid, data) {
-            try {
-                const gameDocRef = doc(db, "playerSaves", uid);
-                await setDoc(gameDocRef, data);
-            } catch (e) { console.error("Hiba a mentés során: ", e); }
+        function loadGame() {
+            const savedData = localStorage.getItem(SAVE_KEY);
+            if (savedData) {
+                try {
+                    return JSON.parse(savedData);
+                } catch (e) {
+                    console.error("Hiba a betöltés során, sérült mentés? ", e);
+                    return null;
+                }
+            }
+            return null;
         }
 
-        async function loadGame(uid) {
-            const gameDocRef = doc(db, "playerSaves", uid);
-            const docSnap = await getDoc(gameDocRef);
-            return docSnap.exists() ? docSnap.data() : null;
-        }
+        // --- FŐ INICIALIZÁLÁS ---
+        function main() {
+            const loadedData = loadGame();
+            if (loadedData && loadedData.playerName) {
+                const defaultState = {
+                    money: 0, diamonds: 0, goals: 0, assists: 0,
+                    matchesPlayed: 0, trophies: [], clubHistory: [], currentMatchday: 0, schedule: []
+                };
+                gameState = { ...defaultState, ...loadedData };
+                
+                if (!gameState.schedule || gameState.schedule.length === 0 || gameState.currentMatchday >= gameState.schedule.length) {
+                    gameState.schedule = generateSchedule(TEAMS.map(t => t.name));
+                    gameState.currentMatchday = 0;
+                    gameState.league.forEach(team => {
+                        team.played = 0; team.wins = 0; team.draws = 0; team.losses = 0;
+                        team.gf = 0; team.ga = 0; team.gd = 0; team.points = 0;
+                    });
+                    saveGame(gameState);
+                }
 
+                showMainHub();
+            } else {
+                initializeCharacterCreator();
+                document.getElementById('characterCreator').classList.remove('hidden');
+            }
+            setTimeout(() => {
+                 document.getElementById('loadingScreen').classList.add('fade-out');
+            }, 500);
+        }
+        
+        // --- KARAKTERKÉSZÍTŐ ---
         function initializeCharacterCreator() {
             const formCarousel = document.getElementById('formCarousel');
             const totalSteps = formCarousel.children.length;
             let currentStep = 0;
             const playerNameInput = document.getElementById('playerName');
+
             function updateCarousel() { formCarousel.style.transform = `translateX(-${currentStep * 100}%)`; }
             document.querySelectorAll('.next-btn').forEach(btn => btn.addEventListener('click', () => {
                 if (currentStep === 0 && playerNameInput.value.trim() === "") {
@@ -679,6 +655,7 @@
             document.querySelectorAll('.prev-btn').forEach(btn => btn.addEventListener('click', () => {
                 if (currentStep > 0) { currentStep--; updateCarousel(); }
             }));
+
             const selectButton = document.getElementById('nationalitySelect');
             const selectOptions = document.querySelector('.select-options');
             selectButton.addEventListener('click', () => selectOptions.classList.toggle('active'));
@@ -697,12 +674,14 @@
                     card.classList.add('selected');
                 });
             });
+
             document.getElementById('startGameButton').addEventListener('click', startNewGame);
         }
 
-        async function startNewGame() {
+        function startNewGame() {
             const chosenTeam = TEAMS[Math.floor(Math.random() * TEAMS.length)];
             const leagueTeams = TEAMS.map(t => ({ name: t.name, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0 }));
+
             gameState = {
                 playerName: document.getElementById('playerName').value,
                 nationality: document.querySelector('.selected-option').dataset.value || 'Magyar',
@@ -720,10 +699,12 @@
                 currentMatchday: 0,
                 schedule: generateSchedule(TEAMS.map(t => t.name))
             };
-            await saveGame(userId, gameState);
+            
+            saveGame(gameState);
             triggerCinematics();
         }
 
+        // --- SORSOLÁS ÉS MECCS LOGIKA ---
         function generateSchedule(teamNames) {
             const schedule = [];
             const teams = [...teamNames];
@@ -745,7 +726,7 @@
             return [...schedule, ...secondHalf];
         }
         
-        async function playNextMatch() {
+        function playNextMatch() {
             if (gameState.currentMatchday >= gameState.schedule.length) {
                 alert("A szezon véget ért! Új szezon kezdődik.");
                  gameState.schedule = generateSchedule(TEAMS.map(t => t.name));
@@ -754,7 +735,7 @@
                      team.played = 0; team.wins = 0; team.draws = 0; team.losses = 0;
                      team.gf = 0; team.ga = 0; team.gd = 0; team.points = 0;
                  });
-                 await saveGame(userId, gameState);
+                 saveGame(gameState);
                  updateUI();
                 return;
             }
@@ -772,7 +753,7 @@
                 processMatchResult(otherResult);
             });
             gameState.currentMatchday++;
-            await saveGame(userId, gameState);
+            saveGame(gameState);
             showMatchResult(playerResult);
         }
 
@@ -1001,6 +982,7 @@
         });
         
         main();
+    });
     </script>
 </body>
 </html>
