@@ -2,102 +2,55 @@ document.addEventListener('DOMContentLoaded', () => {
     const SAVE_KEY = 'footballLegendSave';
     let gameState = {};
 
-    // --- KARAKTERGRAFIKA BETÖLTÉSE ---
+    // --- KÉP ÉS UI ELEMEK INICIALIZÁLÁSA ---
     const playerSpriteSheet = new Image();
     playerSpriteSheet.src = 'https://i.ibb.co/hR9HB11h/modern-footballer.png';
     let spriteSheetLoaded = false;
-    playerSpriteSheet.onload = () => {
-        spriteSheetLoaded = true;
-    };
+    playerSpriteSheet.onload = () => { spriteSheetLoaded = true; };
     
-    // --- ÁLTALÁNOS UI ELEMEK ---
     const matchSimulatorOverlay = document.getElementById('matchSimulatorOverlay');
     const matchGameOverlay = document.getElementById('matchGameOverlay');
     const matchResultOverlay = document.getElementById('matchResultOverlay');
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // --- JÁTÉK VÁLTOZÓK ---
+    // --- JÁTÉK ÁLLAPOT VÁLTOZÓK ---
     let gameLoop;
     let player, ball, opponents, keys, homeGoal;
     let currentMatchData;
     let simulationInterval;
 
-    // --- SAJTÓTÁJÉKOZTATÓ VÁLTOZÓK ---
-    const pressConferenceUI = document.getElementById('pressConferenceUI');
-    const questionEl = document.getElementById('journalist-question');
-    const answersGridEl = document.getElementById('answersGrid');
-    const pressSummaryEl = document.getElementById('pressSummary');
-    const questions = [
-        {
-            question: `Üdv a {teamName}-nél! Mik a közvetlen céljaid a klubnál?`,
-            answers: [
-                { text: "Keményen dolgozni, tanulni és segíteni a csapatot, ahol csak tudom.", trait: 'humble' },
-                { text: "Minden trófeát megnyerni. Ezért jöttem.", trait: 'arrogant' },
-                { text: "A legjobbamat nyújtani minden edzésen és meccsen.", trait: 'professional' }
-            ]
-        },
-        {
-            question: "Sokan kételkednek benned. Érzed a nyomást?",
-            answers: [
-                { text: "A nyomás egy kiváltság. Alig várom, hogy bizonyítsak.", trait: 'arrogant' },
-                { text: "Csak a játékomra koncentrálok, a külső zaj nem érdekel.", trait: 'professional' },
-                { text: "Természetes, hogy van rajtam nyomás, de bízom a képességeimben.", trait: 'humble' }
-            ]
-        }
-    ];
-    let currentQuestionIndex = 0;
-    const reputation = { humble: 0, arrogant: 0, professional: 0 };
-
+    // --- CSAPAT ADATOK ---
     const TEAMS = [
-        { name: 'Real Madrid', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/1200px-Real_Madrid_CF.svg.png', color: '#FEBE10', strength: 90 },
-        { name: 'FC Barcelona', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/1200px-FC_Barcelona_%28crest%29.svg.png', color: '#A50044', strength: 88 },
-        { name: 'Manchester Utd', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/7/7a/Manchester_United_FC_crest.svg/1200px-Manchester_United_FC_crest.svg.png', color: '#DA291C', strength: 85 },
-        { name: 'Bayern München', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg/1200px-FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg.png', color: '#DC052D', strength: 92 },
-        { name: 'Liverpool', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/0/0c/Liverpool_FC.svg/1200px-Liverpool_FC.svg.png', color: '#C8102E', strength: 87 },
-        { name: 'PSG', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a7/Paris_Saint-Germain_F.C..svg/1200px-Paris_Saint-Germain_F.C..svg.png', color: '#004171', strength: 89 },
-        { name: 'Juventus', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Juventus_FC_2017_logo.svg/1200px-Juventus_FC_2017_logo.svg.png', color: '#000000', strength: 84 },
-        { name: 'AC Milan', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/1200px-Logo_of_AC_Milan.svg.png', color: '#FB090B', strength: 86 },
+        { name: 'Real Madrid', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/1200px-Real_Madrid_CF.svg.png', strength: 90 },
+        { name: 'Barcelona', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/1200px-FC_Barcelona_%28crest%29.svg.png', strength: 88 },
+        { name: 'Man Utd', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/7/7a/Manchester_United_FC_crest.svg/1200px-Manchester_United_FC_crest.svg.png', strength: 85 },
+        { name: 'Bayern', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg/1200px-FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg.png', strength: 92 },
+        { name: 'Liverpool', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/0/0c/Liverpool_FC.svg/1200px-Liverpool_FC.svg.png', strength: 87 },
+        { name: 'PSG', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a7/Paris_Saint-Germain_F.C..svg/1200px-Paris_Saint-Germain_F.C..svg.png', strength: 89 },
+        { name: 'Juventus', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Juventus_FC_2017_logo.svg/1200px-Juventus_FC_2017_logo.svg.png', strength: 84 },
+        { name: 'AC Milan', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/1200px-Logo_of_AC_Milan.svg.png', strength: 86 },
     ];
 
-    function saveGame(data) {
-        try {
-            localStorage.setItem(SAVE_KEY, JSON.stringify(data));
-        } catch (e) {
-            console.error("Hiba a mentés során: ", e);
-        }
-    }
-
+    // --- MENTÉS / BETÖLTÉS ---
+    function saveGame(data) { try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); } catch (e) { console.error("Hiba a mentés során: ", e); } }
     function loadGame() {
         const savedData = localStorage.getItem(SAVE_KEY);
-        if (savedData) {
-            try {
-                return JSON.parse(savedData);
-            } catch (e) {
-                console.error("Hiba a betöltés során, sérült mentés? ", e);
-                return null;
-            }
-        }
+        if (savedData) { try { return JSON.parse(savedData); } catch (e) { return null; } }
         return null;
     }
 
+    // --- FŐ INDÍTÁS ---
     function main() {
         const loadedData = loadGame();
         if (loadedData && loadedData.playerName) {
-            const defaultState = {
-                money: 0, diamonds: 0, goals: 0, assists: 0,
-                matchesPlayed: 0, trophies: [], clubHistory: [], currentMatchday: 0, schedule: []
-            };
+            const defaultState = { money: 0, diamonds: 0, goals: 0, assists: 0, matchesPlayed: 0, trophies: [], clubHistory: [], currentMatchday: 0, schedule: [] };
             gameState = { ...defaultState, ...loadedData };
-            
             if (!gameState.schedule || gameState.schedule.length === 0 || gameState.currentMatchday >= gameState.schedule.length) {
                 gameState.schedule = generateSchedule(TEAMS.map(t => t.name));
                 gameState.currentMatchday = 0;
                 if(gameState.league) {
-                    gameState.league.forEach(team => {
-                        team.played = 0; team.wins = 0; team.draws = 0; team.losses = 0;
-                        team.gf = 0; team.ga = 0; team.gd = 0; team.points = 0;
-                    });
+                    gameState.league.forEach(team => { Object.assign(team, { played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0 }); });
                 }
                 saveGame(gameState);
             }
@@ -106,461 +59,144 @@ document.addEventListener('DOMContentLoaded', () => {
             initializeCharacterCreator();
             document.getElementById('characterCreator').classList.remove('hidden');
         }
-        setTimeout(() => {
-             document.getElementById('loadingScreen').classList.add('fade-out');
-        }, 500);
+        setTimeout(() => { document.getElementById('loadingScreen').classList.add('fade-out'); }, 500);
     }
     
+    // --- KARAKTERKÉSZÍTŐ ---
     function initializeCharacterCreator() {
         const formCarousel = document.getElementById('formCarousel');
         const totalSteps = formCarousel.children.length;
         let currentStep = 0;
         const playerNameInput = document.getElementById('playerName');
-
         function updateCarousel() { formCarousel.style.transform = `translateX(-${currentStep * 100}%)`; }
         document.querySelectorAll('.next-btn').forEach(btn => btn.addEventListener('click', () => {
-            if (currentStep === 0 && playerNameInput.value.trim() === "") {
-                playerNameInput.classList.add('invalid');
-                setTimeout(() => playerNameInput.classList.remove('invalid'), 300);
-                return;
-            }
+            if (currentStep === 0 && playerNameInput.value.trim() === "") return;
             if (currentStep < totalSteps - 1) { currentStep++; updateCarousel(); }
         }));
         document.querySelectorAll('.prev-btn').forEach(btn => btn.addEventListener('click', () => {
             if (currentStep > 0) { currentStep--; updateCarousel(); }
         }));
-
-        const selectButton = document.getElementById('nationalitySelect');
-        const selectOptions = document.querySelector('.select-options');
-        selectButton.addEventListener('click', () => selectOptions.classList.toggle('active'));
-        document.addEventListener('click', (e) => { if (selectButton && !selectButton.contains(e.target)) { selectOptions.classList.remove('active'); } });
-        selectOptions.querySelectorAll('.option').forEach(option => {
-            option.addEventListener('click', () => {
-                selectButton.querySelector('.selected-option').innerHTML = option.innerHTML;
-                selectButton.querySelector('.selected-option').dataset.value = option.dataset.name;
-                selectOptions.classList.remove('active');
-            });
-        });
-        document.getElementById('potentialSlider').addEventListener('input', (e) => { document.getElementById('sliderValue').textContent = e.target.value; });
-        document.querySelectorAll('.formation-card').forEach(card => {
-            card.addEventListener('click', () => {
-                document.querySelector('.formation-card.selected')?.classList.remove('selected');
-                card.classList.add('selected');
-            });
-        });
-
         document.getElementById('startGameButton').addEventListener('click', startNewGame);
     }
 
     function startNewGame() {
         const chosenTeam = TEAMS[Math.floor(Math.random() * TEAMS.length)];
         const leagueTeams = TEAMS.map(t => ({ name: t.name, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0 }));
-
         gameState = {
-            playerName: document.getElementById('playerName').value,
-            nationality: document.querySelector('.selected-option').dataset.value || 'Magyar',
+            playerName: document.getElementById('playerName').value || "Player",
+            nationality: "Magyar",
             rating: document.getElementById('potentialSlider').value,
             team: chosenTeam,
-            money: 250000,
-            salary: 15000,
-            diamonds: 10,
-            goals: 0,
-            assists: 0,
-            matchesPlayed: 0,
-            trophies: [],
+            money: 250000, salary: 15000, diamonds: 10, goals: 0, assists: 0, matchesPlayed: 0, trophies: [],
             clubHistory: [chosenTeam.name],
             league: leagueTeams,
             currentMatchday: 0,
             schedule: generateSchedule(TEAMS.map(t => t.name))
         };
-        
         saveGame(gameState);
-        triggerCinematics();
+        showMainHub();
     }
 
-    function generateSchedule(teamNames) {
-        const schedule = [];
-        const teams = [...teamNames];
-        if (teams.length % 2 !== 0) { teams.push(null); }
-        const numRounds = teams.length - 1;
-        const numMatchesPerRound = teams.length / 2;
-        for (let round = 0; round < numRounds; round++) {
-            const roundMatches = [];
-            for (let i = 0; i < numMatchesPerRound; i++) {
-                const home = teams[i];
-                const away = teams[teams.length - 1 - i];
-                if (home && away) { roundMatches.push({ home, away }); }
-            }
-            schedule.push(roundMatches);
-            const lastTeam = teams.pop();
-            teams.splice(1, 0, lastTeam);
-        }
-        const secondHalf = schedule.map(round => round.map(({ home, away }) => ({ home: away, away: home })));
-        return [...schedule, ...secondHalf];
-    }
-    
-    function startNewSeason() {
-        alert("A szezon véget ért! Új szezon kezdődik.");
-        gameState.schedule = generateSchedule(TEAMS.map(t => t.name));
-        gameState.currentMatchday = 0;
-        gameState.league.forEach(team => {
-            team.played = 0; team.wins = 0; team.draws = 0; team.losses = 0;
-            team.gf = 0; team.ga = 0; team.gd = 0; team.points = 0;
-        });
-        saveGame(gameState);
-        updateUI();
-    }
-    
-    function triggerCinematics() {
-        const animationOverlay = document.getElementById('animationOverlay');
-        const pressConferenceOverlay = document.getElementById('pressConferenceOverlay');
-        document.getElementById('characterCreator').classList.add('hidden');
-        animationOverlay.classList.add('active');
-        const animationSvg = document.getElementById('animation-svg');
-        animationSvg.innerHTML = `
-            <rect width="800" height="450" fill="#1a1a1a"/>
-            <g id="desk">
-                <rect x="150" y="300" width="500" height="150" fill="#4a3f35"/>
-                <rect x="150" y="295" width="500" height="10" fill="#6b5b4f"/>
-                <text x="400" y="350" font-family="Roboto" font-size="20" fill="#fff" text-anchor="middle" id="team-name-on-desk"></text>
-            </g>
-            <g id="character-signing-group">
-                <path d="M 400 310 L 420 235 L 380 235 Z" fill="#34495e" />
-                <circle cx="400" cy="200" r="35" fill="#f0c2a2"/>
-                <circle cx="390" cy="195" r="3" fill="black"/>
-                <circle cx="410" cy="195" r="3" fill="black"/>
-                <path d="M 390 210 Q 400 215 410 210" stroke="black" stroke-width="2" fill="none"/>
-                <path d="M 380 180 A 40 40 0 0 1 420 180" fill="#4a3f35"/>
-                <path d="M 400 275 L 435 300 L 400 300 Z" fill="#34495e"/>
-                <path d="M 400 275 L 365 300 L 400 300 Z" fill="#34495e"/>
-                <circle cx="380" cy="280" r="10" fill="#f0c2a2" />
-            </g>
-            <g id="contract-group">
-                <rect x="325" y="270" width="150" height="30" fill="white" transform="rotate(-5 400 285)"/>
-                <path id="signature-path" d="M 350 285 C 375 270, 385 290, 410 280" stroke="black" stroke-width="2" fill="none"/>
-            </g>
-            <g id="jersey-group">
-                <rect x="325" y="150" width="150" height="150" fill="red" id="jersey-color" rx="10"/>
-                <image id="jersey-logo" x="362.5" y="160" width="75" height="75" href=""/>
-                <text id="jersey-name" x="400" y="265" font-family="Roboto" font-weight="900" font-size="24" fill="white" text-anchor="middle"></text>
-            </g>`;
-
-        document.getElementById('team-name-on-desk').textContent = gameState.team.name;
-        document.getElementById('jersey-color').style.fill = gameState.team.color;
-        document.getElementById('jersey-logo').setAttribute('href', gameState.team.logo);
-        document.getElementById('jersey-name').textContent = gameState.playerName.split(' ').pop().toUpperCase();
-        document.getElementById('final-team-name').textContent = gameState.team.name;
-        
-        const desk = document.getElementById('desk'), character = document.getElementById('character-signing-group'), contract = document.getElementById('contract-group'), signaturePath = document.getElementById('signature-path'), jerseyGroup = document.getElementById('jersey-group');
-        setTimeout(() => { desk.style.opacity = 1; character.style.opacity = 1; character.style.transform = 'translateY(0)'; }, 500);
-        setTimeout(() => { signaturePath.style.transition = 'stroke-dashoffset 1.5s ease-out'; signaturePath.style.strokeDashoffset = 0; }, 1500);
-        setTimeout(() => {
-            contract.style.transition = 'opacity 0.5s'; contract.style.opacity = 0;
-            character.style.transform = 'translateY(-20px)';
-            jerseyGroup.style.opacity = 1; jerseyGroup.style.transform = 'translateY(0)';
-        }, 3500);
-        setTimeout(() => { document.getElementById('flash-overlay').classList.add('flashing'); }, 4500);
-        setTimeout(() => { document.getElementById('finalMessage').classList.add('active'); }, 5000);
-        setTimeout(() => {
-            animationOverlay.classList.remove('active');
-            pressConferenceOverlay.classList.add('active');
-            startPressConference();
-        }, 6500);
-    }
-
-    function startPressConference() {
-        const pressConferenceSvg = document.getElementById('press-conference-svg');
-        pressConferenceSvg.innerHTML = `
-            <g id="press-backdrop">
-                <rect x="50" y="50" width="700" height="300" fill="#2c3e50" rx="10" />
-                <rect x="50" y="50" width="700" height="300" id="backdrop-color" fill-opacity="0.8" rx="10"/>
-                <image id="backdrop-logo" x="350" y="100" width="100" height="100" href=""/>
-            </g>
-            <g id="press-table">
-                <rect x="0" y="350" width="800" height="100" fill="#4a3f35" />
-                <rect x="0" y="345" width="800" height="10" fill="#6b5b4f"/>
-                <circle cx="280" cy="340" r="10" fill="#111"/> <rect x="278" y="310" width="4" height="30" fill="#555"/>
-                <circle cx="400" cy="340" r="10" fill="#111"/> <rect x="398" y="310" width="4" height="30" fill="#555"/>
-                <circle cx="520" cy="340" r="10" fill="#111"/> <rect x="518" y="310" width="4" height="30" fill="#555"/>
-            </g>
-            <g id="manager-character">
-                <path d="M 200 350 L 220 270 L 180 270 Z" fill="#2c3e50" />
-                <circle cx="200" cy="240" r="30" fill="#e0b395"/>
-                <path d="M 180 225 A 30 30 0 0 1 220 225" fill="#333333"/>
-            </g>
-            <g id="coach-character">
-                <path d="M 600 350 L 620 270 L 580 270 Z" id="coach-tracksuit" fill="#DA291C" />
-                <circle cx="600" cy="240" r="30" fill="#f0c2a2"/>
-                <path d="M 580 225 A 30 30 0 0 1 620 225" fill="#a9a9a9"/>
-            </g>
-            <g id="player-character-press">
-                <path d="M 400 350 L 420 270 L 380 270 Z" fill="#34495e" />
-                <circle cx="400" cy="240" r="30" fill="#f0c2a2"/>
-                <path d="M 380 225 A 30 30 0 0 1 420 225" fill="#4a3f35"/>
-            </g>
-        `;
-        questionEl.style.display = 'block';
-        answersGridEl.style.display = 'grid';
-        pressSummaryEl.style.display = 'none';
-        const existingSummary = pressSummaryEl.querySelector('p');
-        if (existingSummary) existingSummary.remove();
-        document.getElementById('continueBtn').onclick = showMainHub;
-        document.getElementById('backdrop-logo').setAttribute('href', gameState.team.logo);
-        document.getElementById('backdrop-color').style.fill = gameState.team.color;
-        document.getElementById('coach-tracksuit').style.fill = gameState.team.color;
-        setTimeout(() => { document.getElementById('press-backdrop').style.opacity = 1; document.getElementById('press-table').style.opacity = 1; }, 200);
-        setTimeout(() => { document.getElementById('manager-character').style.opacity = 1; document.getElementById('coach-character').style.opacity = 1; }, 600);
-        setTimeout(() => {
-            const player = document.getElementById('player-character-press');
-            player.style.opacity = 1; player.style.transform = 'translateY(0)';
-        }, 1000);
-        setTimeout(() => {
-            document.getElementById('pressConferenceUI').classList.add('visible');
-            displayQuestion();
-        }, 1500);
-    }
-    
-    function displayQuestion() {
-        if (currentQuestionIndex >= questions.length) { showSummary(); return; }
-        const qData = questions[currentQuestionIndex];
-        questionEl.textContent = qData.question.replace('{teamName}', gameState.team.name);
-        answersGridEl.innerHTML = '';
-        qData.answers.forEach(answer => {
-            const button = document.createElement('button');
-            button.classList.add('button', 'answer-btn');
-            button.textContent = answer.text;
-            button.onclick = () => selectAnswer(answer.trait);
-            answersGridEl.appendChild(button);
-        });
-    }
-
-    function selectAnswer(trait) { reputation[trait]++; currentQuestionIndex++; displayQuestion(); }
-    
-    function showSummary() {
-        questionEl.style.display = 'none';
-        answersGridEl.style.display = 'none';
-        pressSummaryEl.style.display = 'block';
-        let summaryText = "";
-        const maxRep = Object.keys(reputation).reduce((a, b) => reputation[a] > reputation[b] ? a : b);
-        if(maxRep === 'humble') { summaryText = "A szurkolók értékelik a szerénységedet!"; }
-        else if (maxRep === 'arrogant') { summaryText = "A magabiztos szavaid felkapták a sajtó figyelmét!"; }
-        else { summaryText = "A profi válaszaid pozitív benyomást tettek a klub vezetésére."; }
-        const summaryP = document.createElement('p');
-        summaryP.textContent = summaryText;
-        pressSummaryEl.prepend(summaryP);
-        currentQuestionIndex = 0; reputation.humble = 0; reputation.arrogant = 0; reputation.professional = 0;
-    }
-
-    function showMainHub() {
-        document.getElementById('characterCreator').classList.add('hidden');
-        document.getElementById('animationOverlay').classList.remove('active');
-        document.getElementById('pressConferenceOverlay').classList.remove('active');
-        document.getElementById('mainHub').classList.remove('hidden');
-        updateUI();
-    }
-    
-    function updateUI() {
-        updateHeaderUI();
-        updateDashboardUI();
-        updateLeagueTable();
-        updateProfileUI();
-        updateNavButtons('dashboardScreen');
-    }
-
-    function updateHeaderUI() {
-        document.getElementById('headerPlayerName').textContent = gameState.playerName;
-        document.querySelectorAll('#headerPlayerBalance, #hubPlayerBalance').forEach(el => el.textContent = (gameState.money || 0).toLocaleString());
-        document.getElementById('headerPlayerDiamonds').textContent = (gameState.diamonds || 0).toLocaleString();
-    }
-
-    function updateDashboardUI() {
-        document.getElementById('hubPlayerName').textContent = gameState.playerName;
-        document.getElementById('hubPlayerTeamName').textContent = gameState.team.name;
-        document.getElementById('hubPlayerTeamLogo').src = gameState.team.logo;
-        document.getElementById('hubPlayerRating').textContent = gameState.rating;
-        document.getElementById('hubPlayerNationality').textContent = gameState.nationality;
-        const salarySpan = document.querySelector('#dashboardScreen #hubPlayerSalary');
-        if(salarySpan) salarySpan.textContent = (gameState.salary || 0).toLocaleString();
-        
-        if(gameState.schedule && gameState.currentMatchday < gameState.schedule.length){
-            const nextFixture = gameState.schedule[gameState.currentMatchday].find(f => f.home === gameState.team.name || f.away === gameState.team.name);
-            const opponentName = nextFixture.home === gameState.team.name ? nextFixture.away : nextFixture.home;
-            document.getElementById('hubNextOpponent').textContent = opponentName;
-            document.getElementById('playMatchBtn').disabled = false;
-        } else {
-            document.getElementById('hubNextOpponent').textContent = "Szezon vége";
-            document.getElementById('playMatchBtn').disabled = false; 
-        }
-
-        const leagueClone = [...(gameState.league || [])];
-        const position = leagueClone.sort((a, b) => b.points - a.points || (b.gd - a.gd)).findIndex(t => t.name === gameState.team.name) + 1;
-        document.getElementById('hubLeaguePosition').textContent = `${position > 0 ? position : '-'}.`;
-        document.getElementById('hubMatchday').textContent = `${gameState.currentMatchday} / ${gameState.schedule.length}`;
-    }
-
-    function updateLeagueTable() {
-        const tableBody = document.getElementById('leagueTableBody');
-        if(!tableBody) return;
-        tableBody.innerHTML = '';
-        const leagueClone = [...(gameState.league || [])];
-        leagueClone.sort((a, b) => b.points - a.points || (b.gd - a.gd));
-        leagueClone.forEach((team, index) => {
-            const row = document.createElement('tr');
-            if(team.name === gameState.team.name) row.classList.add('player-team');
-            row.innerHTML = `<td>${index + 1}</td><td>${team.name}</td><td class="hide-on-mobile">${team.played}</td><td class="hide-on-mobile">${team.wins}</td><td class="hide-on-mobile">${team.draws}</td><td class="hide-on-mobile">${team.losses}</td><td>${team.gd}</td><td><strong>${team.points}</strong></td>`;
-            tableBody.appendChild(row);
-        });
-    }
-
-    function updateProfileUI() {
-        document.getElementById('profilePlayerName').textContent = `${gameState.playerName} Profilja`;
-        document.getElementById('profileGoals').textContent = gameState.goals || 0;
-        document.getElementById('profileAssists').textContent = gameState.assists || 0;
-        document.getElementById('profileMatches').textContent = gameState.matchesPlayed || 0;
-        document.getElementById('profileTrophies').textContent = (gameState.trophies || []).length;
-    }
-    
-    const allScreens = document.querySelectorAll('.screen');
-    const allNavButtons = document.querySelectorAll('.nav-btn');
-
-    function showScreen(targetScreenId) {
-        allScreens.forEach(screen => screen.classList.add('hidden'));
-        document.getElementById(targetScreenId)?.classList.remove('hidden');
-        updateNavButtons(targetScreenId);
-    }
-
-    function updateNavButtons(activeScreenId) {
-        allNavButtons.forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.screen === activeScreenId);
-        });
-    }
-
-    allNavButtons.forEach(button => button.addEventListener('click', () => showScreen(button.dataset.screen)));
-    document.getElementById('profileBtn').addEventListener('click', () => showScreen('profileScreen'));
-    document.getElementById('coinStoreBtn').addEventListener('click', () => showScreen('coinStoreScreen'));
-    document.getElementById('diamondStoreBtn').addEventListener('click', () => showScreen('diamondStoreScreen'));
-    document.getElementById('playMatchBtn').addEventListener('click', playNextMatch);
-    document.getElementById('matchResultContinueBtn').addEventListener('click', () => {
-        matchResultOverlay.classList.remove('active');
-        updateUI();
-    });
-    
-    // --- ÚJ MECCS LOGIKA KEZDETE ---
-
+    // --- MECCS LOGIKA (SZIMULÁTOR + MINIJÁTÉK) ---
     function playNextMatch() {
-        if (gameState.currentMatchday >= gameState.schedule.length) {
-            startNewSeason();
-            return;
-        }
+        if (gameState.currentMatchday >= gameState.schedule.length) { startNewSeason(); return; }
         startMatchSimulator();
     }
 
     function startMatchSimulator() {
-        const roundFixtures = gameState.schedule[gameState.currentMatchday];
-        const playerMatchFixture = roundFixtures.find(f => f.home === gameState.team.name || f.away === gameState.team.name);
-        const homeTeam = TEAMS.find(t => t.name === playerMatchFixture.home);
-        const awayTeam = TEAMS.find(t => t.name === playerMatchFixture.away);
+        const fixture = gameState.schedule[gameState.currentMatchday].find(f => f.home === gameState.team.name || f.away === gameState.team.name);
+        const homeTeam = TEAMS.find(t => t.name === fixture.home);
+        const awayTeam = TEAMS.find(t => t.name === fixture.away);
 
-        // Ha ez egy új meccs, nullázzuk az adatokat
-        if (!currentMatchData || currentMatchData.fixture.home !== playerMatchFixture.home) {
-            currentMatchData = {
-                fixture: playerMatchFixture,
-                time: 0,
-                homeScore: 0,
-                awayScore: 0,
-                playerGoals: 0,
-                playerAssists: 0
-            };
+        if (!currentMatchData || currentMatchData.fixture.home !== fixture.home) {
+            currentMatchData = { fixture, time: 0, homeScore: 0, awayScore: 0, playerGoals: 0, events: [{time: 0, comment: "Kick-off!", icon: "fa-futbol"}] };
         }
-
-        document.getElementById('simHomeLogo').src = homeTeam.logo;
+        
         document.getElementById('simHomeName').textContent = homeTeam.name;
-        document.getElementById('simAwayLogo').src = awayTeam.logo;
         document.getElementById('simAwayName').textContent = awayTeam.name;
-        document.getElementById('simScore').textContent = `${currentMatchData.homeScore} - ${currentMatchData.awayScore}`;
+        updateSimulatorUI();
         
-        if(currentMatchData.time === 0) {
-            document.getElementById('commentaryBox').innerHTML = `<p>A csapatok kivonulnak a pályára. Hamarosan kezdődik a mérkőzés!</p>`;
-        }
-        
-        matchSimulatorOverlay.classList.add('active');
+        document.getElementById('mainHub').classList.add('hidden');
+        matchSimulatorOverlay.classList.remove('hidden');
         
         simulationInterval = setInterval(() => {
-            currentMatchData.time += 2; 
-            const minutes = Math.floor(currentMatchData.time).toString().padStart(2, '0');
-            document.getElementById('simTime').textContent = `${minutes}:00`;
-
+            currentMatchData.time += 2;
+            
             const playerTeamStrength = gameState.team.strength;
             const opponentStrength = (gameState.team.name === homeTeam.name) ? awayTeam.strength : homeTeam.strength;
-            const chanceModifier = (playerTeamStrength - opponentStrength) / 200; 
+            const chanceModifier = (playerTeamStrength - opponentStrength) / 250;
 
-            if (Math.random() < 0.1 + chanceModifier) {
-                addCommentary("HELYZET! A csapatod támad, most rajtad a sor!");
+            if (Math.random() < 0.12 + chanceModifier) { // Kicsit növeltem az esélyt
+                addMatchEvent("HELYZET! A csapatod támad, most rajtad a sor!", "fa-star");
                 clearInterval(simulationInterval);
                 setTimeout(() => {
-                    matchSimulatorOverlay.classList.remove('active');
+                    matchSimulatorOverlay.classList.add('hidden');
                     startMatchGame();
                 }, 2000);
                 return;
             } 
             
             const playerIsHome = gameState.team.name === homeTeam.name;
-            if (Math.random() < 0.05 - chanceModifier) {
+            if (Math.random() < 0.04 - chanceModifier) {
                  if(playerIsHome) currentMatchData.awayScore++; else currentMatchData.homeScore++;
-                 document.getElementById('simScore').textContent = `${currentMatchData.homeScore} - ${currentMatchData.awayScore}`;
-                 addCommentary(`${minutes}' GÓL! Az ellenfél szerzett vezetést!`);
-            } else {
-                addCommentary(getRandomCommentary(minutes));
+                 addMatchEvent(`GÓL! Az ellenfél szerzett vezetést! (${awayTeam.name})`, "fa-futbol");
+            } else if (Math.random() < 0.2) {
+                addMatchEvent(getRandomCommentary(), "fa-running");
             }
 
+            updateSimulatorUI();
+
             if (currentMatchData.time >= 90) {
-                endMatchGame(false);
+                endMatchGame();
             }
         }, 1000);
     }
 
-    function addCommentary(text) {
-        const commentaryBox = document.getElementById('commentaryBox');
-        const p = document.createElement('p');
-        p.textContent = text;
-        commentaryBox.prepend(p);
+    function updateSimulatorUI() {
+        document.getElementById('simScore').textContent = `${currentMatchData.homeScore} - ${currentMatchData.awayScore}`;
+        document.getElementById('simTime').textContent = `${String(Math.floor(currentMatchData.time)).padStart(2, '0')}:00`;
+        const timeline = document.getElementById('commentary-timeline');
+        timeline.innerHTML = '';
+        currentMatchData.events.forEach(event => {
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'event-item';
+            eventDiv.innerHTML = `<div class="event-icon"><i class="fas ${event.icon}"></i></div>
+                                  <div class="event-text"><span class="time">${String(event.time).padStart(2, '0')}'</span> <span class="comment">${event.comment}</span></div>`;
+            timeline.appendChild(eventDiv);
+        });
     }
 
-    function getRandomCommentary(minutes) {
-        const comments = [`${minutes}' A középpályán folyik a játék.`, `${minutes}' Szép passz a szélen.`, `${minutes}' Bedobás következik.`, `${minutes}' Szabadrúgáshoz jut az ellenfél.`, `${minutes}' A kapus magabiztosan fogja a labdát.`];
+    function addMatchEvent(comment, icon) {
+        currentMatchData.events.unshift({time: Math.floor(currentMatchData.time), comment, icon});
+        updateSimulatorUI();
+    }
+    
+    function getRandomCommentary() {
+        const comments = ["A középpályán folyik a játék.", "Szép passz a szélen.", "Bedobás következik."];
         return comments[Math.floor(Math.random() * comments.length)];
     }
 
     function startMatchGame() {
-        matchGameOverlay.classList.add('active');
+        matchGameOverlay.classList.remove('hidden');
         resizeCanvas();
 
-        document.getElementById('gameHomeInfo').textContent = `${currentMatchData.fixture.home} ${currentMatchData.homeScore}`;
-        document.getElementById('gameAwayInfo').textContent = `${currentMatchData.fixture.away} ${currentMatchData.awayScore}`;
-        document.getElementById('gameTimer').textContent = `${String(Math.floor(currentMatchData.time)).padStart(2, '0')}:00`;
+        document.getElementById('gameHomeName').textContent = currentMatchData.fixture.home.substring(0,3).toUpperCase();
+        document.getElementById('gameAwayName').textContent = currentMatchData.fixture.away.substring(0,3).toUpperCase();
+        document.getElementById('gameScore').textContent = `${currentMatchData.homeScore} - ${currentMatchData.awayScore}`;
+        document.getElementById('gameTime').textContent = `${String(Math.floor(currentMatchData.time)).padStart(2, '0')}:00`;
 
         keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, ' ': false };
-        
-        const spriteConfig = {
-            width: 256, height: 256, frameCount: 6, frameSpeed: 8
-        };
+        const spriteConfig = { width: 256, height: 256, frameCount: 6, frameSpeed: 8 };
 
-        player = {
-            x: canvas.width / 2, y: canvas.height * 0.7,
-            speed: 4, hasBall: true, isPlayer: true,
-            ...spriteConfig, frameX: 0, gameFrame: 0, moving: false,
-        };
+        player = { x: canvas.width / 2, y: canvas.height * 0.75, speed: 4, hasBall: true, isPlayer: true, ...spriteConfig, frameX: 0, gameFrame: 0, moving: false };
         ball = { x: player.x, y: player.y + 20, radius: 8, speedX: 0, speedY: 0, friction: 0.98 };
-        
-        opponents = [
-            { x: canvas.width * 0.5, y: canvas.height * 0.3, speed: 1.8, ...spriteConfig, frameX: 0, gameFrame: 0, moving: true }
-        ];
-
+        opponents = [ { x: canvas.width * 0.5, y: canvas.height * 0.3, speed: 1.8, ...spriteConfig, frameX: 0, gameFrame: 0, moving: true } ];
         homeGoal = { x: canvas.width / 2, y: 0, width: 150, height: 30 };
         
         document.addEventListener('keydown', handleKeyDown);
         document.addEventListener('keyup', handleKeyUp);
-        
+        setupMobileControls();
+
         gameLoop = requestAnimationFrame(updateGame);
     }
     
@@ -568,81 +204,63 @@ document.addEventListener('DOMContentLoaded', () => {
         cancelAnimationFrame(gameLoop);
         document.removeEventListener('keydown', handleKeyDown);
         document.removeEventListener('keyup', handleKeyUp);
+        removeMobileControls();
 
-        const minutes = String(Math.floor(currentMatchData.time)).padStart(2, '0');
         const playerIsHome = gameState.team.name === currentMatchData.fixture.home;
-
         if (isGoal) {
             if(playerIsHome) currentMatchData.homeScore++; else currentMatchData.awayScore++;
             currentMatchData.playerGoals++;
-            addCommentary(`${minutes}' GÓÓÓÓL! Fantasztikus befejezés!`);
+            addMatchEvent(`GÓÓÓÓL! Fantasztikus befejezés! (${gameState.playerName})`, "fa-futbol");
         } else {
-            addCommentary(`${minutes}' Hatalmas helyzet maradt ki!`);
+            addMatchEvent("Kihagyott helyzet!", "fa-times-circle");
         }
-
-        document.getElementById('simScore').textContent = `${currentMatchData.homeScore} - ${currentMatchData.awayScore}`;
-        matchGameOverlay.classList.remove('active');
+        
+        matchGameOverlay.classList.add('hidden');
         
         setTimeout(() => {
             if (currentMatchData.time < 90) {
+                matchSimulatorOverlay.classList.remove('hidden');
                 startMatchSimulator();
             } else {
-                endMatchGame(false);
+                endMatchGame();
             }
-        }, 2000);
+        }, 1500);
     }
 
-    function endMatchGame(fromMiniGame) {
+    function endMatchGame() {
         clearInterval(simulationInterval);
-        addCommentary("VÉGE A MÉRKŐZÉSNEK!");
+        addMatchEvent("VÉGE A MÉRKŐZÉSNEK!", "fa-stopwatch");
 
         setTimeout(() => {
-            matchSimulatorOverlay.classList.remove('active');
-            
-            const playerIsHome = gameState.team.name === currentMatchData.fixture.home;
-            const finalResult = {
-                homeName: currentMatchData.fixture.home,
-                awayName: currentMatchData.fixture.away,
-                homeScore: currentMatchData.homeScore,
-                awayScore: currentMatchData.awayScore,
-                playerGoals: currentMatchData.playerGoals,
-                playerAssists: currentMatchData.playerAssists
-            };
-            
-            processMatchResult(finalResult, playerIsHome);
+            matchSimulatorOverlay.classList.add('hidden');
+            const finalResult = { ...currentMatchData, homeName: currentMatchData.fixture.home, awayName: currentMatchData.fixture.away };
+            processMatchResult(finalResult);
             
             const allFixtures = gameState.schedule[gameState.currentMatchday];
             const otherFixtures = allFixtures.filter(f => f.home !== gameState.team.name && f.away !== gameState.team.name);
-            otherFixtures.forEach(fixture => {
-                const otherResult = simulateOtherMatch(fixture.home, fixture.away);
-                processMatchResult(otherResult);
-            });
+            otherFixtures.forEach(fixture => { processMatchResult(simulateOtherMatch(fixture.home, fixture.away)); });
 
             gameState.currentMatchday++;
             saveGame(gameState);
             showMatchResult(finalResult);
-            currentMatchData = null; // Meccs adatainak törlése a következő meccsre
+            currentMatchData = null;
         }, 2000);
     }
 
-    function processMatchResult(result, playerIsHomeTeam) {
+    function processMatchResult(result) {
         const homeTeam = gameState.league.find(t => t.name === result.homeName);
         const awayTeam = gameState.league.find(t => t.name === result.awayName);
-        
+        if (!homeTeam || !awayTeam) return;
+
         homeTeam.played++; awayTeam.played++;
         homeTeam.gf += result.homeScore; homeTeam.ga += result.awayScore;
         awayTeam.gf += result.awayScore; awayTeam.ga += result.homeScore;
         homeTeam.gd = homeTeam.gf - homeTeam.ga;
         awayTeam.gd = awayTeam.gf - awayTeam.ga;
 
-        if (result.homeScore > result.awayScore) {
-            homeTeam.wins++; awayTeam.losses++; homeTeam.points += 3;
-        } else if (result.awayScore > result.homeScore) {
-            awayTeam.wins++; homeTeam.losses++; awayTeam.points += 3;
-        } else {
-            homeTeam.draws++; awayTeam.draws++;
-            homeTeam.points += 1; awayTeam.points += 1;
-        }
+        if (result.homeScore > result.awayScore) { homeTeam.wins++; awayTeam.losses++; homeTeam.points += 3; } 
+        else if (result.awayScore > result.homeScore) { awayTeam.wins++; homeTeam.losses++; awayTeam.points += 3; } 
+        else { homeTeam.draws++; awayTeam.draws++; homeTeam.points++; awayTeam.points++; }
     }
 
     function showMatchResult(result) {
@@ -654,32 +272,31 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let bonus = 0;
         const playerTeamWon = (gameState.team.name === result.homeName && result.homeScore > result.awayScore) || (gameState.team.name === result.awayName && result.awayScore > result.homeScore);
-        const isDraw = result.homeScore === result.awayScore;
         if (playerTeamWon) bonus += 20000;
-        if (isDraw) bonus += 5000;
+        if (result.homeScore === result.awayScore) bonus += 5000;
         bonus += result.playerGoals * 10000;
-        bonus += result.playerAssists * 5000;
-        gameState.money += gameState.salary + bonus;
+        gameState.money += (gameState.salary || 0) + bonus;
         gameState.goals += result.playerGoals;
-        gameState.assists += result.playerAssists;
         gameState.matchesPlayed++;
 
-        document.getElementById('resultPlayerPerformance').textContent = `Gólok: ${result.playerGoals}, Gólpasszok: ${result.playerAssists}`;
-        document.getElementById('resultEarnings').textContent = `Fizetés: €${gameState.salary.toLocaleString()}, Bónusz: €${bonus.toLocaleString()}`;
-        matchResultOverlay.classList.add('active');
+        document.getElementById('resultPlayerPerformance').textContent = `Gólok: ${result.playerGoals}, Gólpasszok: 0`;
+        document.getElementById('resultEarnings').textContent = `Fizetés: €${(gameState.salary || 0).toLocaleString()}, Bónusz: €${bonus.toLocaleString()}`;
+        matchResultOverlay.classList.remove('hidden');
     }
     
     function simulateOtherMatch(homeName, awayName) {
         const homeTeam = TEAMS.find(t => t.name === homeName);
         const awayTeam = TEAMS.find(t => t.name === awayName);
-        const homeScore = Math.floor(Math.random() * (homeTeam.strength / 25));
-        const awayScore = Math.floor(Math.random() * (awayTeam.strength / 25));
-        return { homeName, awayName, homeScore, awayScore, playerGoals: 0, playerAssists: 0 };
+        const homeScore = Math.floor(Math.random() * (homeTeam.strength / 28));
+        const awayScore = Math.floor(Math.random() * (awayTeam.strength / 28));
+        return { homeName, awayName, homeScore, awayScore, playerGoals: 0 };
     }
 
+    // --- IRÁNYÍTÁS ---
     function handleKeyDown(e) { keys[e.key] = true; }
     function handleKeyUp(e) { keys[e.key] = false; }
 
+    // --- MINIJÁTÉK FRISSÍTÉS ÉS RAJZOLÁS ---
     function updateGame() {
         player.moving = (keys.ArrowUp || keys.ArrowDown || keys.ArrowLeft || keys.ArrowRight);
         if (keys.ArrowUp) player.y -= player.speed;
@@ -691,95 +308,128 @@ document.addEventListener('DOMContentLoaded', () => {
         player.y = Math.max(0, Math.min(canvas.height, player.y));
 
         if (player.hasBall) {
-            ball.x = player.x;
-            ball.y = player.y + 20;
+            ball.x = player.x; ball.y = player.y + 20;
             if (keys[' ']) {
                 player.hasBall = false;
                 const angle = Math.atan2((homeGoal.y + homeGoal.height / 2) - player.y, homeGoal.x - player.x);
-                ball.speedX = Math.cos(angle) * 15;
-                ball.speedY = Math.sin(angle) * 15;
+                ball.speedX = Math.cos(angle) * 20;
+                ball.speedY = Math.sin(angle) * 20;
                 keys[' '] = false;
             }
         } else {
-            ball.x += ball.speedX;
-            ball.y += ball.speedY;
-            ball.speedX *= ball.friction;
-            ball.speedY *= ball.friction;
+            ball.x += ball.speedX; ball.y += ball.speedY;
+            ball.speedX *= ball.friction; ball.speedY *= ball.friction;
         }
         
-        if (ball.y < homeGoal.y + homeGoal.height && ball.x > homeGoal.x - homeGoal.width / 2 && ball.x < homeGoal.x + homeGoal.width / 2) {
-            endMatchAction(true);
-        }
-
-        if (ball.y < 0 || ball.y > canvas.height || ball.x < 0 || ball.x > canvas.width) {
-            endMatchAction(false);
-        }
+        if (ball.y < homeGoal.y + homeGoal.height && ball.x > homeGoal.x - homeGoal.width / 2 && ball.x < homeGoal.x + homeGoal.width / 2) { endMatchAction(true); }
+        if (ball.y < 0 || ball.y > canvas.height || ball.x < 0 || ball.x > canvas.width) { endMatchAction(false); }
 
         draw();
         gameLoop = requestAnimationFrame(updateGame);
     }
     
     function draw() {
-        ctx.fillStyle = '#2a8c2a';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-        ctx.lineWidth = 5;
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, canvas.height, 100, Math.PI, 2 * Math.PI);
-        ctx.stroke();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 5;
+        ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height, 100, Math.PI, 2 * Math.PI); ctx.stroke();
         ctx.strokeRect(canvas.width/2 - 200, 0, 400, 150);
-
         ctx.fillStyle = 'rgba(0,0,0,0.2)';
         ctx.fillRect(homeGoal.x - homeGoal.width / 2, homeGoal.y, homeGoal.width, homeGoal.height);
         
-        drawPlayerSprite(player);
-        opponents.forEach(opp => drawPlayerSprite(opp));
+        drawPlayerSprite(player); opponents.forEach(drawPlayerSprite);
         
-        ctx.fillStyle = 'white';
-        ctx.beginPath();
-        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 1;
-        ctx.stroke();
+        ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'black'; ctx.lineWidth = 1; ctx.stroke();
     }
     
     function drawPlayerSprite(entity) {
         if (!spriteSheetLoaded) return;
         if (entity.moving) {
-            if (entity.gameFrame % entity.frameSpeed === 0) {
-                entity.frameX = (entity.frameX + 1) % entity.frameCount;
-            }
-        } else {
-            entity.frameX = 0;
-        }
+            if (entity.gameFrame % entity.frameSpeed === 0) { entity.frameX = (entity.frameX + 1) % entity.frameCount; }
+        } else { entity.frameX = 0; }
         entity.gameFrame++;
         const scale = 0.45;
-        const scaledWidth = entity.width * scale;
-        const scaledHeight = entity.height * scale;
+        const scaledWidth = entity.width * scale; const scaledHeight = entity.height * scale;
         ctx.drawImage(playerSpriteSheet, entity.frameX * entity.width, 0, entity.width, entity.height, entity.x - scaledWidth / 2, entity.y - scaledHeight / 2, scaledWidth, scaledHeight);
     }
     
     function resizeCanvas() {
         const aspectRatio = 9 / 16;
         const parent = matchGameOverlay;
-        let newWidth = parent.clientWidth * 0.9;
-        let newHeight = parent.clientHeight * 0.8;
-
-        if (newWidth / newHeight > aspectRatio) {
-            newWidth = newHeight * aspectRatio;
-        } else {
-            newHeight = newWidth / aspectRatio;
-        }
-
-        canvas.width = 450;
-        canvas.height = 800;
-        canvas.style.width = `${newWidth}px`;
-        canvas.style.height = `${newHeight}px`;
+        let newWidth = parent.clientWidth; let newHeight = parent.clientHeight;
+        if (newWidth / newHeight > aspectRatio) { newWidth = newHeight * aspectRatio; } else { newHeight = newWidth / aspectRatio; }
+        canvas.width = 450; canvas.height = 800;
+        canvas.style.width = `${newWidth}px`; canvas.style.height = `${newHeight}px`;
     }
+    
+    // --- MOBIL IRÁNYÍTÁS ---
+    const joystickZone = document.getElementById('joystick-zone');
+    const joystickHandle = document.getElementById('joystick-handle');
+    const shootBtn = document.getElementById('shoot-btn');
+    function handleJoystickStart(e) { e.preventDefault(); const touch = e.changedTouches[0]; joystickStart.x = touch.clientX; joystickStart.y = touch.clientY; }
+    function handleJoystickMove(e) { e.preventDefault(); const touch = e.changedTouches[0]; joystickCurrent.x = touch.clientX; joystickCurrent.y = touch.clientY; updateJoystick(); }
+    function handleJoystickEnd(e) { e.preventDefault(); keys.ArrowUp = keys.ArrowDown = keys.ArrowLeft = keys.ArrowRight = false; joystickHandle.style.transform = `translate(0px, 0px)`;}
+    function updateJoystick() {
+        const dx = joystickCurrent.x - joystickStart.x;
+        const dy = joystickCurrent.y - joystickStart.y;
+        const angle = Math.atan2(dy, dx);
+        const distance = Math.min(30, Math.sqrt(dx * dx + dy * dy)); // Kisebb max távolság
+        const x = distance * Math.cos(angle);
+        const y = distance * Math.sin(angle);
+        joystickHandle.style.transform = `translate(${x}px, ${y}px)`;
+        const deadZone = 10;
+        keys.ArrowUp = dy < -deadZone; keys.ArrowDown = dy > deadZone;
+        keys.ArrowLeft = dx < -deadZone; keys.ArrowRight = dx > deadZone;
+    }
+    const handleShoot = (e) => { e.preventDefault(); keys[' '] = true; setTimeout(() => keys[' '] = false, 100); };
+    function setupMobileControls() {
+        joystickZone.addEventListener('touchstart', handleJoystickStart, {passive: false});
+        joystickZone.addEventListener('touchmove', handleJoystickMove, {passive: false});
+        joystickZone.addEventListener('touchend', handleJoystickEnd, {passive: false});
+        shootBtn.addEventListener('touchstart', handleShoot, {passive: false});
+    }
+    function removeMobileControls() {
+        joystickZone.removeEventListener('touchstart', handleJoystickStart);
+        joystickZone.removeEventListener('touchmove', handleJoystickMove);
+        joystickZone.removeEventListener('touchend', handleJoystickEnd);
+        shootBtn.removeEventListener('touchstart', handleShoot);
+    }
+    
+    // --- UI FÜGGVÉNYEK ÉS ESEMÉNYKEZELŐK ---
+    function showMainHub() {
+        document.querySelectorAll('.overlay').forEach(o => o.classList.add('hidden'));
+        document.getElementById('mainHub').classList.remove('hidden');
+        updateUI();
+    }
+    
+    const allScreens = document.querySelectorAll('.screen');
+    const allNavButtons = document.querySelectorAll('.nav-btn');
+    function showScreen(targetScreenId) {
+        allScreens.forEach(screen => screen.classList.add('hidden'));
+        document.getElementById(targetScreenId)?.classList.remove('hidden');
+        updateNavButtons(targetScreenId);
+    }
+    function updateNavButtons(activeScreenId) { allNavButtons.forEach(btn => { btn.classList.toggle('active', btn.dataset.screen === activeScreenId); }); }
+    
+    function updateUI() {
+        updateHeaderUI();
+        updateDashboardUI();
+        updateLeagueTable();
+        updateProfileUI();
+        updateNavButtons('dashboardScreen');
+    }
+    function updateHeaderUI() { /*...*/ document.getElementById('headerPlayerName').textContent = gameState.playerName; document.getElementById('headerPlayerBalance').textContent = (gameState.money || 0).toLocaleString(); document.getElementById('headerPlayerDiamonds').textContent = (gameState.diamonds || 0).toLocaleString(); }
+    function updateDashboardUI() { /*...*/ document.getElementById('hubPlayerName').textContent = gameState.playerName; document.getElementById('hubPlayerTeamName').textContent = gameState.team.name; document.getElementById('hubPlayerTeamLogo').src = gameState.team.logo; document.getElementById('hubPlayerRating').textContent = gameState.rating; document.getElementById('hubPlayerNationality').textContent = gameState.nationality; if (gameState.schedule && gameState.schedule[gameState.currentMatchday]) { const nextFixture = gameState.schedule[gameState.currentMatchday].find(f => f.home === gameState.team.name || f.away === gameState.team.name); document.getElementById('hubNextOpponent').textContent = nextFixture.home === gameState.team.name ? nextFixture.away : nextFixture.home; } document.getElementById('hubMatchday').textContent = `${gameState.currentMatchday} / ${gameState.schedule.length}`; }
+    function updateLeagueTable() { /*...*/ const tableBody = document.getElementById('leagueTableBody'); if (!tableBody) return; tableBody.innerHTML = ''; const leagueClone = [...(gameState.league || [])]; leagueClone.sort((a, b) => b.points - a.points || (b.gd - a.gd)); leagueClone.forEach((team, index) => { const row = document.createElement('tr'); if(team.name === gameState.team.name) row.classList.add('player-team'); row.innerHTML = `<td>${index + 1}</td><td>${team.name}</td><td class="hide-on-mobile">${team.played}</td><td class="hide-on-mobile">${team.wins}</td><td class="hide-on-mobile">${team.draws}</td><td class="hide-on-mobile">${team.losses}</td><td>${team.gd}</td><td><strong>${team.points}</strong></td>`; tableBody.appendChild(row); });}
+    function updateProfileUI() { /*...*/ document.getElementById('profilePlayerName').textContent = `${gameState.playerName} Profilja`; document.getElementById('profileGoals').textContent = gameState.goals || 0; document.getElementById('profileAssists').textContent = gameState.assists || 0; document.getElementById('profileMatches').textContent = gameState.matchesPlayed || 0; document.getElementById('profileTrophies').textContent = (gameState.trophies || []).length; }
+    function generateSchedule(teamNames) {const schedule = [];const teams = [...teamNames];if (teams.length % 2 !== 0) { teams.push(null); }const numRounds = teams.length - 1;const numMatchesPerRound = teams.length / 2;for (let round = 0; round < numRounds; round++) {const roundMatches = [];for (let i = 0; i < numMatchesPerRound; i++) {const home = teams[i];const away = teams[teams.length - 1 - i];if (home && away) { roundMatches.push({ home, away }); }}schedule.push(roundMatches);const lastTeam = teams.pop();teams.splice(1, 0, lastTeam);}const secondHalf = schedule.map(round => round.map(({ home, away }) => ({ home: away, away: home })));return [...schedule, ...secondHalf];}
+    
+    allNavButtons.forEach(button => button.addEventListener('click', () => showScreen(button.dataset.screen)));
+    document.getElementById('profileBtn').addEventListener('click', () => showScreen('profileScreen'));
+    document.getElementById('playMatchBtn').addEventListener('click', playNextMatch);
+    document.getElementById('matchResultContinueBtn').addEventListener('click', showMainHub);
 
     window.addEventListener('resize', resizeCanvas);
-    
     main();
 });
+
