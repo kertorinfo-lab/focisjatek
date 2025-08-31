@@ -209,8 +209,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         player = { x: canvas.width / 2, y: canvas.height * 0.75, speed: 4, hasBall: true, isPlayer: true, radius: 15 };
         ball = { x: player.x, y: player.y - 25, radius: 8, speedX: 0, speedY: 0, friction: 0.98 };
-        opponents = [ { x: canvas.width * 0.5, y: canvas.height * 0.25, speed: 2.5, radius: 15, direction: 1 } ];
         homeGoal = { x: canvas.width / 2, y: 0, width: 150, height: 30 };
+        
+        opponents = [
+            // Goalkeeper
+            { x: canvas.width / 2, y: 50, speed: 2, radius: 16, type: 'goalkeeper', jerseyNumber: 1 },
+            // Defenders
+            { x: canvas.width / 2 - 80, y: 150, speed: 2.2, radius: 15, type: 'defender', jerseyNumber: 4 },
+            { x: canvas.width / 2 + 80, y: 150, speed: 2.2, radius: 15, type: 'defender', jerseyNumber: 5 }
+        ];
         
         document.addEventListener('keydown', handleKeyDown);
         document.addEventListener('keyup', handleKeyUp);
@@ -234,13 +241,12 @@ document.addEventListener('DOMContentLoaded', () => {
             currentMatchData.playerGoals++;
             addMatchEvent(`GÓÓÓÓL! Fantasztikus befejezés! (${gameState.playerName})`, "fa-futbol");
         } else {
-            addMatchEvent("Kihagyott helyzet!", "fa-times-circle");
+            addMatchEvent("Kihagyott helyzet! Az ellenfél szerzett labdát.", "fa-times-circle");
         }
         
-        // Zökkenőmentes visszatérés
-        matchSimulatorOverlay.classList.remove('hidden');
-        updateSimulatorUI(); // Frissítjük a góllal/kihagyott helyzettel
         matchGameOverlay.classList.add('hidden');
+        matchSimulatorOverlay.classList.remove('hidden');
+        updateSimulatorUI();
         
         setTimeout(() => {
             if (currentMatchData.time < 90) {
@@ -322,6 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateGame() {
         if(!miniGameActive) return;
 
+        // Player movement
         if (keys.ArrowUp) player.y -= player.speed;
         if (keys.ArrowDown) player.y += player.speed;
         if (keys.ArrowLeft) player.x -= player.speed;
@@ -329,8 +336,9 @@ document.addEventListener('DOMContentLoaded', () => {
         player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x));
         player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
 
+        // Ball movement
         if (player.hasBall) {
-            ball.x = player.x; ball.y = player.y - 25; // Labda a játékos előtt
+            ball.x = player.x; ball.y = player.y - 25;
             if (keys[' ']) {
                 player.hasBall = false;
                 const angle = Math.atan2((homeGoal.y + homeGoal.height / 2) - player.y, homeGoal.x - player.x);
@@ -343,16 +351,29 @@ document.addEventListener('DOMContentLoaded', () => {
             ball.speedX *= ball.friction; ball.speedY *= ball.friction;
         }
 
+        // Opponent AI and Collision
         opponents.forEach(opp => {
-            opp.x += opp.speed * opp.direction;
-            if (opp.x > canvas.width - 150 || opp.x < 150) {
-                opp.direction *= -1;
+            if(opp.type === 'goalkeeper') {
+                opp.x += (ball.x - opp.x) * 0.08; // Követi a labda X pozícióját
+                opp.x = Math.max(homeGoal.x - homeGoal.width / 2, Math.min(homeGoal.x + homeGoal.width / 2, opp.x)); // Kapun belül marad
+            } else { // Defender AI
+                const angle = Math.atan2(player.y - opp.y, player.x - opp.x);
+                opp.x += Math.cos(angle) * opp.speed;
+                opp.y += Math.sin(angle) * opp.speed;
+            }
+
+            // Collision check
+            const dist = Math.hypot(ball.x - opp.x, ball.y - opp.y);
+            if (dist < ball.radius + opp.radius) {
+                endMatchAction(false);
             }
         });
         
+        // Goal detection
         if (ball.y < homeGoal.y + homeGoal.height && ball.x > homeGoal.x - homeGoal.width / 2 && ball.x < homeGoal.x + homeGoal.width / 2) { 
             endMatchAction(true); 
         }
+        // Out of bounds detection
         if (ball.y < 0 || ball.y > canvas.height || ball.x < 0 || ball.x > canvas.width) { 
             endMatchAction(false); 
         }
@@ -404,7 +425,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function drawPlayer(entity) {
-        ctx.fillStyle = entity.isPlayer ? (gameState.team.color || '#3498db') : '#e74c3c';
+        let teamColor = '#e74c3c'; // Alapértelmezett ellenfél szín
+        if (entity.isPlayer) {
+            teamColor = gameState.team.color || '#3498db';
+        } else if (entity.type === 'goalkeeper') {
+            teamColor = '#f1c40f'; // Kapus sárga
+        }
+        
+        ctx.fillStyle = teamColor;
         ctx.beginPath();
         ctx.arc(entity.x, entity.y, entity.radius, 0, Math.PI * 2);
         ctx.fill();
@@ -416,7 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.font = 'bold 14px Inter';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(entity.isPlayer ? gameState.jerseyNumber : '5', entity.x, entity.y);
+        ctx.fillText(entity.isPlayer ? gameState.jerseyNumber : entity.jerseyNumber, entity.x, entity.y);
 
         if(entity.isPlayer) {
             ctx.beginPath();
