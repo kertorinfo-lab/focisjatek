@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: 'Juventus', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Juventus_FC_2017_logo.svg/1200px-Juventus_FC_2017_logo.svg.png', strength: 84 },
         { name: 'AC Milan', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/1200px-Logo_of_AC_Milan.svg.png', strength: 86 },
     ];
-
+    
     // --- MENTÉS / BETÖLTÉS ---
     function saveGame(data) { try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); } catch (e) { console.error("Hiba a mentés során: ", e); } }
     function loadGame() {
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
             schedule: generateSchedule(TEAMS.map(t => t.name))
         };
         saveGame(gameState);
-        showMainHub();
+        showMainHub(); // Átmenetileg a cinematikus jeleneteket kihagyjuk a gyorsabb tesztelésért. Ha szeretnéd, ezt a sort kicserélhetjük triggerCinematics()-re.
     }
 
     // --- MECCS LOGIKA (SZIMULÁTOR + MINIJÁTÉK) ---
@@ -138,8 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function runSimulation() {
-        updateSimulatorUI();
-        
         simulationInterval = setInterval(() => {
             currentMatchData.time += 2;
             
@@ -176,7 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }, 1000);
     }
-
 
     function updateSimulatorUI() {
         document.getElementById('simScore').textContent = `${currentMatchData.homeScore} - ${currentMatchData.awayScore}`;
@@ -354,13 +351,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(fieldTexture, 0, 0, canvas.width, canvas.height); // Pálya textúra rajzolása
+        ctx.drawImage(fieldTexture, 0, 0, canvas.width, canvas.height);
         
         ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 3;
         ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height, 80, Math.PI, 2 * Math.PI); ctx.stroke();
         ctx.strokeRect(canvas.width/2 - 150, 0, 300, 120);
 
-        // Kapu + háló rajzolása
         const goalX = homeGoal.x - homeGoal.width / 2;
         const goalY = homeGoal.y;
         ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 4;
@@ -385,12 +381,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const scaledWidth = entity.width * scale; const scaledHeight = entity.height * scale;
         
         ctx.save();
-        // Mez átszínezése
-        // Ezt a részt később lehet fejleszteni, most az egyszerűség kedvéért nem színezünk
         ctx.drawImage(playerSpriteSheet, entity.frameX * entity.width, 0, entity.width, entity.height, entity.x - scaledWidth / 2, entity.y - scaledHeight / 2, scaledWidth, scaledHeight);
         ctx.restore();
 
-        // Játékos jelölő
         if(entity.isPlayer) {
             ctx.beginPath();
             ctx.moveTo(entity.x, entity.y - scaledHeight/2 - 15);
@@ -476,7 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function updateHeaderUI() { document.getElementById('headerPlayerName').textContent = gameState.playerName; document.getElementById('headerPlayerBalance').textContent = (gameState.money || 0).toLocaleString(); document.getElementById('headerPlayerDiamonds').textContent = (gameState.diamonds || 0).toLocaleString(); }
     function updateDashboardUI() { document.getElementById('hubPlayerName').textContent = gameState.playerName; document.getElementById('hubPlayerTeamName').textContent = gameState.team.name; document.getElementById('hubPlayerTeamLogo').src = gameState.team.logo; document.getElementById('hubPlayerRating').textContent = gameState.rating; if (gameState.schedule && gameState.schedule[gameState.currentMatchday]) { const nextFixture = gameState.schedule[gameState.currentMatchday].find(f => f.home === gameState.team.name || f.away === gameState.team.name); document.getElementById('hubNextOpponent').textContent = nextFixture.home === gameState.team.name ? nextFixture.away : nextFixture.home; } document.getElementById('hubMatchday').textContent = `${gameState.currentMatchday} / ${gameState.schedule.length}`; }
-    function updateLeagueTable() { const tableBody = document.getElementById('leagueTableBody'); if (!tableBody) return; tableBody.innerHTML = ''; const leagueClone = [...(gameState.league || [])]; leagueClone.sort((a, b) => b.points - a.points || (b.gd - a.gd)); leagueClone.forEach((team, index) => { const row = document.createElement('tr'); if(team.name === gameState.team.name) row.classList.add('player-team'); row.innerHTML = `<td>${index + 1}</td><td>${team.name}</td><td class="hide-on-mobile">${team.played}</td><td class="hide-on-mobile">${team.wins}</td><td class="hide-on-mobile">${team.draws}</td><td class="hide-on-mobile">${team.losses}</td><td>${team.gd}</td><td><strong>${team.points}</strong></td>`; tableBody.appendChild(row); });}
+    function updateLeagueTable() { const tableBody = document.getElementById('leagueTableBody'); if (!tableBody) return; tableBody.innerHTML = ''; const leagueClone = [...(gameState.league || [])]; leagueClone.sort((a, b) => b.points - a.points || (b.gd - a.gd)); leagueClone.forEach((team, index) => { const row = document.createElement('tr'); if(team.name === gameState.team.name) row.classList.add('player-team'); row.innerHTML = `<td>${index + 1}</td><td>${team.name}</td><td class="hide-on-mobile">${team.played}</td><td class="hide-on-mobile">${team.wins}</td><td class="hide-on-mobile">${team.draws}</td><td class.hide-on-mobile">${team.losses}</td><td>${team.gd}</td><td><strong>${team.points}</strong></td>`; tableBody.appendChild(row); });}
     function updateProfileUI() { document.getElementById('profilePlayerName').textContent = `${gameState.playerName} Profilja`; document.getElementById('profileGoals').textContent = gameState.goals || 0; document.getElementById('profileAssists').textContent = gameState.assists || 0; document.getElementById('profileMatches').textContent = gameState.matchesPlayed || 0; document.getElementById('profileTrophies').textContent = (gameState.trophies || []).length; }
     function generateSchedule(teamNames) {const schedule = [];const teams = [...teamNames];if (teams.length % 2 !== 0) { teams.push(null); }const numRounds = teams.length - 1;const numMatchesPerRound = teams.length / 2;for (let round = 0; round < numRounds; round++) {const roundMatches = [];for (let i = 0; i < numMatchesPerRound; i++) {const home = teams[i];const away = teams[teams.length - 1 - i];if (home && away) { roundMatches.push({ home, away }); }}schedule.push(roundMatches);const lastTeam = teams.pop();teams.splice(1, 0, lastTeam);}const secondHalf = schedule.map(round => round.map(({ home, away }) => ({ home: away, away: home })));return [...schedule, ...secondHalf];}
     
