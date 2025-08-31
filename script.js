@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- KÉP ÉS UI ELEMEK INICIALIZÁLÁSA ---
     const playerSpriteSheet = new Image();
     playerSpriteSheet.src = 'https://i.ibb.co/hR9HB11h/modern-footballer.png';
+    const fieldTexture = new Image();
+    fieldTexture.src = 'https://i.imgur.com/gPKFmJk.jpeg'; // Élethű fű textúra
     let spriteSheetLoaded = false;
     playerSpriteSheet.onload = () => { spriteSheetLoaded = true; };
     
@@ -99,12 +101,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- MECCS LOGIKA (SZIMULÁTOR + MINIJÁTÉK) ---
     function playNextMatch() {
-        if (gameState.currentMatchday >= gameState.schedule.length) { startNewSeason(); return; }
+        if (!gameState.schedule || !gameState.schedule[gameState.currentMatchday]) {
+            console.error("Hiba: A meccsnaptár nincs betöltve!");
+            return;
+        }
+        if (gameState.currentMatchday >= gameState.schedule.length) { 
+            startNewSeason(); 
+            return; 
+        }
         startMatchSimulator();
     }
 
     function startMatchSimulator() {
         const fixture = gameState.schedule[gameState.currentMatchday].find(f => f.home === gameState.team.name || f.away === gameState.team.name);
+        if (!fixture) {
+            console.error("Hiba: Nem található a játékos meccse a sorsolásban!");
+            return;
+        }
+        
         const homeTeam = TEAMS.find(t => t.name === fixture.home);
         const awayTeam = TEAMS.find(t => t.name === fixture.away);
 
@@ -114,25 +128,36 @@ document.addEventListener('DOMContentLoaded', () => {
         
         document.getElementById('simHomeName').textContent = homeTeam.name;
         document.getElementById('simAwayName').textContent = awayTeam.name;
+        document.getElementById('bannerPlayerName').textContent = gameState.playerName;
         updateSimulatorUI();
         
         document.getElementById('mainHub').classList.add('hidden');
         matchSimulatorOverlay.classList.remove('hidden');
         
+        runSimulation();
+    }
+
+    function runSimulation() {
+        updateSimulatorUI();
+        
         simulationInterval = setInterval(() => {
             currentMatchData.time += 2;
             
+            const homeTeam = TEAMS.find(t => t.name === currentMatchData.fixture.home);
+            const awayTeam = TEAMS.find(t => t.name === currentMatchData.fixture.away);
             const playerTeamStrength = gameState.team.strength;
             const opponentStrength = (gameState.team.name === homeTeam.name) ? awayTeam.strength : homeTeam.strength;
             const chanceModifier = (playerTeamStrength - opponentStrength) / 250;
 
-            if (Math.random() < 0.12 + chanceModifier) { // Kicsit növeltem az esélyt
+            if (Math.random() < 0.12 + chanceModifier) {
+                document.getElementById('pitch-enter-banner').classList.remove('hidden');
                 addMatchEvent("HELYZET! A csapatod támad, most rajtad a sor!", "fa-star");
                 clearInterval(simulationInterval);
                 setTimeout(() => {
                     matchSimulatorOverlay.classList.add('hidden');
+                    document.getElementById('pitch-enter-banner').classList.add('hidden');
                     startMatchGame();
-                }, 2000);
+                }, 2500);
                 return;
             } 
             
@@ -151,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }, 1000);
     }
+
 
     function updateSimulatorUI() {
         document.getElementById('simScore').textContent = `${currentMatchData.homeScore} - ${currentMatchData.awayScore}`;
@@ -220,7 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             if (currentMatchData.time < 90) {
                 matchSimulatorOverlay.classList.remove('hidden');
-                startMatchSimulator();
+                runSimulation();
             } else {
                 endMatchGame();
             }
@@ -292,11 +318,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return { homeName, awayName, homeScore, awayScore, playerGoals: 0 };
     }
 
-    // --- IRÁNYÍTÁS ---
     function handleKeyDown(e) { keys[e.key] = true; }
     function handleKeyUp(e) { keys[e.key] = false; }
 
-    // --- MINIJÁTÉK FRISSÍTÉS ÉS RAJZOLÁS ---
     function updateGame() {
         player.moving = (keys.ArrowUp || keys.ArrowDown || keys.ArrowLeft || keys.ArrowRight);
         if (keys.ArrowUp) player.y -= player.speed;
@@ -330,12 +354,21 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 5;
-        ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height, 100, Math.PI, 2 * Math.PI); ctx.stroke();
-        ctx.strokeRect(canvas.width/2 - 200, 0, 400, 150);
-        ctx.fillStyle = 'rgba(0,0,0,0.2)';
-        ctx.fillRect(homeGoal.x - homeGoal.width / 2, homeGoal.y, homeGoal.width, homeGoal.height);
+        ctx.drawImage(fieldTexture, 0, 0, canvas.width, canvas.height); // Pálya textúra rajzolása
         
+        ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height, 80, Math.PI, 2 * Math.PI); ctx.stroke();
+        ctx.strokeRect(canvas.width/2 - 150, 0, 300, 120);
+
+        // Kapu + háló rajzolása
+        const goalX = homeGoal.x - homeGoal.width / 2;
+        const goalY = homeGoal.y;
+        ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 4;
+        ctx.strokeRect(goalX, goalY, homeGoal.width, homeGoal.height);
+        ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        for (let i = 1; i < 15; i++) { ctx.beginPath(); ctx.moveTo(goalX + (i * homeGoal.width / 15), goalY); ctx.lineTo(goalX + (i * homeGoal.width / 15), goalY + homeGoal.height); ctx.stroke(); }
+        for (let i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(goalX, goalY + (i * homeGoal.height / 4)); ctx.lineTo(goalX + homeGoal.width, goalY + (i * homeGoal.height / 4)); ctx.stroke(); }
+
         drawPlayerSprite(player); opponents.forEach(drawPlayerSprite);
         
         ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2); ctx.fill();
@@ -348,9 +381,25 @@ document.addEventListener('DOMContentLoaded', () => {
             if (entity.gameFrame % entity.frameSpeed === 0) { entity.frameX = (entity.frameX + 1) % entity.frameCount; }
         } else { entity.frameX = 0; }
         entity.gameFrame++;
-        const scale = 0.45;
+        const scale = 0.4;
         const scaledWidth = entity.width * scale; const scaledHeight = entity.height * scale;
+        
+        ctx.save();
+        // Mez átszínezése
+        // Ezt a részt később lehet fejleszteni, most az egyszerűség kedvéért nem színezünk
         ctx.drawImage(playerSpriteSheet, entity.frameX * entity.width, 0, entity.width, entity.height, entity.x - scaledWidth / 2, entity.y - scaledHeight / 2, scaledWidth, scaledHeight);
+        ctx.restore();
+
+        // Játékos jelölő
+        if(entity.isPlayer) {
+            ctx.beginPath();
+            ctx.moveTo(entity.x, entity.y - scaledHeight/2 - 15);
+            ctx.lineTo(entity.x - 7, entity.y - scaledHeight/2 - 22);
+            ctx.lineTo(entity.x + 7, entity.y - scaledHeight/2 - 22);
+            ctx.closePath();
+            ctx.fillStyle = 'yellow';
+            ctx.fill();
+        }
     }
     
     function resizeCanvas() {
@@ -366,14 +415,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const joystickZone = document.getElementById('joystick-zone');
     const joystickHandle = document.getElementById('joystick-handle');
     const shootBtn = document.getElementById('shoot-btn');
-    function handleJoystickStart(e) { e.preventDefault(); const touch = e.changedTouches[0]; joystickStart.x = touch.clientX; joystickStart.y = touch.clientY; }
-    function handleJoystickMove(e) { e.preventDefault(); const touch = e.changedTouches[0]; joystickCurrent.x = touch.clientX; joystickCurrent.y = touch.clientY; updateJoystick(); }
+    let joystickStart = {};
+    let joystickCurrent = {};
+
+    function handleJoystickStart(e) { e.preventDefault(); const touch = e.changedTouches[0]; joystickStart = { x: touch.clientX, y: touch.clientY }; joystickCurrent = { ...joystickStart }; }
+    function handleJoystickMove(e) { e.preventDefault(); const touch = e.changedTouches[0]; joystickCurrent = { x: touch.clientX, y: touch.clientY }; updateJoystick(); }
     function handleJoystickEnd(e) { e.preventDefault(); keys.ArrowUp = keys.ArrowDown = keys.ArrowLeft = keys.ArrowRight = false; joystickHandle.style.transform = `translate(0px, 0px)`;}
     function updateJoystick() {
         const dx = joystickCurrent.x - joystickStart.x;
         const dy = joystickCurrent.y - joystickStart.y;
         const angle = Math.atan2(dy, dx);
-        const distance = Math.min(30, Math.sqrt(dx * dx + dy * dy)); // Kisebb max távolság
+        const distance = Math.min(30, Math.sqrt(dx * dx + dy * dy));
         const x = distance * Math.cos(angle);
         const y = distance * Math.sin(angle);
         joystickHandle.style.transform = `translate(${x}px, ${y}px)`;
@@ -382,12 +434,14 @@ document.addEventListener('DOMContentLoaded', () => {
         keys.ArrowLeft = dx < -deadZone; keys.ArrowRight = dx > deadZone;
     }
     const handleShoot = (e) => { e.preventDefault(); keys[' '] = true; setTimeout(() => keys[' '] = false, 100); };
+    
     function setupMobileControls() {
         joystickZone.addEventListener('touchstart', handleJoystickStart, {passive: false});
         joystickZone.addEventListener('touchmove', handleJoystickMove, {passive: false});
         joystickZone.addEventListener('touchend', handleJoystickEnd, {passive: false});
         shootBtn.addEventListener('touchstart', handleShoot, {passive: false});
     }
+
     function removeMobileControls() {
         joystickZone.removeEventListener('touchstart', handleJoystickStart);
         joystickZone.removeEventListener('touchmove', handleJoystickMove);
@@ -398,12 +452,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- UI FÜGGVÉNYEK ÉS ESEMÉNYKEZELŐK ---
     function showMainHub() {
         document.querySelectorAll('.overlay').forEach(o => o.classList.add('hidden'));
+        document.getElementById('characterCreator').classList.add('hidden');
         document.getElementById('mainHub').classList.remove('hidden');
         updateUI();
     }
     
     const allScreens = document.querySelectorAll('.screen');
     const allNavButtons = document.querySelectorAll('.nav-btn');
+
     function showScreen(targetScreenId) {
         allScreens.forEach(screen => screen.classList.add('hidden'));
         document.getElementById(targetScreenId)?.classList.remove('hidden');
@@ -418,10 +474,10 @@ document.addEventListener('DOMContentLoaded', () => {
         updateProfileUI();
         updateNavButtons('dashboardScreen');
     }
-    function updateHeaderUI() { /*...*/ document.getElementById('headerPlayerName').textContent = gameState.playerName; document.getElementById('headerPlayerBalance').textContent = (gameState.money || 0).toLocaleString(); document.getElementById('headerPlayerDiamonds').textContent = (gameState.diamonds || 0).toLocaleString(); }
-    function updateDashboardUI() { /*...*/ document.getElementById('hubPlayerName').textContent = gameState.playerName; document.getElementById('hubPlayerTeamName').textContent = gameState.team.name; document.getElementById('hubPlayerTeamLogo').src = gameState.team.logo; document.getElementById('hubPlayerRating').textContent = gameState.rating; document.getElementById('hubPlayerNationality').textContent = gameState.nationality; if (gameState.schedule && gameState.schedule[gameState.currentMatchday]) { const nextFixture = gameState.schedule[gameState.currentMatchday].find(f => f.home === gameState.team.name || f.away === gameState.team.name); document.getElementById('hubNextOpponent').textContent = nextFixture.home === gameState.team.name ? nextFixture.away : nextFixture.home; } document.getElementById('hubMatchday').textContent = `${gameState.currentMatchday} / ${gameState.schedule.length}`; }
-    function updateLeagueTable() { /*...*/ const tableBody = document.getElementById('leagueTableBody'); if (!tableBody) return; tableBody.innerHTML = ''; const leagueClone = [...(gameState.league || [])]; leagueClone.sort((a, b) => b.points - a.points || (b.gd - a.gd)); leagueClone.forEach((team, index) => { const row = document.createElement('tr'); if(team.name === gameState.team.name) row.classList.add('player-team'); row.innerHTML = `<td>${index + 1}</td><td>${team.name}</td><td class="hide-on-mobile">${team.played}</td><td class="hide-on-mobile">${team.wins}</td><td class="hide-on-mobile">${team.draws}</td><td class="hide-on-mobile">${team.losses}</td><td>${team.gd}</td><td><strong>${team.points}</strong></td>`; tableBody.appendChild(row); });}
-    function updateProfileUI() { /*...*/ document.getElementById('profilePlayerName').textContent = `${gameState.playerName} Profilja`; document.getElementById('profileGoals').textContent = gameState.goals || 0; document.getElementById('profileAssists').textContent = gameState.assists || 0; document.getElementById('profileMatches').textContent = gameState.matchesPlayed || 0; document.getElementById('profileTrophies').textContent = (gameState.trophies || []).length; }
+    function updateHeaderUI() { document.getElementById('headerPlayerName').textContent = gameState.playerName; document.getElementById('headerPlayerBalance').textContent = (gameState.money || 0).toLocaleString(); document.getElementById('headerPlayerDiamonds').textContent = (gameState.diamonds || 0).toLocaleString(); }
+    function updateDashboardUI() { document.getElementById('hubPlayerName').textContent = gameState.playerName; document.getElementById('hubPlayerTeamName').textContent = gameState.team.name; document.getElementById('hubPlayerTeamLogo').src = gameState.team.logo; document.getElementById('hubPlayerRating').textContent = gameState.rating; if (gameState.schedule && gameState.schedule[gameState.currentMatchday]) { const nextFixture = gameState.schedule[gameState.currentMatchday].find(f => f.home === gameState.team.name || f.away === gameState.team.name); document.getElementById('hubNextOpponent').textContent = nextFixture.home === gameState.team.name ? nextFixture.away : nextFixture.home; } document.getElementById('hubMatchday').textContent = `${gameState.currentMatchday} / ${gameState.schedule.length}`; }
+    function updateLeagueTable() { const tableBody = document.getElementById('leagueTableBody'); if (!tableBody) return; tableBody.innerHTML = ''; const leagueClone = [...(gameState.league || [])]; leagueClone.sort((a, b) => b.points - a.points || (b.gd - a.gd)); leagueClone.forEach((team, index) => { const row = document.createElement('tr'); if(team.name === gameState.team.name) row.classList.add('player-team'); row.innerHTML = `<td>${index + 1}</td><td>${team.name}</td><td class="hide-on-mobile">${team.played}</td><td class="hide-on-mobile">${team.wins}</td><td class="hide-on-mobile">${team.draws}</td><td class="hide-on-mobile">${team.losses}</td><td>${team.gd}</td><td><strong>${team.points}</strong></td>`; tableBody.appendChild(row); });}
+    function updateProfileUI() { document.getElementById('profilePlayerName').textContent = `${gameState.playerName} Profilja`; document.getElementById('profileGoals').textContent = gameState.goals || 0; document.getElementById('profileAssists').textContent = gameState.assists || 0; document.getElementById('profileMatches').textContent = gameState.matchesPlayed || 0; document.getElementById('profileTrophies').textContent = (gameState.trophies || []).length; }
     function generateSchedule(teamNames) {const schedule = [];const teams = [...teamNames];if (teams.length % 2 !== 0) { teams.push(null); }const numRounds = teams.length - 1;const numMatchesPerRound = teams.length / 2;for (let round = 0; round < numRounds; round++) {const roundMatches = [];for (let i = 0; i < numMatchesPerRound; i++) {const home = teams[i];const away = teams[teams.length - 1 - i];if (home && away) { roundMatches.push({ home, away }); }}schedule.push(roundMatches);const lastTeam = teams.pop();teams.splice(1, 0, lastTeam);}const secondHalf = schedule.map(round => round.map(({ home, away }) => ({ home: away, away: home })));return [...schedule, ...secondHalf];}
     
     allNavButtons.forEach(button => button.addEventListener('click', () => showScreen(button.dataset.screen)));
