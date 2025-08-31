@@ -4,9 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- ÚJ KARAKTERGRAFIKA BETÖLTÉSE ---
     const playerSpriteSheet = new Image();
-    // FONTOS: Mentsd le a fenti képet, töltsd fel valahova (pl. imgbb.com),
-    // és a kapott direkt linket másold ide az idézőjelek közé!
-    playerSpriteSheet.src = 'https://i.ibb.co/Yc5G20P/modern-footballer.png'; // <- CSERÉLD LE A SAJÁT LINKEDRE!
+    // A megadott direkt link beillesztve:
+    playerSpriteSheet.src = 'https://i.ibb.co/hR9HB11h/modern-footballer.png'; 
     let spriteSheetLoaded = false;
     playerSpriteSheet.onload = () => {
         spriteSheetLoaded = true;
@@ -519,7 +518,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let gameLoop;
     let player, ball, opponents, keys, homeGoal, awayGoal, homeScore, awayScore;
 
-    // --- ÚJ FÜGGVÉNY ---
     function startMatchGame(fixture) {
         matchGameOverlay.classList.add('active');
         resizeCanvas();
@@ -702,7 +700,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fill();
     }
     
-    // --- ÚJ FÜGGVÉNY ---
     function drawPlayerSprite(entity) {
         if (!spriteSheetLoaded) return; // Csak akkor rajzolunk, ha a kép már betöltődött
 
@@ -712,7 +709,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 entity.frameX = (entity.frameX + 1) % entity.frameCount;
             }
         } else {
-            entity.frameX = 0; // Ha áll, az első képkockát mutatjuk
+            entity.frameX = 0; // Ha áll, az első képkockát mutatjuk (ez az álló póz a sprite sheet-en)
         }
         entity.gameFrame++;
 
