@@ -27,12 +27,12 @@
                 <p class="form-description">Melyik országot képviseled a nemzetközi porondon?</p>
                 <div class="custom-select-wrapper">
                     <div class="select-button" id="nationalitySelect">
-                        <div class="selected-option" data-value="hu"><img src="https://flagcdn.com/w40/hu.png"><span>Magyar</span></div><span>&#9660;</span>
+                        <div class="selected-option" data-value="hu"><img src="https://flagcdn.com/w40/hu.png" alt="Magyar zászló"><span>Magyar</span></div><span>&#9660;</span>
                     </div>
                     <div class="select-options">
-                        <div class="option" data-value="hu" data-name="Magyar"><img src="https://flagcdn.com/w40/hu.png">Magyar</div>
-                        <div class="option" data-value="gb-eng" data-name="Angol"><img src="https://flagcdn.com/w40/gb-eng.png">Angol</div>
-                        <div class="option" data-value="de" data-name="Német"><img src="https://flagcdn.com/w40/de.png">Német</div>
+                        <div class="option" data-value="hu" data-name="Magyar"><img src="https://flagcdn.com/w40/hu.png" alt="Magyar zászló">Magyar</div>
+                        <div class="option" data-value="gb-eng" data-name="Angol"><img src="https://flagcdn.com/w40/gb-eng.png" alt="Angol zászló">Angol</div>
+                        <div class="option" data-value="de" data-name="Német"><img src="https://flagcdn.com/w40/de.png" alt="Német zászló">Német</div>
                     </div>
                 </div>
                 <div class="navigation-buttons"><button class="button prev-btn">&larr; Vissza</button><button class="button next-btn">Tovább &rarr;</button></div>
@@ -138,7 +138,7 @@
             <header class="top-bar">
                 <button id="profileBtn" class="profile-btn">
                     <i class="fas fa-user"></i> 
-                    <span id="headerPlayerName">Játékos Neve</span>
+                    <span id="headerPlayerName" class="hide-on-mobile">Játékos Neve</span>
                 </button>
                 <div class="currency-display">
                     <div class="currency-item" id="coinStoreBtn" data-tooltip="Coin Bolt">
@@ -199,10 +199,10 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Csapat</th>
-                                    <th>M</th>
-                                    <th>Gy</th>
-                                    <th>D</th>
-                                    <th>V</th>
+                                    <th class="hide-on-mobile">M</th>
+                                    <th class="hide-on-mobile">Gy</th>
+                                    <th class="hide-on-mobile">D</th>
+                                    <th class="hide-on-mobile">V</th>
                                     <th>GK</th>
                                     <th>P</th>
                                 </tr>
@@ -258,7 +258,15 @@
                 </div>
             </main>
         </div>
+        <!-- ÚJ ELEM: Alsó navigációs sáv mobilra -->
+        <nav class="bottom-bar">
+            <button class="nav-btn active" data-screen="dashboardScreen" aria-label="Irányítópult"><i class="fas fa-tachometer-alt"></i></button>
+            <button class="nav-btn" data-screen="leagueScreen" aria-label="Bajnokság"><i class="fas fa-trophy"></i></button>
+            <button class="nav-btn" data-screen="trophyRoomScreen" aria-label="Trófea Szoba"><i class="fas fa-award"></i></button>
+            <button class="nav-btn" data-screen="nationalTeamScreen" aria-label="Válogatott"><i class="fas fa-flag"></i></button>
+        </nav>
     </div>
     <script src="script.js"></script>
 </body>
 </html>
+
