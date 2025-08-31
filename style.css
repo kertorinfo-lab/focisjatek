@@ -130,9 +130,8 @@ input[type="range"] { width: 100%; accent-color: var(--primary-color); }
     background-color: rgba(18, 18, 18, 0.8);
     backdrop-filter: blur(10px);
     display: flex; justify-content: center; align-items: center;
-    z-index: 10000; opacity: 0; transition: opacity 0.5s ease-in; pointer-events: none;
+    z-index: 10000;
 }
-.overlay.active { opacity: 1; pointer-events: auto; }
 .scene-container { width: 90%; max-width: 800px; position: absolute; }
 #desk, #character-signing-group, #jersey-group { opacity: 0; transition: opacity 0.5s ease-in-out, transform 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
 #character-signing-group { transform: translateY(50px); }
@@ -160,7 +159,6 @@ input[type="range"] { width: 100%; accent-color: var(--primary-color); }
 .answer-btn:hover { background-color: #4a627a; border-color: var(--primary-color); }
 .continue-btn { margin-top: 20px; background-color: var(--success-color); padding: 12px 35px; }
 
-
 #matchResultOverlay .card {
     background: rgba(0,0,0,0.8);
     backdrop-filter: blur(15px);
@@ -176,17 +174,84 @@ input[type="range"] { width: 100%; accent-color: var(--primary-color); }
 .match-summary h4 { font-size: 1.5em; color: var(--primary-color); margin-bottom: 10px; }
 .match-summary p { margin: 5px 0; font-size: 1.1em; }
 
+/* === ÚJ MECCS SZIMULÁTOR KÉPERNYŐ === */
+#matchSimulatorOverlay {
+    background-color: rgba(0, 0, 0, 0.9);
+}
+.simulator-container {
+    width: 90%;
+    max-width: 700px;
+    background: #1e1e1e;
+    border-radius: 10px;
+    padding: 20px;
+    border: 2px solid #333;
+    font-family: 'Inter', sans-serif;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.sim-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #444;
+}
+.sim-team {
+    display: flex;
+    align-items: center;
+    width: 35%;
+}
+.sim-team img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+.sim-team-home { justify-content: flex-start; }
+.sim-team-away { justify-content: flex-end; }
+.sim-team span {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 0 10px;
+}
+.sim-score-time { text-align: center; }
+.sim-score-time #simScore {
+    font-size: 2.2rem;
+    font-weight: 900;
+    display: block;
+}
+.sim-score-time #simTime {
+    font-size: 1.1rem;
+    color: #a0a0a0;
+    background-color: #000;
+    padding: 2px 8px;
+    border-radius: 5px;
+}
+.commentary-box {
+    margin-top: 20px;
+    height: 200px;
+    background-color: #111;
+    border-radius: 5px;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column-reverse; /* Hogy az új üzenet alul legyen és felfelé gördüljön */
+    font-size: 0.9em;
+}
+.commentary-box p {
+    margin: 5px 0;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #222;
+    color: #ccc;
+}
+.commentary-box p:first-child {
+    color: #fff;
+    font-weight: bold;
+}
+
 #matchGameOverlay { flex-direction: column; }
 #gameCanvas {
     border: 2px solid var(--border-color);
-    background-image:
-        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
-    background-size: 50px 50px;
     background-color: #0a5c0a;
-    /* ÚJ: Éles pixel art megjelenítés */
-    image-rendering: -moz-crisp-edges;
-    image-rendering: -webkit-crisp-edges;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
 }
@@ -303,7 +368,7 @@ input[type="range"] { width: 100%; accent-color: var(--primary-color); }
 .stat-card .stat-value { font-size: 2.5em; font-weight: 900; color: var(--primary-color); }
 .stat-card .stat-label { font-size: 1em; color: var(--text-muted); margin-top: 5px; }
 
-.league-table-container { 
+.league-table-container {
     background: var(--card-bg);
     border-radius: 12px;
     border: 1px solid var(--border-color);
@@ -355,7 +420,6 @@ input[type="range"] { width: 100%; accent-color: var(--primary-color); }
 /* === RESPONSIVE DESIGN FOR MOBILE === */
 @media (max-width: 768px) {
     body {
-        /* Mobilokon a 100vh problémás lehet a böngésző UI miatt, ez egy stabilabb megoldás */
         height: -webkit-fill-available;
     }
 
@@ -367,7 +431,6 @@ input[type="range"] { width: 100%; accent-color: var(--primary-color); }
         border: none;
     }
 
-    /* Oldalsáv elrejtése, alsó sáv megjelenítése */
     .sidebar {
         display: none;
     }
@@ -394,12 +457,11 @@ input[type="range"] { width: 100%; accent-color: var(--primary-color); }
         background: rgba(0, 166, 126, 0.15);
     }
     .bottom-bar .nav-btn.active::before {
-        /* Mobilon a kis csík nem kell */
         display: none;
     }
 
     .hub-content-wrapper {
-        padding-bottom: 70px; /* Hely az alsó navigációs sávnak */
+        padding-bottom: 70px;
     }
 
     .top-bar {
@@ -424,12 +486,12 @@ input[type="range"] { width: 100%; accent-color: var(--primary-color); }
     }
 
     .dashboard-grid, .stats-grid {
-        grid-template-columns: 1fr; /* Mobilon minden kártya teljes szélességű */
+        grid-template-columns: 1fr;
         gap: 15px;
     }
 
     .league-table-container {
-        overflow-x: auto; /* Csak a táblázatot görgethetővé tesszük */
+        overflow-x: auto;
     }
     .league-table th, .league-table td {
         padding: 12px 10px;
@@ -452,4 +514,3 @@ input[type="range"] { width: 100%; accent-color: var(--primary-color); }
     .match-result-score { font-size: 3em; }
     #matchResultOverlay .card { padding: 20px; }
 }
-
