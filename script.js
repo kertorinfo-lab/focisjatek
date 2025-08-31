@@ -200,23 +200,26 @@ document.addEventListener('DOMContentLoaded', () => {
         matchGameOverlay.classList.remove('hidden');
         resizeCanvas();
 
-        document.getElementById('gameHomeName').textContent = currentMatchData.fixture.home.substring(0,3).toUpperCase();
-        document.getElementById('gameAwayName').textContent = currentMatchData.fixture.away.substring(0,3).toUpperCase();
+        const homeTeam = TEAMS.find(t=> t.name === currentMatchData.fixture.home);
+        const awayTeam = TEAMS.find(t=> t.name === currentMatchData.fixture.away);
+
+        document.getElementById('gameHomeLogo').src = homeTeam.logo;
+        document.getElementById('gameAwayLogo').src = awayTeam.logo;
+        document.getElementById('gameHomeName').textContent = homeTeam.name.substring(0,3).toUpperCase();
+        document.getElementById('gameAwayName').textContent = awayTeam.name.substring(0,3).toUpperCase();
         document.getElementById('gameScore').textContent = `${currentMatchData.homeScore} - ${currentMatchData.awayScore}`;
         document.getElementById('gameTime').textContent = `${String(Math.floor(currentMatchData.time)).padStart(2, '0')}:00`;
 
         keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, ' ': false };
 
-        player = { x: canvas.width / 2, y: canvas.height * 0.75, speed: 4, hasBall: true, isPlayer: true, radius: 15 };
-        ball = { x: player.x, y: player.y - 25, radius: 8, speedX: 0, speedY: 0, friction: 0.98 };
+        player = { x: canvas.width / 2, y: canvas.height * 0.85, speed: 4, hasBall: false, isPlayer: true, radius: 15, possessionRadius: 10 };
+        ball = { x: canvas.width / 2, y: canvas.height * 0.6, radius: 8, speedX: 0, speedY: 0, friction: 0.98 };
         homeGoal = { x: canvas.width / 2, y: 0, width: 150, height: 30 };
         
         opponents = [
-            // Goalkeeper
             { x: canvas.width / 2, y: 50, speed: 2, radius: 16, type: 'goalkeeper', jerseyNumber: 1 },
-            // Defenders
-            { x: canvas.width / 2 - 80, y: 150, speed: 2.2, radius: 15, type: 'defender', jerseyNumber: 4 },
-            { x: canvas.width / 2 + 80, y: 150, speed: 2.2, radius: 15, type: 'defender', jerseyNumber: 5 }
+            { x: canvas.width / 2 - 80, y: 180, speed: 2.2, radius: 15, type: 'defender', jerseyNumber: 4 },
+            { x: canvas.width / 2 + 80, y: 180, speed: 2.2, radius: 15, type: 'defender', jerseyNumber: 5 }
         ];
         
         document.addEventListener('keydown', handleKeyDown);
@@ -328,7 +331,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateGame() {
         if(!miniGameActive) return;
 
-        // Player movement
         if (keys.ArrowUp) player.y -= player.speed;
         if (keys.ArrowDown) player.y += player.speed;
         if (keys.ArrowLeft) player.x -= player.speed;
@@ -336,9 +338,17 @@ document.addEventListener('DOMContentLoaded', () => {
         player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x));
         player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
 
-        // Ball movement
+        const distToBall = Math.hypot(player.x - ball.x, player.y - ball.y);
+        if (!player.hasBall && distToBall < player.radius + ball.radius + player.possessionRadius) {
+            player.hasBall = true;
+        }
+
         if (player.hasBall) {
-            ball.x = player.x; ball.y = player.y - 25;
+            const dribbleDist = player.radius + ball.radius + 2;
+            const angleToPlayer = Math.atan2(player.y - ball.y, player.x - ball.x);
+            ball.speedX = Math.cos(angleToPlayer) * player.speed * 1.1;
+            ball.speedY = Math.sin(angleToPlayer) * player.speed * 1.1;
+
             if (keys[' ']) {
                 player.hasBall = false;
                 const angle = Math.atan2((homeGoal.y + homeGoal.height / 2) - player.y, homeGoal.x - player.x);
@@ -346,37 +356,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 ball.speedY = Math.sin(angle) * 20;
                 keys[' '] = false;
             }
-        } else {
-            ball.x += ball.speedX; ball.y += ball.speedY;
-            ball.speedX *= ball.friction; ball.speedY *= ball.friction;
-        }
+        } 
+        
+        ball.x += ball.speedX; ball.y += ball.speedY;
+        ball.speedX *= ball.friction; ball.speedY *= ball.friction;
 
-        // Opponent AI and Collision
         opponents.forEach(opp => {
             if(opp.type === 'goalkeeper') {
-                opp.x += (ball.x - opp.x) * 0.08; // Követi a labda X pozícióját
-                opp.x = Math.max(homeGoal.x - homeGoal.width / 2, Math.min(homeGoal.x + homeGoal.width / 2, opp.x)); // Kapun belül marad
-            } else { // Defender AI
-                const angle = Math.atan2(player.y - opp.y, player.x - opp.x);
+                opp.x += (ball.x - opp.x) * 0.08;
+                opp.x = Math.max(homeGoal.x - homeGoal.width / 2, Math.min(homeGoal.x + homeGoal.width / 2, opp.x));
+            } else {
+                const angle = Math.atan2(ball.y - opp.y, ball.x - opp.x);
                 opp.x += Math.cos(angle) * opp.speed;
                 opp.y += Math.sin(angle) * opp.speed;
             }
 
-            // Collision check
             const dist = Math.hypot(ball.x - opp.x, ball.y - opp.y);
             if (dist < ball.radius + opp.radius) {
                 endMatchAction(false);
             }
         });
         
-        // Goal detection
-        if (ball.y < homeGoal.y + homeGoal.height && ball.x > homeGoal.x - homeGoal.width / 2 && ball.x < homeGoal.x + homeGoal.width / 2) { 
-            endMatchAction(true); 
-        }
-        // Out of bounds detection
-        if (ball.y < 0 || ball.y > canvas.height || ball.x < 0 || ball.x > canvas.width) { 
-            endMatchAction(false); 
-        }
+        if (ball.y < homeGoal.y + homeGoal.height && ball.x > homeGoal.x - homeGoal.width / 2 && ball.x < homeGoal.x + homeGoal.width / 2) { endMatchAction(true); }
+        
+        const sidelineMargin = 10;
+        if (ball.x < sidelineMargin || ball.x > canvas.width - sidelineMargin) { endMatchAction(false); }
+        if (ball.y < 0 && (ball.x < homeGoal.x - homeGoal.width / 2 || ball.x > homeGoal.x + homeGoal.width / 2)) { endMatchAction(false); }
+        if (ball.y > canvas.height) { endMatchAction(false); }
 
         draw();
         gameLoop = requestAnimationFrame(updateGame);
@@ -385,13 +391,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Pálya rajzolása csíkokkal
         for(let i = 0; i < 10; i++) {
             ctx.fillStyle = i % 2 === 0 ? '#2a8c2a' : '#2e942e';
             ctx.fillRect(0, i * canvas.height / 10, canvas.width, canvas.height / 10);
         }
         
         ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 3;
+        ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+        ctx.beginPath(); ctx.moveTo(10, canvas.height/2); ctx.lineTo(canvas.width - 10, canvas.height/2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height/2, 60, 0, 2*Math.PI); ctx.stroke();
         ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height, 80, Math.PI, 2 * Math.PI); ctx.stroke();
         ctx.strokeRect(canvas.width/2 - 150, 0, 300, 120);
 
@@ -425,12 +433,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function drawPlayer(entity) {
-        let teamColor = '#e74c3c'; // Alapértelmezett ellenfél szín
-        if (entity.isPlayer) {
-            teamColor = gameState.team.color || '#3498db';
-        } else if (entity.type === 'goalkeeper') {
-            teamColor = '#f1c40f'; // Kapus sárga
-        }
+        let teamColor = '#e74c3c';
+        if (entity.isPlayer) { teamColor = gameState.team.color || '#3498db'; } 
+        else if (entity.type === 'goalkeeper') { teamColor = '#000000'; }
         
         ctx.fillStyle = teamColor;
         ctx.beginPath();
@@ -447,6 +452,15 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fillText(entity.isPlayer ? gameState.jerseyNumber : entity.jerseyNumber, entity.x, entity.y);
 
         if(entity.isPlayer) {
+            if (!entity.hasBall) {
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(entity.x, entity.y, entity.radius + entity.possessionRadius, 0, Math.PI * 2);
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
             ctx.beginPath();
             ctx.moveTo(entity.x, entity.y - entity.radius - 5);
             ctx.lineTo(entity.x - 6, entity.y - entity.radius - 11);
