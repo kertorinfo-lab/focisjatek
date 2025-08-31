@@ -2,6 +2,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const SAVE_KEY = 'footballLegendSave';
     let gameState = {};
 
+    // --- ÚJ: PIXEL ART SPRITE BETÖLTÉSE ---
+    const playerSpriteSheet = new Image();
+    playerSpriteSheet.src = 'https://i.ibb.co/k3d1JvR/player-sprite-sheet.png'; // Egy egyszerű sprite sheet
+    let spriteSheetLoaded = false;
+    playerSpriteSheet.onload = () => {
+        spriteSheetLoaded = true;
+    };
+
+
     // --- SAJTÓTÁJÉKOZTATÓ VÁLTOZÓK ---
     const pressConferenceUI = document.getElementById('pressConferenceUI');
     const questionEl = document.getElementById('journalist-question');
@@ -426,10 +435,11 @@ document.addEventListener('DOMContentLoaded', () => {
         updateDashboardUI();
         updateLeagueTable();
         updateProfileUI();
+        updateNavButtons();
     }
     function updateHeaderUI() {
         document.getElementById('headerPlayerName').textContent = gameState.playerName;
-        document.getElementById('headerPlayerBalance').textContent = (gameState.money || 0).toLocaleString();
+        document.querySelectorAll('#headerPlayerBalance, #hubPlayerBalance').forEach(el => el.textContent = (gameState.money || 0).toLocaleString());
         document.getElementById('headerPlayerDiamonds').textContent = (gameState.diamonds || 0).toLocaleString();
     }
     function updateDashboardUI() {
@@ -438,8 +448,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('hubPlayerTeamLogo').src = gameState.team.logo;
         document.getElementById('hubPlayerRating').textContent = gameState.rating;
         document.getElementById('hubPlayerNationality').textContent = gameState.nationality;
-        const balanceSpan = document.querySelector('#dashboardScreen #hubPlayerBalance');
-        if (balanceSpan) balanceSpan.textContent = (gameState.money || 0).toLocaleString();
         const salarySpan = document.querySelector('#dashboardScreen #hubPlayerSalary');
         if(salarySpan) salarySpan.textContent = (gameState.salary || 0).toLocaleString();
         
@@ -467,7 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
         leagueClone.forEach((team, index) => {
             const row = document.createElement('tr');
             if(team.name === gameState.team.name) row.classList.add('player-team');
-            row.innerHTML = `<td>${index + 1}</td><td>${team.name}</td><td>${team.played}</td><td>${team.wins}</td><td>${team.draws}</td><td>${team.losses}</td><td>${team.gd}</td><td><strong>${team.points}</strong></td>`;
+            row.innerHTML = `<td>${index + 1}</td><td>${team.name}</td><td class="hide-on-mobile">${team.played}</td><td class="hide-on-mobile">${team.wins}</td><td class="hide-on-mobile">${team.draws}</td><td class="hide-on-mobile">${team.losses}</td><td>${team.gd}</td><td><strong>${team.points}</strong></td>`;
             tableBody.appendChild(row);
         });
     }
@@ -481,13 +489,21 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- NAVIGÁCIÓ ---
     const allScreens = document.querySelectorAll('.screen');
-    const navButtons = document.querySelectorAll('.nav-btn');
+    const allNavButtons = document.querySelectorAll('.nav-btn');
+
     function showScreen(targetScreenId) {
         allScreens.forEach(screen => screen.classList.add('hidden'));
         document.getElementById(targetScreenId)?.classList.remove('hidden');
-        navButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.screen === targetScreenId));
+        updateNavButtons(targetScreenId);
     }
-    navButtons.forEach(button => button.addEventListener('click', () => showScreen(button.dataset.screen)));
+
+    function updateNavButtons(activeScreenId) {
+        allNavButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.screen === activeScreenId);
+        });
+    }
+
+    allNavButtons.forEach(button => button.addEventListener('click', () => showScreen(button.dataset.screen)));
     document.getElementById('profileBtn').addEventListener('click', () => showScreen('profileScreen'));
     document.getElementById('coinStoreBtn').addEventListener('click', () => showScreen('coinStoreScreen'));
     document.getElementById('diamondStoreBtn').addEventListener('click', () => showScreen('diamondStoreScreen'));
@@ -510,7 +526,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const homeTeamDetails = TEAMS.find(t => t.name === fixture.home);
         const awayTeamDetails = TEAMS.find(t => t.name === fixture.away);
-        const playerIsHome = gameState.team.name === homeTeamDetails.name;
         
         document.getElementById('gameHomeInfo').textContent = `${fixture.home} 0`;
         document.getElementById('gameAwayInfo').textContent = `${fixture.away} 0`;
@@ -520,15 +535,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, Space: false };
         
-        const playerColor = playerIsHome ? homeTeamDetails.color : awayTeamDetails.color;
-        const opponentColor = playerIsHome ? awayTeamDetails.color : homeTeamDetails.color;
-
-        player = { x: canvas.width / 4, y: canvas.height / 2, radius: 10, speed: 3, color: playerColor, hasBall: true };
+        player = {
+            x: canvas.width * 0.25, y: canvas.height / 2,
+            speed: 3, hasBall: true, isPlayer: true,
+            spriteWidth: 64, spriteHeight: 64, frameX: 0, frameCount: 4,
+            frameSpeed: 8, gameFrame: 0, moving: false
+        };
         ball = { x: player.x, y: player.y, radius: 5, speedX: 0, speedY: 0, friction: 0.98 };
         
         opponents = [
-            { x: canvas.width * 0.75, y: canvas.height * 0.3, radius: 10, speed: 1.5, color: opponentColor },
-            { x: canvas.width * 0.75, y: canvas.height * 0.7, radius: 10, speed: 1.5, color: opponentColor }
+            { x: canvas.width * 0.75, y: canvas.height * 0.3, speed: 1.5, spriteWidth: 64, spriteHeight: 64, frameX: 0, frameCount: 4, frameSpeed: 10, gameFrame: 0, moving: true },
+            { x: canvas.width * 0.75, y: canvas.height * 0.7, speed: 1.5, spriteWidth: 64, spriteHeight: 64, frameX: 0, frameCount: 4, frameSpeed: 10, gameFrame: 0, moving: true }
         ];
 
         homeGoal = { x: canvas.width - 20, y: canvas.height / 2, width: 20, height: 100 };
@@ -558,7 +575,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.removeEventListener('keyup', handleKeyUp);
         matchGameOverlay.classList.remove('active');
         
-        // Eredmények feldolgozása
         const roundFixtures = gameState.schedule[gameState.currentMatchday];
         const playerMatchFixture = roundFixtures.find(f => f.home === gameState.team.name || f.away === gameState.team.name);
         const playerIsHome = gameState.team.name === playerMatchFixture.home;
@@ -568,7 +584,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         processMatchResult(playerResult);
         
-        // NPC meccsek szimulációja
         const otherFixtures = roundFixtures.filter(f => f.home !== gameState.team.name && f.away !== gameState.team.name);
         otherFixtures.forEach(fixture => {
             const otherResult = simulateMatch(fixture.home, fixture.away, false, 0);
@@ -584,19 +599,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleKeyUp(e) { keys[e.key] = false; }
 
     function updateGame() {
-        // Játékos mozgása
+        player.moving = (keys.ArrowUp || keys.ArrowDown || keys.ArrowLeft || keys.ArrowRight);
         if (keys.ArrowUp) player.y -= player.speed;
         if (keys.ArrowDown) player.y += player.speed;
         if (keys.ArrowLeft) player.x -= player.speed;
         if (keys.ArrowRight) player.x += player.speed;
         
-        // Határok
-        player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x));
-        player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
+        player.x = Math.max(player.spriteWidth / 2, Math.min(canvas.width - player.spriteWidth / 2, player.x));
+        player.y = Math.max(player.spriteHeight / 2, Math.min(canvas.height - player.spriteHeight / 2, player.y));
 
-        // Labda követi a játékost, ha nála van
         if (player.hasBall) {
-            ball.x = player.x + 12;
+            ball.x = player.x + 15;
             ball.y = player.y;
             if (keys.Space) {
                 player.hasBall = false;
@@ -605,24 +618,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 keys.Space = false;
             }
         } else {
-            // Labda mozgása
             ball.x += ball.speedX;
             ball.y += ball.speedY;
             ball.speedX *= ball.friction;
             ball.speedY *= ball.friction;
         }
 
-        // Ellenfél logikája
         opponents.forEach(opp => {
             const dx = ball.x - opp.x;
             const dy = ball.y - opp.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            opp.x += (dx / dist) * opp.speed;
-            opp.y += (dy / dist) * opp.speed;
+            if (dist > 1) {
+                opp.x += (dx / dist) * opp.speed;
+                opp.y += (dy / dist) * opp.speed;
+            }
 
-            // Ütközés a játékosokkal
             const playerDist = Math.sqrt(Math.pow(player.x - opp.x, 2) + Math.pow(player.y - opp.y, 2));
-            if (playerDist < player.radius + opp.radius) {
+            if (playerDist < 30) {
                 if(player.hasBall) {
                     player.hasBall = false;
                     ball.speedX = (Math.random() - 0.5) * 10;
@@ -631,13 +643,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // Labda megszerzése
         const distToBall = Math.sqrt(Math.pow(player.x - ball.x, 2) + Math.pow(player.y - ball.y, 2));
-        if (!player.hasBall && distToBall < player.radius + ball.radius) {
+        if (!player.hasBall && distToBall < 20) {
             player.hasBall = true;
         }
 
-        // Gól ellenőrzés
         if (ball.x > homeGoal.x && ball.y > homeGoal.y - homeGoal.height/2 && ball.y < homeGoal.y + homeGoal.height/2) {
             homeScore++;
             document.getElementById('gameHomeInfo').textContent = `${gameState.schedule[gameState.currentMatchday].find(f => f.home === gameState.team.name || f.away === gameState.team.name).home} ${homeScore}`;
@@ -664,10 +674,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Pálya rajzolása
         ctx.strokeStyle = 'rgba(255,255,255,0.5)';
         ctx.lineWidth = 3;
-        ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20); // Oldalvonalak
+        ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
         ctx.beginPath();
         ctx.moveTo(canvas.width / 2, 10);
         ctx.lineTo(canvas.width / 2, canvas.height - 10);
@@ -676,15 +685,12 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.arc(canvas.width / 2, canvas.height / 2, 50, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Kapuk
         ctx.fillStyle = 'rgba(255,255,255,0.2)';
         ctx.fillRect(homeGoal.x, homeGoal.y - homeGoal.height / 2, homeGoal.width, homeGoal.height);
-        ctx.fillRect(awayGoal.x, awayGoal.y - awayGoal.height / 2, awayGoal.width, awayGoal.height);
+        ctx.fillRect(awayGoal.x, awayGoal.y - awayGoal.height / 2, awayGoal.width, homeGoal.height);
 
-
-        // Játékosok és labda
-        drawPlayerSprite(ctx, player.x, player.y, player.color, true);
-        opponents.forEach(opp => drawPlayerSprite(ctx, opp.x, opp.y, opp.color, false));
+        drawPlayerSprite(player);
+        opponents.forEach(opp => drawPlayerSprite(opp));
 
         ctx.fillStyle = 'white';
         ctx.beginPath();
@@ -692,29 +698,36 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fill();
     }
     
-    function drawPlayerSprite(ctx, x, y, color, isPlayer) {
-        // Test
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.moveTo(x, y + 15);
-        ctx.lineTo(x - 7, y - 10);
-        ctx.lineTo(x + 7, y - 10);
-        ctx.closePath();
-        ctx.fill();
+    // --- MÓDOSÍTVA: PIXEL ART KIRAJZOLÓ FÜGGVÉNY ---
+    function drawPlayerSprite(entity) {
+        if (!spriteSheetLoaded) return;
 
-        // Fej
-        ctx.fillStyle = '#f0c2a2'; // Bőrszín
-        ctx.beginPath();
-        ctx.arc(x, y - 15, 8, 0, Math.PI * 2);
-        ctx.fill();
+        // Animáció logika
+        if (entity.moving) {
+            if (entity.gameFrame % entity.frameSpeed === 0) {
+                entity.frameX = (entity.frameX + 1) % entity.frameCount;
+            }
+        } else {
+            entity.frameX = 0; // Álló képkocka
+        }
+        entity.gameFrame++;
+
+        // Kép kirajzolása a sprite sheet-ből
+        ctx.drawImage(
+            playerSpriteSheet,
+            entity.frameX * entity.spriteWidth, 0, // Forrás X, Y
+            entity.spriteWidth, entity.spriteHeight, // Forrás szélesség, magasság
+            entity.x - entity.spriteWidth / 2, entity.y - entity.spriteHeight / 2, // Cél X, Y
+            entity.spriteWidth, entity.spriteHeight // Cél szélesség, magasság
+        );
         
         // Jelző a játékos felett
-        if (isPlayer) {
+        if (entity.isPlayer) {
             ctx.fillStyle = 'yellow';
             ctx.beginPath();
-            ctx.moveTo(x, y - 30);
-            ctx.lineTo(x - 5, y - 25);
-            ctx.lineTo(x + 5, y - 25);
+            ctx.moveTo(entity.x, entity.y - 35);
+            ctx.lineTo(entity.x - 5, entity.y - 30);
+            ctx.lineTo(entity.x + 5, entity.y - 30);
             ctx.closePath();
             ctx.fill();
         }
@@ -733,7 +746,7 @@ document.addEventListener('DOMContentLoaded', () => {
             newWidth = parentHeight * aspectRatio;
         }
 
-        canvas.width = 800; // Belső felbontás
+        canvas.width = 800;
         canvas.height = 450;
         canvas.style.width = `${newWidth}px`;
         canvas.style.height = `${newHeight}px`;
