@@ -2,10 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const SAVE_KEY = 'footballLegendSave';
     let gameState = {};
 
-    // --- JAVÍTVA: Működő link a részletesebb Pixel Art Sprite-hoz ---
+    // --- JAVÍTVA: A grafika Base64 kódként beágyazva a 100%-os megbízhatóságért ---
     const playerSpriteSheet = new Image();
-    // Forrás: https://chierit.itch.io/soccer-players-spritesheet (CC0 License)
-    playerSpriteSheet.src = 'https://i.ibb.co/yqY6r0d/soccer-players-spritesheet.png';
+    // A kép most már a kód része, nem egy külső link, így sosem fog eltűnni.
+    playerSpriteSheet.src = 'data:image/png;base64,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';
     let spriteSheetLoaded = false;
     playerSpriteSheet.onload = () => {
         spriteSheetLoaded = true;
@@ -344,33 +344,33 @@ document.addEventListener('DOMContentLoaded', () => {
     function startPressConference() {
         const pressConferenceSvg = document.getElementById('press-conference-svg');
         pressConferenceSvg.innerHTML = `
-             <g id="press-backdrop">
-                 <rect x="50" y="50" width="700" height="300" fill="#2c3e50" rx="10" />
-                 <rect x="50" y="50" width="700" height="300" id="backdrop-color" fill-opacity="0.8" rx="10"/>
-                 <image id="backdrop-logo" x="350" y="100" width="100" height="100" href=""/>
-             </g>
-             <g id="press-table">
-                 <rect x="0" y="350" width="800" height="100" fill="#4a3f35" />
-                 <rect x="0" y="345" width="800" height="10" fill="#6b5b4f"/>
-                 <circle cx="280" cy="340" r="10" fill="#111"/> <rect x="278" y="310" width="4" height="30" fill="#555"/>
-                 <circle cx="400" cy="340" r="10" fill="#111"/> <rect x="398" y="310" width="4" height="30" fill="#555"/>
-                 <circle cx="520" cy="340" r="10" fill="#111"/> <rect x="518" y="310" width="4" height="30" fill="#555"/>
-             </g>
-             <g id="manager-character">
-                 <path d="M 200 350 L 220 270 L 180 270 Z" fill="#2c3e50" />
-                 <circle cx="200" cy="240" r="30" fill="#e0b395"/>
-                 <path d="M 180 225 A 30 30 0 0 1 220 225" fill="#333333"/>
-             </g>
-             <g id="coach-character">
-                  <path d="M 600 350 L 620 270 L 580 270 Z" id="coach-tracksuit" fill="#DA291C" />
-                 <circle cx="600" cy="240" r="30" fill="#f0c2a2"/>
-                  <path d="M 580 225 A 30 30 0 0 1 620 225" fill="#a9a9a9"/>
-             </g>
-             <g id="player-character-press">
-                 <path d="M 400 350 L 420 270 L 380 270 Z" fill="#34495e" />
-                 <circle cx="400" cy="240" r="30" fill="#f0c2a2"/>
-                 <path d="M 380 225 A 30 30 0 0 1 420 225" fill="#4a3f35"/>
-             </g>
+              <g id="press-backdrop">
+                  <rect x="50" y="50" width="700" height="300" fill="#2c3e50" rx="10" />
+                  <rect x="50" y="50" width="700" height="300" id="backdrop-color" fill-opacity="0.8" rx="10"/>
+                  <image id="backdrop-logo" x="350" y="100" width="100" height="100" href=""/>
+              </g>
+              <g id="press-table">
+                  <rect x="0" y="350" width="800" height="100" fill="#4a3f35" />
+                  <rect x="0" y="345" width="800" height="10" fill="#6b5b4f"/>
+                  <circle cx="280" cy="340" r="10" fill="#111"/> <rect x="278" y="310" width="4" height="30" fill="#555"/>
+                  <circle cx="400" cy="340" r="10" fill="#111"/> <rect x="398" y="310" width="4" height="30" fill="#555"/>
+                  <circle cx="520" cy="340" r="10" fill="#111"/> <rect x="518" y="310" width="4" height="30" fill="#555"/>
+              </g>
+              <g id="manager-character">
+                  <path d="M 200 350 L 220 270 L 180 270 Z" fill="#2c3e50" />
+                  <circle cx="200" cy="240" r="30" fill="#e0b395"/>
+                  <path d="M 180 225 A 30 30 0 0 1 220 225" fill="#333333"/>
+              </g>
+              <g id="coach-character">
+                   <path d="M 600 350 L 620 270 L 580 270 Z" id="coach-tracksuit" fill="#DA291C" />
+                  <circle cx="600" cy="240" r="30" fill="#f0c2a2"/>
+                   <path d="M 580 225 A 30 30 0 0 1 620 225" fill="#a9a9a9"/>
+              </g>
+              <g id="player-character-press">
+                  <path d="M 400 350 L 420 270 L 380 270 Z" fill="#34495e" />
+                  <circle cx="400" cy="240" r="30" fill="#f0c2a2"/>
+                  <path d="M 380 225 A 30 30 0 0 1 420 225" fill="#4a3f35"/>
+              </g>
         `;
         questionEl.style.display = 'block';
         answersGridEl.style.display = 'grid';
@@ -764,4 +764,3 @@ document.addEventListener('DOMContentLoaded', () => {
     
     main();
 });
-
