@@ -2,10 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const SAVE_KEY = 'footballLegendSave';
     let gameState = {};
 
-    // --- KÉP ÉS UI ELEMEK INICIALIZÁLÁSA ---
-    const fieldTexture = new Image();
-    fieldTexture.src = 'https://i.imgur.com/gPKFmJk.jpeg'; // Élethű fű textúra
-    
+    // --- UI ELEMEK INICIALIZÁLÁSA ---
     const matchSimulatorOverlay = document.getElementById('matchSimulatorOverlay');
     const matchGameOverlay = document.getElementById('matchGameOverlay');
     const matchResultOverlay = document.getElementById('matchResultOverlay');
@@ -18,8 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentMatchData;
     let simulationInterval;
     let miniGameActive = false;
+    let isPaused = false;
 
-    // --- CSAPAT ADATOK (JAVÍTOTT NEVEKKEL) ---
+    // --- CSAPAT ADATOK ---
     const TEAMS = [
         { name: 'Real Madrid', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/1200px-Real_Madrid_CF.svg.png', strength: 90 },
         { name: 'FC Barcelona', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/1200px-FC_Barcelona_%28crest%29.svg.png', strength: 88 },
@@ -90,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             clubHistory: [chosenTeam.name],
             league: leagueTeams,
             currentMatchday: 0,
-            jerseyNumber: Math.floor(Math.random() * 98) + 1, // Véletlenszerű mezszám
+            jerseyNumber: Math.floor(Math.random() * 98) + 1,
             schedule: generateSchedule(TEAMS.map(t => t.name))
         };
         saveGame(gameState);
@@ -123,11 +121,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('mainHub').classList.add('hidden');
         matchSimulatorOverlay.classList.remove('hidden');
         
+        isPaused = false;
+        document.getElementById('sim-pause-btn').innerHTML = '<i class="fas fa-pause"></i>';
         runSimulation();
     }
 
     function runSimulation() {
         simulationInterval = setInterval(() => {
+            if (isPaused) return;
             currentMatchData.time += 2;
             
             const homeTeam = TEAMS.find(t => t.name === currentMatchData.fixture.home);
@@ -137,9 +138,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const chanceModifier = (playerTeamStrength - opponentStrength) / 250;
 
             if (Math.random() < 0.15 + chanceModifier) {
-                document.getElementById('pitch-enter-banner').classList.remove('hidden');
-                addMatchEvent("HELYZET! A csapatod támad, most rajtad a sor!", "fa-star");
                 clearInterval(simulationInterval);
+                addMatchEvent("HELYZET! A csapatod támad, most rajtad a sor!", "fa-star");
+                document.getElementById('pitch-enter-banner').classList.remove('hidden');
                 setTimeout(() => {
                     matchSimulatorOverlay.classList.add('hidden');
                     document.getElementById('pitch-enter-banner').classList.add('hidden');
@@ -162,6 +163,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 endMatchGame();
             }
         }, 1000);
+    }
+    
+    function togglePause() {
+        isPaused = !isPaused;
+        const pauseBtn = document.getElementById('sim-pause-btn');
+        pauseBtn.innerHTML = isPaused ? '<i class="fas fa-play"></i>' : '<i class="fas fa-pause"></i>';
     }
 
     function updateSimulatorUI() {
@@ -201,8 +208,8 @@ document.addEventListener('DOMContentLoaded', () => {
         keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, ' ': false };
 
         player = { x: canvas.width / 2, y: canvas.height * 0.75, speed: 4, hasBall: true, isPlayer: true, radius: 15 };
-        ball = { x: player.x, y: player.y + 20, radius: 8, speedX: 0, speedY: 0, friction: 0.98 };
-        opponents = [ { x: canvas.width * 0.5, y: canvas.height * 0.25, speed: 2, radius: 15, direction: 1 } ];
+        ball = { x: player.x, y: player.y - 25, radius: 8, speedX: 0, speedY: 0, friction: 0.98 };
+        opponents = [ { x: canvas.width * 0.5, y: canvas.height * 0.25, speed: 2.5, radius: 15, direction: 1 } ];
         homeGoal = { x: canvas.width / 2, y: 0, width: 150, height: 30 };
         
         document.addEventListener('keydown', handleKeyDown);
@@ -213,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function endMatchAction(isGoal) {
-        if (!miniGameActive) return; // BUGFIX: Ne fusson le többször
+        if (!miniGameActive) return;
         miniGameActive = false;
 
         cancelAnimationFrame(gameLoop);
@@ -230,11 +237,13 @@ document.addEventListener('DOMContentLoaded', () => {
             addMatchEvent("Kihagyott helyzet!", "fa-times-circle");
         }
         
+        // Zökkenőmentes visszatérés
+        matchSimulatorOverlay.classList.remove('hidden');
+        updateSimulatorUI(); // Frissítjük a góllal/kihagyott helyzettel
         matchGameOverlay.classList.add('hidden');
         
         setTimeout(() => {
             if (currentMatchData.time < 90) {
-                matchSimulatorOverlay.classList.remove('hidden');
                 runSimulation();
             } else {
                 endMatchGame();
@@ -313,7 +322,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateGame() {
         if(!miniGameActive) return;
 
-        // Player movement
         if (keys.ArrowUp) player.y -= player.speed;
         if (keys.ArrowDown) player.y += player.speed;
         if (keys.ArrowLeft) player.x -= player.speed;
@@ -321,9 +329,8 @@ document.addEventListener('DOMContentLoaded', () => {
         player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x));
         player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
 
-        // Ball movement
         if (player.hasBall) {
-            ball.x = player.x; ball.y = player.y + 20;
+            ball.x = player.x; ball.y = player.y - 25; // Labda a játékos előtt
             if (keys[' ']) {
                 player.hasBall = false;
                 const angle = Math.atan2((homeGoal.y + homeGoal.height / 2) - player.y, homeGoal.x - player.x);
@@ -336,7 +343,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ball.speedX *= ball.friction; ball.speedY *= ball.friction;
         }
 
-        // Opponent movement
         opponents.forEach(opp => {
             opp.x += opp.speed * opp.direction;
             if (opp.x > canvas.width - 150 || opp.x < 150) {
@@ -344,11 +350,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // Goal detection
         if (ball.y < homeGoal.y + homeGoal.height && ball.x > homeGoal.x - homeGoal.width / 2 && ball.x < homeGoal.x + homeGoal.width / 2) { 
             endMatchAction(true); 
         }
-        // Out of bounds detection
         if (ball.y < 0 || ball.y > canvas.height || ball.x < 0 || ball.x > canvas.width) { 
             endMatchAction(false); 
         }
@@ -359,7 +363,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(fieldTexture, 0, 0, canvas.width, canvas.height);
+        
+        // Pálya rajzolása csíkokkal
+        for(let i = 0; i < 10; i++) {
+            ctx.fillStyle = i % 2 === 0 ? '#2a8c2a' : '#2e942e';
+            ctx.fillRect(0, i * canvas.height / 10, canvas.width, canvas.height / 10);
+        }
         
         ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 3;
         ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height, 80, Math.PI, 2 * Math.PI); ctx.stroke();
@@ -374,14 +383,28 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(goalX, goalY + (i * homeGoal.height / 4)); ctx.lineTo(goalX + homeGoal.width, goalY + (i * homeGoal.height / 4)); ctx.stroke(); }
 
         drawPlayer(player); opponents.forEach(drawPlayer);
-        
-        ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = 'black'; ctx.lineWidth = 1; ctx.stroke();
+        drawBall(ball);
+    }
+
+    function drawBall(b) {
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(0, 0, b.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'black';
+        for (let i = 0; i < 5; i++) {
+            const angle = (i / 5) * Math.PI * 2;
+            ctx.beginPath();
+            ctx.arc(b.radius * 0.5 * Math.cos(angle), b.radius * 0.5 * Math.sin(angle), b.radius * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.restore();
     }
     
     function drawPlayer(entity) {
-        // Játékos (kör + mezszám)
-        ctx.fillStyle = entity.isPlayer ? gameState.team.color : '#e74c3c';
+        ctx.fillStyle = entity.isPlayer ? (gameState.team.color || '#3498db') : '#e74c3c';
         ctx.beginPath();
         ctx.arc(entity.x, entity.y, entity.radius, 0, Math.PI * 2);
         ctx.fill();
@@ -395,7 +418,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.textBaseline = 'middle';
         ctx.fillText(entity.isPlayer ? gameState.jerseyNumber : '5', entity.x, entity.y);
 
-        // Játékos jelölő
         if(entity.isPlayer) {
             ctx.beginPath();
             ctx.moveTo(entity.x, entity.y - entity.radius - 5);
@@ -421,14 +443,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const joystickHandle = document.getElementById('joystick-handle');
     const shootBtn = document.getElementById('shoot-btn');
     let joystickStart = {};
-    let joystickCurrent = {};
 
-    function handleJoystickStart(e) { e.preventDefault(); const touch = e.changedTouches[0]; joystickStart = { x: touch.clientX, y: touch.clientY }; joystickCurrent = { ...joystickStart }; }
-    function handleJoystickMove(e) { e.preventDefault(); const touch = e.changedTouches[0]; joystickCurrent = { x: touch.clientX, y: touch.clientY }; updateJoystick(); }
+    function handleJoystickStart(e) { e.preventDefault(); const touch = e.changedTouches[0]; joystickStart = { x: touch.clientX, y: touch.clientY }; }
+    function handleJoystickMove(e) { e.preventDefault(); const touch = e.changedTouches[0]; updateJoystick({ x: touch.clientX, y: touch.clientY }); }
     function handleJoystickEnd(e) { e.preventDefault(); keys.ArrowUp = keys.ArrowDown = keys.ArrowLeft = keys.ArrowRight = false; joystickHandle.style.transform = `translate(0px, 0px)`;}
-    function updateJoystick() {
-        const dx = joystickCurrent.x - joystickStart.x;
-        const dy = joystickCurrent.y - joystickStart.y;
+    function updateJoystick(current) {
+        const dx = current.x - joystickStart.x;
+        const dy = current.y - joystickStart.y;
         const angle = Math.atan2(dy, dx);
         const distance = Math.min(30, Math.sqrt(dx * dx + dy * dy));
         const x = distance * Math.cos(angle);
@@ -488,6 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('profileBtn').addEventListener('click', () => showScreen('profileScreen'));
     document.getElementById('playMatchBtn').addEventListener('click', playNextMatch);
     document.getElementById('matchResultContinueBtn').addEventListener('click', showMainHub);
+    document.getElementById('sim-pause-btn').addEventListener('click', togglePause);
 
     window.addEventListener('resize', resizeCanvas);
     main();
