@@ -184,6 +184,11 @@ input[type="range"] { width: 100%; accent-color: var(--primary-color); }
         linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
     background-size: 50px 50px;
     background-color: #0a5c0a;
+    /* ÚJ: Éles pixel art megjelenítés */
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
 }
 .game-ui {
     display: flex; justify-content: space-between;
