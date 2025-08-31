@@ -2,9 +2,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const SAVE_KEY = 'footballLegendSave';
     let gameState = {};
 
-    // A karakterek kirajzolása már nem képfájlból, hanem közvetlenül kóddal történik,
-    // így nincs szükség a playerSpriteSheet változóra.
-
+    // --- ÚJ KARAKTERGRAFIKA BETÖLTÉSE ---
+    const playerSpriteSheet = new Image();
+    // FONTOS: Mentsd le a fenti képet, töltsd fel valahova (pl. imgbb.com),
+    // és a kapott direkt linket másold ide az idézőjelek közé!
+    playerSpriteSheet.src = 'https://i.ibb.co/Yc5G20P/modern-footballer.png'; // <- CSERÉLD LE A SAJÁT LINKEDRE!
+    let spriteSheetLoaded = false;
+    playerSpriteSheet.onload = () => {
+        spriteSheetLoaded = true;
+    };
+    
     // --- SAJTÓTÁJÉKOZTATÓ VÁLTOZÓK ---
     const pressConferenceUI = document.getElementById('pressConferenceUI');
     const questionEl = document.getElementById('journalist-question');
@@ -318,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const desk = document.getElementById('desk'), character = document.getElementById('character-signing-group'), contract = document.getElementById('contract-group'), signaturePath = document.getElementById('signature-path'), jerseyGroup = document.getElementById('jersey-group');
         setTimeout(() => { desk.style.opacity = 1; character.style.opacity = 1; character.style.transform = 'translateY(0)'; }, 500);
-        setTimeout(() => { signaturePath.style.transition = 'stroke-dashoffset 1.s ease-out'; signaturePath.style.strokeDashoffset = 0; }, 1500);
+        setTimeout(() => { signaturePath.style.transition = 'stroke-dashoffset 1.5s ease-out'; signaturePath.style.strokeDashoffset = 0; }, 1500);
         setTimeout(() => {
             contract.style.transition = 'opacity 0.5s'; contract.style.opacity = 0;
             character.style.transform = 'translateY(-20px)';
@@ -512,38 +519,37 @@ document.addEventListener('DOMContentLoaded', () => {
     let gameLoop;
     let player, ball, opponents, keys, homeGoal, awayGoal, homeScore, awayScore;
 
+    // --- ÚJ FÜGGVÉNY ---
     function startMatchGame(fixture) {
         matchGameOverlay.classList.add('active');
         resizeCanvas();
-        
-        const homeTeamDetails = TEAMS.find(t => t.name === fixture.home);
-        const awayTeamDetails = TEAMS.find(t => t.name === fixture.away);
         
         document.getElementById('gameHomeInfo').textContent = `${fixture.home} 0`;
         document.getElementById('gameAwayInfo').textContent = `${fixture.away} 0`;
 
         homeScore = 0;
         awayScore = 0;
-
         keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, Space: false };
         
-        // --- MÓDOSÍTÁS: Kép helyett színeket adunk meg ---
-        const playerColor = gameState.team.color || '#00FF00'; // A játékos csapatának színe, vagy zöld
-        let opponentColor = '#FF0000'; // Az ellenfél piros
-        if (playerColor === opponentColor) {
-            opponentColor = '#FFA500'; // Ha a játékos is piros, az ellenfél legyen narancs
-        }
+        // Az új sprite sheet tulajdonságai
+        const spriteConfig = {
+            width: 256, // Egy animációs kocka szélessége
+            height: 256, // Egy animációs kocka magassága
+            frameCount: 6, // Animációs kockák száma egy sorban
+            frameSpeed: 5 // Animáció sebessége
+        };
 
         player = {
             x: canvas.width * 0.25, y: canvas.height / 2,
             speed: 3, hasBall: true, isPlayer: true,
-            color: playerColor // Szín hozzáadva
+            ...spriteConfig,
+            frameX: 0, gameFrame: 0, moving: false,
         };
         ball = { x: player.x, y: player.y, radius: 5, speedX: 0, speedY: 0, friction: 0.98 };
         
         opponents = [
-            { x: canvas.width * 0.75, y: canvas.height * 0.3, speed: 1.5, color: opponentColor }, // Szín hozzáadva
-            { x: canvas.width * 0.75, y: canvas.height * 0.7, speed: 1.5, color: opponentColor }  // Szín hozzáadva
+            { x: canvas.width * 0.75, y: canvas.height * 0.3, speed: 1.5, ...spriteConfig, frameX: 0, gameFrame: 0, moving: true },
+            { x: canvas.width * 0.75, y: canvas.height * 0.7, speed: 1.5, ...spriteConfig, frameX: 0, gameFrame: 0, moving: true }
         ];
 
         homeGoal = { x: canvas.width - 20, y: canvas.height / 2, width: 20, height: 100 };
@@ -603,8 +609,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (keys.ArrowLeft) player.x -= player.speed;
         if (keys.ArrowRight) player.x += player.speed;
         
-        player.x = Math.max(15, Math.min(canvas.width - 15, player.x));
-        player.y = Math.max(15, Math.min(canvas.height - 15, player.y));
+        player.x = Math.max(player.width / 4, Math.min(canvas.width - player.width / 4, player.x));
+        player.y = Math.max(player.height / 4, Math.min(canvas.height - player.height / 4, player.y));
 
         if (player.hasBall) {
             ball.x = player.x + 15;
@@ -632,7 +638,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const playerDist = Math.sqrt(Math.pow(player.x - opp.x, 2) + Math.pow(player.y - opp.y, 2));
-            if (playerDist < 30) { 
+            if (playerDist < 20) { 
                 if(player.hasBall) {
                     player.hasBall = false;
                     ball.speedX = (Math.random() - 0.5) * 10;
@@ -696,19 +702,37 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fill();
     }
     
+    // --- ÚJ FÜGGVÉNY ---
     function drawPlayerSprite(entity) {
-        // A bonyolult képkirajzolás helyett egy egyszerű kört rajzolunk.
-        ctx.beginPath();
-        ctx.arc(entity.x, entity.y, 15, 0, Math.PI * 2); // 15 pixel sugarú kör
-        ctx.fillStyle = entity.color; // A játékoshoz rendelt szín
-        ctx.fill();
-        ctx.closePath();
+        if (!spriteSheetLoaded) return; // Csak akkor rajzolunk, ha a kép már betöltődött
+
+        // Animáció logika: váltogatjuk a képkockákat
+        if (entity.moving) {
+            if (entity.gameFrame % entity.frameSpeed === 0) {
+                entity.frameX = (entity.frameX + 1) % entity.frameCount;
+            }
+        } else {
+            entity.frameX = 0; // Ha áll, az első képkockát mutatjuk
+        }
+        entity.gameFrame++;
+
+        // A karakter kirajzolása a nagy sprite sheet-ből
+        const scale = 0.35; // A karakter méretének csökkentése, hogy beférjen a pályára
+        const scaledWidth = entity.width * scale;
+        const scaledHeight = entity.height * scale;
+
+        ctx.drawImage(
+            playerSpriteSheet,
+            entity.frameX * entity.width, 0, // Forrás X és Y (honnan vágjuk ki a képet)
+            entity.width, entity.height,     // A kivágandó rész mérete
+            entity.x - scaledWidth / 2, entity.y - scaledHeight / 2, // Hova rajzoljuk a vásznon (középre igazítva)
+            scaledWidth, scaledHeight        // A kirajzolt kép mérete
+        );
         
-        // A játékost jelölő sárga háromszög megmarad, hogy könnyű legyen követni.
         if (entity.isPlayer) {
             ctx.fillStyle = 'yellow';
             ctx.beginPath();
-            const markerY = entity.y - 15 - 5; // A kör fölé igazítva
+            const markerY = entity.y - scaledHeight / 2 - 5;
             ctx.moveTo(entity.x, markerY);
             ctx.lineTo(entity.x - 5, markerY - 5);
             ctx.lineTo(entity.x + 5, markerY - 5);
