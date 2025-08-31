@@ -14,15 +14,17 @@
         <h1 class="loading-title">Football Legend</h1>
     </div>
 
-    <div class="container hidden" id="characterCreator">
+    <div class="character-creator-container hidden" id="characterCreator">
         <div class="form-carousel" id="formCarousel">
              <div class="form-step">
                 <h2>Add meg a neved</h2>
+                <p class="form-description">Ez a név fog megjelenni a mezeken és a sajtóban.</p>
                 <input type="text" id="playerName" placeholder="pl. Minta János" required>
                 <div class="navigation-buttons" style="justify-content: flex-end;"><button class="button next-btn">Tovább &rarr;</button></div>
             </div>
             <div class="form-step">
                 <h2>Válaszd ki a nemzetiséged</h2>
+                <p class="form-description">Melyik országot képviseled a nemzetközi porondon?</p>
                 <div class="custom-select-wrapper">
                     <div class="select-button" id="nationalitySelect">
                         <div class="selected-option" data-value="hu"><img src="https://flagcdn.com/w40/hu.png"><span>Magyar</span></div><span>&#9660;</span>
@@ -37,6 +39,7 @@
             </div>
             <div class="form-step">
                 <h2>Állítsd be a kezdő erőnléted</h2>
+                 <p class="form-description">Ez határozza meg a kezdő képességeidet a pályán.</p>
                 <div class="slider-group">
                     <div id="sliderValue" class="slider-value">60</div>
                     <input type="range" id="potentialSlider" min="20" max="100" value="60">
@@ -45,6 +48,7 @@
             </div>
             <div class="form-step">
                 <h2>Mi a kedvenc formációd?</h2>
+                 <p class="form-description">Milyen felállásban érzed magad a legkomfortosabban?</p>
                 <div class="formation-grid" id="formationGrid">
                     <div class="formation-card">4-4-2</div><div class="formation-card">4-3-3</div><div class="formation-card">3-5-2</div>
                 </div>
@@ -52,7 +56,7 @@
             </div>
             <div class="form-step">
                 <h2>Készen állsz a nagy lépésre?</h2>
-                <p style="text-align: center; color: #555;">Egy top csapat szerződést ajánl. Fogadd el, hogy elindítsd a karriered!</p>
+                <p style="text-align: center; color: var(--text-muted);">Egy top csapat szerződést ajánl. Fogadd el, hogy elindítsd a karriered!</p>
                 <div class="navigation-buttons">
                     <button class="button prev-btn">&larr; Vissza</button>
                     <button class="button submit-btn" id="startGameButton">Szerződés Aláírása</button>
@@ -93,12 +97,12 @@
         <div class="card">
             <div class="match-result-header">
                 <div class="match-result-team">
-                    <img id="resultHomeLogo" src="">
+                    <img id="resultHomeLogo" src="" alt="Hazai csapat logó">
                     <h3 id="resultHomeName">Hazai</h3>
                 </div>
                 <div class="match-result-score" id="resultScore">0 - 0</div>
                 <div class="match-result-team">
-                    <img id="resultAwayLogo" src="">
+                    <img id="resultAwayLogo" src="" alt="Vendég csapat logó">
                     <h3 id="resultAwayName">Vendég</h3>
                 </div>
             </div>
@@ -125,10 +129,10 @@
     <!-- Fő Játék Képernyő -->
     <div class="main-hub hidden" id="mainHub">
         <nav class="sidebar">
-            <button class="nav-btn active" data-screen="dashboardScreen"><i class="fas fa-tachometer-alt"></i></button>
-            <button class="nav-btn" data-screen="leagueScreen"><i class="fas fa-trophy"></i></button>
-            <button class="nav-btn" data-screen="trophyRoomScreen"><i class="fas fa-award"></i></button>
-            <button class="nav-btn" data-screen="nationalTeamScreen"><i class="fas fa-flag"></i></button>
+            <button class="nav-btn active" data-screen="dashboardScreen" data-tooltip="Irányítópult" aria-label="Irányítópult"><i class="fas fa-tachometer-alt"></i></button>
+            <button class="nav-btn" data-screen="leagueScreen" data-tooltip="Bajnokság" aria-label="Bajnokság"><i class="fas fa-trophy"></i></button>
+            <button class="nav-btn" data-screen="trophyRoomScreen" data-tooltip="Trófea Szoba" aria-label="Trófea Szoba"><i class="fas fa-award"></i></button>
+            <button class="nav-btn" data-screen="nationalTeamScreen" data-tooltip="Válogatott" aria-label="Válogatott"><i class="fas fa-flag"></i></button>
         </nav>
         <div class="hub-content-wrapper">
             <header class="top-bar">
@@ -137,15 +141,13 @@
                     <span id="headerPlayerName">Játékos Neve</span>
                 </button>
                 <div class="currency-display">
-                    <div class="currency-item" id="coinStoreBtn">
+                    <div class="currency-item" id="coinStoreBtn" data-tooltip="Coin Bolt">
                         <i class="fas fa-coins"></i>
                         <span id="headerPlayerBalance">0</span>
-                        <span class="plus-icon">+</span>
                     </div>
-                    <div class="currency-item" id="diamondStoreBtn">
+                    <div class="currency-item" id="diamondStoreBtn" data-tooltip="Gyémánt Bolt">
                         <i class="fas fa-gem"></i>
                         <span id="headerPlayerDiamonds">0</span>
-                        <span class="plus-icon">+</span>
                     </div>
                 </div>
             </header>
@@ -154,7 +156,7 @@
                     <div class="dashboard-grid">
                         <div class="dashboard-card player-profile-card">
                             <div class="card-header">
-                                <img id="hubPlayerTeamLogo" class="team-logo" src="" alt="Team Logo">
+                                <img id="hubPlayerTeamLogo" class="team-logo" src="" alt="Csapat Logó">
                                 <div class="player-info">
                                     <h4 id="hubPlayerName">Játékos Neve</h4>
                                     <p id="hubPlayerTeamName">Csapat Neve</p>
@@ -213,9 +215,11 @@
                 </div>
                 <div id="trophyRoomScreen" class="screen hidden">
                     <h2>Trófea Szoba</h2>
+                    <p class="placeholder-text">Itt gyűlnek majd a megnyert kupáid. Térj vissza később!</p>
                 </div>
                 <div id="nationalTeamScreen" class="screen hidden">
                     <h2>Nemzeti Válogatott</h2>
+                    <p class="placeholder-text">Elég jó vagy, hogy bekerülj? Itt követheted a válogatott karriered.</p>
                 </div>
                 <div id="profileScreen" class="screen hidden profile-screen">
                     <h2 id="profilePlayerName">Játékos Profilja</h2>
@@ -231,9 +235,9 @@
                      <h2>Coin Bolt</h2>
                      <div class="dashboard-grid">
                         <div class="store-package">
-                           <div class="icon"><i class="fas fa-coins" style="color: #f1c40f;"></i></div>
-                           <h3>100,000 Coin</h3> <p>Kezdő csomag</p>
-                           <button class="button buy-btn" style="background-color: var(--success-color);">€ 0.99</button>
+                            <div class="icon"><i class="fas fa-coins" style="color: #f1c40f;"></i></div>
+                            <h3>100,000 Coin</h3> <p>Kezdő csomag</p>
+                            <button class="button buy-btn" style="background-color: var(--success-color);">€ 0.99</button>
                         </div>
                      </div>
                 </div>
@@ -241,14 +245,14 @@
                     <h2>Gyémánt Bolt</h2>
                     <div class="dashboard-grid">
                         <div class="store-package">
-                           <div class="icon"><i class="fas fa-gem" style="color: var(--diamond-color);"></i></div>
-                           <h3>100 Gyémánt</h3> <p>Kis csomag</p>
-                           <button class="button buy-btn" style="background-color: var(--diamond-color)">200 Ft</button>
+                            <div class="icon"><i class="fas fa-gem" style="color: var(--diamond-color);"></i></div>
+                            <h3>100 Gyémánt</h3> <p>Kis csomag</p>
+                            <button class="button buy-btn" style="background-color: var(--diamond-color)">200 Ft</button>
                         </div>
                          <div class="store-package">
-                           <div class="icon"><i class="fas fa-gem" style="color: var(--diamond-color);"></i></div>
-                           <h3>550 Gyémánt</h3> <p>Népszerű csomag</p>
-                           <button class="button buy-btn" style="background-color: var(--diamond-color)">900 Ft</button>
+                            <div class="icon"><i class="fas fa-gem" style="color: var(--diamond-color);"></i></div>
+                            <h3>550 Gyémánt</h3> <p>Népszerű csomag</p>
+                            <button class="button buy-btn" style="background-color: var(--diamond-color)">900 Ft</button>
                         </div>
                     </div>
                 </div>
