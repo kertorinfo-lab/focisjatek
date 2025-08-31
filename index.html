@@ -16,7 +16,7 @@
 
     <div class="character-creator-container hidden" id="characterCreator">
         <div class="form-carousel" id="formCarousel">
-             <div class="form-step">
+            <div class="form-step">
                 <h2>Add meg a neved</h2>
                 <p class="form-description">Ez a név fog megjelenni a mezeken és a sajtóban.</p>
                 <input type="text" id="playerName" placeholder="pl. Minta János" required>
@@ -48,7 +48,7 @@
             </div>
             <div class="form-step">
                 <h2>Mi a kedvenc formációd?</h2>
-                 <p class="form-description">Milyen felállásban érzed magad a legkomfortosabban?</p>
+                  <p class="form-description">Milyen felállásban érzed magad a legkomfortosabban?</p>
                 <div class="formation-grid" id="formationGrid">
                     <div class="formation-card">4-4-2</div><div class="formation-card">4-3-3</div><div class="formation-card">3-5-2</div>
                 </div>
@@ -67,9 +67,7 @@
 
     <div class="overlay" id="animationOverlay">
         <div class="scene-container">
-            <svg id="animation-svg" viewBox="0 0 800 450">
-                <!-- SVG Tartalom a script.js-ből dinamikusan generálva -->
-            </svg>
+            <svg id="animation-svg" viewBox="0 0 800 450"></svg>
         </div>
         <div id="flash-overlay"></div>
         <div class="final-message" id="finalMessage">
@@ -80,9 +78,7 @@
     
     <div class="overlay" id="pressConferenceOverlay">
         <div class="scene-container press-conference-scene">
-            <svg id="press-conference-svg" viewBox="0 0 800 450">
-                 <!-- SVG Tartalom a script.js-ből dinamikusan generálva -->
-            </svg>
+            <svg id="press-conference-svg" viewBox="0 0 800 450"></svg>
         </div>
         <div class="press-conference-ui" id="pressConferenceUI">
             <h2 id="journalist-question">A kérdés helye...</h2>
@@ -116,6 +112,28 @@
         </div>
     </div>
     
+    <div id="matchSimulatorOverlay" class="overlay hidden">
+        <div class="simulator-container">
+            <div class="sim-header">
+                <div class="sim-team sim-team-home">
+                    <img id="simHomeLogo" src="" alt="Hazai logó">
+                    <span id="simHomeName">Hazai</span>
+                </div>
+                <div class="sim-score-time">
+                    <span id="simScore">0 - 0</span>
+                    <span id="simTime">00:00</span>
+                </div>
+                <div class="sim-team sim-team-away">
+                    <span id="simAwayName">Vendég</span>
+                    <img id="simAwayLogo" src="" alt="Vendég logó">
+                </div>
+            </div>
+            <div id="commentaryBox" class="commentary-box">
+                <p>A mérkőzés hamarosan kezdődik...</p>
+            </div>
+        </div>
+    </div>
+
     <div class="overlay" id="matchGameOverlay">
         <div class="game-ui">
             <div id="gameHomeInfo">HAZAI 0</div>
@@ -126,7 +144,6 @@
     </div>
 
 
-    <!-- Fő Játék Képernyő -->
     <div class="main-hub hidden" id="mainHub">
         <nav class="sidebar">
             <button class="nav-btn active" data-screen="dashboardScreen" data-tooltip="Irányítópult" aria-label="Irányítópult"><i class="fas fa-tachometer-alt"></i></button>
@@ -208,7 +225,6 @@
                                 </tr>
                             </thead>
                             <tbody id="leagueTableBody">
-                                <!-- JS tölti fel -->
                             </tbody>
                         </table>
                     </div>
@@ -229,16 +245,15 @@
                         <div class="stat-card"><div class="stat-value" id="profileMatches">0</div><div class="stat-label">Játszott Meccsek</div></div>
                         <div class="stat-card"><div class="stat-value" id="profileTrophies">0</div><div class="stat-label">Trófeák</div></div>
                     </div>
-                    <!-- Klubtörténet és egyéb adatok jönnek ide -->
                 </div>
                 <div id="coinStoreScreen" class="screen hidden store-screen">
-                     <h2>Coin Bolt</h2>
-                     <div class="dashboard-grid">
-                        <div class="store-package">
-                            <div class="icon"><i class="fas fa-coins" style="color: #f1c40f;"></i></div>
-                            <h3>100,000 Coin</h3> <p>Kezdő csomag</p>
-                            <button class="button buy-btn" style="background-color: var(--success-color);">€ 0.99</button>
-                        </div>
+                      <h2>Coin Bolt</h2>
+                      <div class="dashboard-grid">
+                          <div class="store-package">
+                              <div class="icon"><i class="fas fa-coins" style="color: #f1c40f;"></i></div>
+                              <h3>100,000 Coin</h3> <p>Kezdő csomag</p>
+                              <button class="button buy-btn" style="background-color: var(--success-color);">€ 0.99</button>
+                          </div>
                      </div>
                 </div>
                 <div id="diamondStoreScreen" class="screen hidden store-screen">
@@ -258,7 +273,6 @@
                 </div>
             </main>
         </div>
-        <!-- ÚJ ELEM: Alsó navigációs sáv mobilra -->
         <nav class="bottom-bar">
             <button class="nav-btn active" data-screen="dashboardScreen" aria-label="Irányítópult"><i class="fas fa-tachometer-alt"></i></button>
             <button class="nav-btn" data-screen="leagueScreen" aria-label="Bajnokság"><i class="fas fa-trophy"></i></button>
@@ -269,4 +283,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
