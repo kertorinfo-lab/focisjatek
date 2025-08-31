@@ -335,32 +335,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const pressConferenceSvg = document.getElementById('press-conference-svg');
         pressConferenceSvg.innerHTML = `
              <g id="press-backdrop">
-                    <rect x="50" y="50" width="700" height="300" fill="#2c3e50" rx="10" />
-                    <rect x="50" y="50" width="700" height="300" id="backdrop-color" fill-opacity="0.8" rx="10"/>
-                    <image id="backdrop-logo" x="350" y="100" width="100" height="100" href=""/>
-                </g>
-                <g id="press-table">
-                    <rect x="0" y="350" width="800" height="100" fill="#4a3f35" />
-                    <rect x="0" y="345" width="800" height="10" fill="#6b5b4f"/>
-                    <circle cx="280" cy="340" r="10" fill="#111"/> <rect x="278" y="310" width="4" height="30" fill="#555"/>
-                    <circle cx="400" cy="340" r="10" fill="#111"/> <rect x="398" y="310" width="4" height="30" fill="#555"/>
-                    <circle cx="520" cy="340" r="10" fill="#111"/> <rect x="518" y="310" width="4" height="30" fill="#555"/>
-                </g>
-                <g id="manager-character">
-                    <path d="M 200 350 L 220 270 L 180 270 Z" fill="#2c3e50" />
-                    <circle cx="200" cy="240" r="30" fill="#e0b395"/>
-                    <path d="M 180 225 A 30 30 0 0 1 220 225" fill="#333333"/>
-                </g>
-                <g id="coach-character">
-                     <path d="M 600 350 L 620 270 L 580 270 Z" id="coach-tracksuit" fill="#DA291C" />
-                    <circle cx="600" cy="240" r="30" fill="#f0c2a2"/>
-                     <path d="M 580 225 A 30 30 0 0 1 620 225" fill="#a9a9a9"/>
-                </g>
-                <g id="player-character-press">
-                    <path d="M 400 350 L 420 270 L 380 270 Z" fill="#34495e" />
-                    <circle cx="400" cy="240" r="30" fill="#f0c2a2"/>
-                    <path d="M 380 225 A 30 30 0 0 1 420 225" fill="#4a3f35"/>
-                </g>
+                 <rect x="50" y="50" width="700" height="300" fill="#2c3e50" rx="10" />
+                 <rect x="50" y="50" width="700" height="300" id="backdrop-color" fill-opacity="0.8" rx="10"/>
+                 <image id="backdrop-logo" x="350" y="100" width="100" height="100" href=""/>
+             </g>
+             <g id="press-table">
+                 <rect x="0" y="350" width="800" height="100" fill="#4a3f35" />
+                 <rect x="0" y="345" width="800" height="10" fill="#6b5b4f"/>
+                 <circle cx="280" cy="340" r="10" fill="#111"/> <rect x="278" y="310" width="4" height="30" fill="#555"/>
+                 <circle cx="400" cy="340" r="10" fill="#111"/> <rect x="398" y="310" width="4" height="30" fill="#555"/>
+                 <circle cx="520" cy="340" r="10" fill="#111"/> <rect x="518" y="310" width="4" height="30" fill="#555"/>
+             </g>
+             <g id="manager-character">
+                 <path d="M 200 350 L 220 270 L 180 270 Z" fill="#2c3e50" />
+                 <circle cx="200" cy="240" r="30" fill="#e0b395"/>
+                 <path d="M 180 225 A 30 30 0 0 1 220 225" fill="#333333"/>
+             </g>
+             <g id="coach-character">
+                  <path d="M 600 350 L 620 270 L 580 270 Z" id="coach-tracksuit" fill="#DA291C" />
+                 <circle cx="600" cy="240" r="30" fill="#f0c2a2"/>
+                  <path d="M 580 225 A 30 30 0 0 1 620 225" fill="#a9a9a9"/>
+             </g>
+             <g id="player-character-press">
+                 <path d="M 400 350 L 420 270 L 380 270 Z" fill="#34495e" />
+                 <circle cx="400" cy="240" r="30" fill="#f0c2a2"/>
+                 <path d="M 380 225 A 30 30 0 0 1 420 225" fill="#4a3f35"/>
+             </g>
         `;
         questionEl.style.display = 'block';
         answersGridEl.style.display = 'grid';
@@ -412,6 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentQuestionIndex = 0; reputation.humble = 0; reputation.arrogant = 0; reputation.professional = 0;
     }
 
+    // --- UI FRISSÍTÉS ---
     function showMainHub() {
         document.getElementById('characterCreator').classList.add('hidden');
         document.getElementById('animationOverlay').classList.remove('active');
@@ -739,96 +740,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.addEventListener('resize', resizeCanvas);
-
-
-    // --- UI FRISSÍTÉS ---
-    function showMainHub() {
-        document.getElementById('characterCreator').classList.add('hidden');
-        document.getElementById('animationOverlay').classList.remove('active');
-        document.getElementById('pressConferenceOverlay').classList.remove('active');
-        document.getElementById('mainHub').classList.remove('hidden');
-        updateUI();
-    }
-    
-    function updateUI() {
-        updateHeaderUI();
-        updateDashboardUI();
-        updateLeagueTable();
-        updateProfileUI();
-    }
-    function updateHeaderUI() {
-        document.getElementById('headerPlayerName').textContent = gameState.playerName;
-        document.getElementById('headerPlayerBalance').textContent = (gameState.money || 0).toLocaleString();
-        document.getElementById('headerPlayerDiamonds').textContent = (gameState.diamonds || 0).toLocaleString();
-    }
-    function updateDashboardUI() {
-        document.getElementById('hubPlayerName').textContent = gameState.playerName;
-        document.getElementById('hubPlayerTeamName').textContent = gameState.team.name;
-        document.getElementById('hubPlayerTeamLogo').src = gameState.team.logo;
-        document.getElementById('hubPlayerRating').textContent = gameState.rating;
-        document.getElementById('hubPlayerNationality').textContent = gameState.nationality;
-        const balanceSpan = document.querySelector('#dashboardScreen #hubPlayerBalance');
-        if (balanceSpan) balanceSpan.textContent = (gameState.money || 0).toLocaleString();
-        const salarySpan = document.querySelector('#dashboardScreen #hubPlayerSalary');
-        if(salarySpan) salarySpan.textContent = (gameState.salary || 0).toLocaleString();
-        
-        if(gameState.schedule && gameState.currentMatchday < gameState.schedule.length){
-            const nextFixture = gameState.schedule[gameState.currentMatchday].find(f => f.home === gameState.team.name || f.away === gameState.team.name);
-            const opponentName = nextFixture.home === gameState.team.name ? nextFixture.away : nextFixture.home;
-            document.getElementById('hubNextOpponent').textContent = opponentName;
-            document.getElementById('playMatchBtn').disabled = false;
-        } else {
-            document.getElementById('hubNextOpponent').textContent = "Szezon vége";
-            document.getElementById('playMatchBtn').disabled = false; 
-        }
-
-        const leagueClone = [...(gameState.league || [])];
-        const position = leagueClone.sort((a, b) => b.points - a.points || (b.gd - a.gd)).findIndex(t => t.name === gameState.team.name) + 1;
-        document.getElementById('hubLeaguePosition').textContent = `${position > 0 ? position : '-'}.`;
-        document.getElementById('hubMatchday').textContent = `${gameState.currentMatchday} / ${gameState.schedule.length}`;
-    }
-    function updateLeagueTable() {
-        const tableBody = document.getElementById('leagueTableBody');
-        if(!tableBody) return;
-        tableBody.innerHTML = '';
-        const leagueClone = [...(gameState.league || [])];
-        leagueClone.sort((a, b) => b.points - a.points || (b.gd - a.gd));
-        leagueClone.forEach((team, index) => {
-            const row = document.createElement('tr');
-            if(team.name === gameState.team.name) row.classList.add('player-team');
-            row.innerHTML = `<td>${index + 1}</td><td>${team.name}</td><td>${team.played}</td><td>${team.wins}</td><td>${team.draws}</td><td>${team.losses}</td><td>${team.gd}</td><td><strong>${team.points}</strong></td>`;
-            tableBody.appendChild(row);
-        });
-    }
-    function updateProfileUI() {
-        document.getElementById('profilePlayerName').textContent = `${gameState.playerName} Profilja`;
-        document.getElementById('profileGoals').textContent = gameState.goals || 0;
-        document.getElementById('profileAssists').textContent = gameState.assists || 0;
-        document.getElementById('profileMatches').textContent = gameState.matchesPlayed || 0;
-        document.getElementById('profileTrophies').textContent = (gameState.trophies || []).length;
-    }
-    
-    // --- NAVIGÁCIÓ ---
-    const allScreens = document.querySelectorAll('.screen');
-    const navButtons = document.querySelectorAll('.nav-btn');
-    function showScreen(targetScreenId) {
-        allScreens.forEach(screen => screen.classList.add('hidden'));
-        document.getElementById(targetScreenId)?.classList.remove('hidden');
-        navButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.screen === targetScreenId));
-    }
-    navButtons.forEach(button => button.addEventListener('click', () => showScreen(button.dataset.screen)));
-    document.getElementById('profileBtn').addEventListener('click', () => showScreen('profileScreen'));
-    document.getElementById('coinStoreBtn').addEventListener('click', () => showScreen('coinStoreScreen'));
-    document.getElementById('diamondStoreBtn').addEventListener('click', () => showScreen('diamondStoreScreen'));
-    document.getElementById('playMatchBtn').addEventListener('click', playNextMatch);
-    document.getElementById('matchResultContinueBtn').addEventListener('click', () => {
-        document.getElementById('matchResultOverlay').classList.remove('active');
-        updateUI();
-    });
     
     main();
 });
-</script>
-</body>
-</html>
-
