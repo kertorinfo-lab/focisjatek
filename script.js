@@ -2,10 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const SAVE_KEY = 'footballLegendSave';
     let gameState = {};
 
-    // --- JAVÍTVA: Megbízható Pixel Art Sprite betöltése ---
+    // --- FRISSÍTVE: Új, részletesebb Pixel Art Sprite betöltése ---
     const playerSpriteSheet = new Image();
-    // Új, garantáltan működő, transzparens hátterű sprite sheet
-    playerSpriteSheet.src = 'https://i.ibb.co/dK2x1dC/pixel-char-sprite.png';
+    // Forrás: https://chierit.itch.io/soccer-players-spritesheet (CC0 License)
+    playerSpriteSheet.src = 'https://i.ibb.co/TqZ7zY9/soccer-players-spritesheet.png';
     let spriteSheetLoaded = false;
     playerSpriteSheet.onload = () => {
         spriteSheetLoaded = true;
@@ -536,19 +536,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, Space: false };
         
+        // ÚJ: Véletlenszerű mez választása a csapatoknak
+        const playerTeamSpriteRow = Math.floor(Math.random() * 4);
+        let opponentTeamSpriteRow = Math.floor(Math.random() * 4);
+        while (opponentTeamSpriteRow === playerTeamSpriteRow) {
+            opponentTeamSpriteRow = Math.floor(Math.random() * 4); // Biztosítjuk, hogy ne legyen ugyanaz a mez
+        }
+
         player = {
             x: canvas.width * 0.25, y: canvas.height / 2,
             speed: 3, hasBall: true, isPlayer: true,
-            // JAVÍTVA: Méretek az új sprite-hoz igazítva
-            spriteWidth: 32, spriteHeight: 32, frameX: 0, frameCount: 4,
-            frameSpeed: 8, gameFrame: 0, moving: false
+            spriteWidth: 32, spriteHeight: 32, frameX: 0, frameCount: 8,
+            frameSpeed: 5, gameFrame: 0, moving: false,
+            spriteRow: playerTeamSpriteRow // Hozzárendeljük a játékoshoz a mez sorát
         };
         ball = { x: player.x, y: player.y, radius: 5, speedX: 0, speedY: 0, friction: 0.98 };
         
         opponents = [
-            // JAVÍTVA: Méretek az új sprite-hoz igazítva
-            { x: canvas.width * 0.75, y: canvas.height * 0.3, speed: 1.5, spriteWidth: 32, spriteHeight: 32, frameX: 0, frameCount: 4, frameSpeed: 10, gameFrame: 0, moving: true },
-            { x: canvas.width * 0.75, y: canvas.height * 0.7, speed: 1.5, spriteWidth: 32, spriteHeight: 32, frameX: 0, frameCount: 4, frameSpeed: 10, gameFrame: 0, moving: true }
+            { x: canvas.width * 0.75, y: canvas.height * 0.3, speed: 1.5, spriteWidth: 32, spriteHeight: 32, frameX: 0, frameCount: 8, frameSpeed: 7, gameFrame: 0, moving: true, spriteRow: opponentTeamSpriteRow },
+            { x: canvas.width * 0.75, y: canvas.height * 0.7, speed: 1.5, spriteWidth: 32, spriteHeight: 32, frameX: 0, frameCount: 8, frameSpeed: 7, gameFrame: 0, moving: true, spriteRow: opponentTeamSpriteRow }
         ];
 
         homeGoal = { x: canvas.width - 20, y: canvas.height / 2, width: 20, height: 100 };
@@ -637,7 +643,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const playerDist = Math.sqrt(Math.pow(player.x - opp.x, 2) + Math.pow(player.y - opp.y, 2));
-            // JAVÍTVA: Ütközési távolság az új mérethez igazítva
             if (playerDist < 20) { 
                 if(player.hasBall) {
                     player.hasBall = false;
@@ -648,7 +653,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         const distToBall = Math.sqrt(Math.pow(player.x - ball.x, 2) + Math.pow(player.y - ball.y, 2));
-        // JAVÍTVA: Labdaszerzési távolság
         if (!player.hasBall && distToBall < 20) {
             player.hasBall = true;
         }
@@ -703,6 +707,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fill();
     }
     
+    // --- FRISSÍTVE: Pixel Art kirajzoló függvény a csapatmezekhez ---
     function drawPlayerSprite(entity) {
         if (!spriteSheetLoaded) return;
 
@@ -715,21 +720,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         entity.gameFrame++;
 
+        // Kép kirajzolása a sprite sheet-ből, a megfelelő sor kiválasztásával
         ctx.drawImage(
             playerSpriteSheet,
-            entity.frameX * entity.spriteWidth, 0,
+            entity.frameX * entity.spriteWidth, entity.spriteRow * entity.spriteHeight, // Forrás X és Y (a mez sorával)
             entity.spriteWidth, entity.spriteHeight,
-            entity.x - entity.spriteWidth / 2, entity.y - entity.spriteHeight / 2,
-            entity.spriteWidth, entity.spriteHeight
+            entity.x - (entity.spriteWidth * 1.5) / 2, entity.y - (entity.spriteHeight * 1.5) / 2, // Nagyobb méret középre igazítása
+            entity.spriteWidth * 1.5, entity.spriteHeight * 1.5 // A karakterek nagyítása a jobb láthatóságért
         );
         
         if (entity.isPlayer) {
             ctx.fillStyle = 'yellow';
             ctx.beginPath();
-            // JAVÍTVA: Jelző pozíciója az új mérethez igazítva
-            ctx.moveTo(entity.x, entity.y - 25);
-            ctx.lineTo(entity.x - 5, entity.y - 20);
-            ctx.lineTo(entity.x + 5, entity.y - 20);
+            const markerY = entity.y - (entity.spriteHeight * 1.5) / 2 - 10;
+            ctx.moveTo(entity.x, markerY);
+            ctx.lineTo(entity.x - 5, markerY + 5);
+            ctx.lineTo(entity.x + 5, markerY + 5);
             ctx.closePath();
             ctx.fill();
         }
