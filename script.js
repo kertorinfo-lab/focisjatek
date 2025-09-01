@@ -605,8 +605,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const parent = matchGameOverlay;
         canvas.width = parent.clientWidth;
         canvas.height = parent.clientHeight;
-        homeGoal.width = canvas.width * 0.3; // A kapu méretét is frissítjük
-        homeGoal.x = canvas.width / 2;
+        if (homeGoal) { // HIBA JAVÍTÁSA: Csak akkor frissítjük, ha már létezik
+            homeGoal.width = canvas.width * 0.3; 
+            homeGoal.x = canvas.width / 2;
+        }
     }
     
     // --- MOBILE CONTROLS ---
