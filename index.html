@@ -100,19 +100,21 @@
 
     <div class="overlay hidden" id="matchGameOverlay">
         <div class="game-scoreboard-wrapper">
-             <div id="game-scoreboard" class="game-scoreboard">
+            <div id="game-scoreboard" class="game-scoreboard">
                 <div class="team-info left">
-                    <img id="gameHomeLogo" src="">
                     <span id="gameHomeName">HOM</span>
                 </div>
                 <div class="score-info">
                     <div id="gameScore">0 - 0</div>
-                    <div id="gameTime">00:00</div>
+                    <div class="score-timeline">
+                         <span id="homeProgress"></span>
+                         <span id="awayProgress"></span>
+                    </div>
                 </div>
                 <div class="team-info right">
                     <span id="gameAwayName">AWY</span>
-                    <img id="gameAwayLogo" src="">
                 </div>
+                <div id="gameTime" style="display:none;">00:00</div> <!-- Ezt elrejthetjük, ha nem kell a dizájnba -->
             </div>
         </div>
         <canvas id="gameCanvas" width="450" height="800"></canvas>
@@ -121,8 +123,14 @@
                 <div id="joystick-handle" class="joystick-handle"></div>
             </div>
             <div class="action-buttons">
-                <button id="pass-btn" class="action-btn pass-btn">PASS</button>
-                <button id="shoot-btn" class="action-btn shoot-btn">SHOOT</button>
+                <button id="pass-btn" class="action-btn pass-btn">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Passz</span>
+                </button>
+                <button id="shoot-btn" class="action-btn shoot-btn">
+                    <i class="fas fa-futbol"></i>
+                    <span>Lövés</span>
+                </button>
             </div>
         </div>
     </div>
