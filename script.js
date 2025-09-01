@@ -239,9 +239,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, ' ': false, 'c': false };
 
-        player = { x: canvas.width / 2, y: canvas.height / 2 + 50, speed: 4, isPlayer: true, radius: 15, possessionRadius: 25 };
+        player = { x: canvas.width / 2, y: canvas.height / 2 + 100, speed: 4, isPlayer: true, radius: 15, possessionRadius: 25 };
         ball = { x: canvas.width / 2, y: canvas.height / 2, radius: 8, speedX: 0, speedY: 0, friction: 0.98, controlledBy: null };
-        homeGoal = { x: canvas.width / 2, y: 15, width: 150, height: 30 };
+        homeGoal = { x: canvas.width / 2, y: 15, width: canvas.width * 0.3, height: 20 };
         
         teammates = [
             { x: canvas.width * 0.25, y: canvas.height * 0.45, speed: 2.8, radius: 15, jerseyNumber: 8, decisionTimeout: 0 },
@@ -250,8 +250,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         opponents = [
             { x: canvas.width / 2, y: 70, speed: 1.8, radius: 16, type: 'goalkeeper', jerseyNumber: 1 },
-            { x: canvas.width * 0.35, y: 200, speed: 2.0, radius: 15, type: 'defender', jerseyNumber: 4 },
-            { x: canvas.width * 0.65, y: 200, speed: 2.0, radius: 15, type: 'defender', jerseyNumber: 5 }
+            { x: canvas.width * 0.35, y: 220, speed: 2.0, radius: 15, type: 'defender', jerseyNumber: 4 },
+            { x: canvas.width * 0.65, y: 220, speed: 2.0, radius: 15, type: 'defender', jerseyNumber: 5 }
         ];
         
         document.addEventListener('keydown', handleKeyDown);
@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentMatchData.playerGoals++;
             addMatchEvent(`GÓÓÓÓL! Fantasztikus befejezés! (${gameState.playerName})`, "fa-futbol");
         } else {
-            addMatchEvent("Kihagyott helyzet! Az ellenfél szerzett labdát.", "fa-times-circle");
+            addMatchEvent("Szereltek! Az ellenfélhez került a labda.", "fa-times-circle");
         }
         
         updateScoreboardUI();
@@ -291,6 +291,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 endMatchGame();
             }
         }, 1500);
+    }
+    
+    function resetBallAfterOutOfBounds(type = 'throw_in') {
+        ball.speedX = 0;
+        ball.speedY = 0;
+        if (ball.controlledBy) {
+            ball.controlledBy = null;
+        }
+
+        if (type === 'goalkick') {
+            const keeper = opponents.find(o => o.type === 'goalkeeper');
+            if (keeper) {
+                ball.x = keeper.x;
+                ball.y = keeper.y + 30;
+            }
+        } else {
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+        }
     }
 
     function endMatchGame() {
@@ -378,14 +397,27 @@ document.addEventListener('DOMContentLoaded', () => {
             if (distToPlayer < player.possessionRadius) { ball.controlledBy = player; }
             teammates.forEach(tm => {
                 const distToTm = Math.hypot(tm.x - ball.x, tm.y - ball.y);
-                if (distToTm < tm.radius + ball.radius + 5) { ball.controlledBy = tm; tm.decisionTimeout = 60; }
+                if (distToTm < tm.radius + ball.radius + 5) { ball.controlledBy = tm; tm.decisionTimeout = 90; }
             });
         }
         
         if (ball.controlledBy === player) {
-            const angleToPlayer = Math.atan2(player.y - ball.y, player.x - ball.x);
-            ball.x += Math.cos(angleToPlayer) * player.speed;
-            ball.y += Math.sin(angleToPlayer) * player.speed;
+            let targetX = player.x;
+            let targetY = player.y;
+            const dribbleDistance = 35;
+            let hasMovement = keys.ArrowUp || keys.ArrowDown || keys.ArrowLeft || keys.ArrowRight;
+
+            if (hasMovement) {
+                let moveAngle = Math.atan2(
+                    (keys.ArrowDown ? 1 : 0) - (keys.ArrowUp ? 1 : 0),
+                    (keys.ArrowRight ? 1 : 0) - (keys.ArrowLeft ? 1 : 0)
+                );
+                targetX = player.x + Math.cos(moveAngle) * dribbleDistance;
+                targetY = player.y + Math.sin(moveAngle) * dribbleDistance;
+            }
+            ball.x += (targetX - ball.x) * 0.2;
+            ball.y += (targetY - ball.y) * 0.2;
+
 
             if (keys[' ']) { // SHOOT
                 ball.controlledBy = null;
@@ -413,11 +445,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const angleToGoal = Math.atan2(homeGoal.y - tm.y, homeGoal.x - tm.x);
             tm.x += Math.cos(angleToGoal) * (tm.speed * 0.8);
             tm.y += Math.sin(angleToGoal) * (tm.speed * 0.8);
-            ball.x = tm.x; ball.y = tm.y;
+            ball.x += (tm.x - ball.x) * 0.3; ball.y += (tm.y - ball.y) * 0.3;
 
             if (tm.decisionTimeout <= 0) {
                 ball.controlledBy = null;
-                if (tm.y < canvas.height / 2 && Math.random() < 0.5) { // Shoot if in attacking half
+                if (tm.y < canvas.height / 2 && Math.random() < 0.5) { // Shoot
                     const angle = Math.atan2((homeGoal.y + homeGoal.height / 2) - tm.y, homeGoal.x - tm.x);
                     ball.speedX = Math.cos(angle) * 18;
                     ball.speedY = Math.sin(angle) * 18;
@@ -434,8 +466,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         teammates.forEach(tm => {
             if (ball.controlledBy !== tm) {
-                const idealX = player.x + (tm.jerseyNumber === 8 ? -100 : 100);
-                const idealY = player.y - 80;
+                const idealX = player.x + (tm.jerseyNumber === 8 ? -120 : 120);
+                const idealY = player.y - 90;
                 const angle = Math.atan2(idealY - tm.y, idealX - tm.x);
                 tm.x += Math.cos(angle) * (tm.speed * 0.3);
                 tm.y += Math.sin(angle) * (tm.speed * 0.3);
@@ -447,20 +479,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 opp.x += (ball.x - opp.x) * 0.08;
                 opp.x = Math.max(homeGoal.x - homeGoal.width / 2, Math.min(homeGoal.x + homeGoal.width / 2, opp.x));
             } else {
-                const target = ball.controlledBy === player ? player : ball;
+                const target = ball.controlledBy === player || ball.controlledBy === null ? ball : player;
                 const angle = Math.atan2(target.y - opp.y, target.x - opp.x);
                 opp.x += Math.cos(angle) * opp.speed;
                 opp.y += Math.sin(angle) * opp.speed;
             }
-            const dist = Math.hypot(ball.x - opp.x, ball.y - opp.y);
-            if (dist < ball.radius + opp.radius) { endMatchAction(false); }
+            const distToPlayer = Math.hypot(player.x - opp.x, player.y - opp.y);
+            if (ball.controlledBy === player && distToPlayer < player.radius + opp.radius) { endMatchAction(false); }
         });
         
-        if (ball.y < homeGoal.y + homeGoal.height && ball.x > homeGoal.x - homeGoal.width / 2 && ball.x < homeGoal.x + homeGoal.width / 2) { endMatchAction(true); }
+        // --- GOAL AND OUT OF BOUNDS ---
+        if (ball.y < homeGoal.y + homeGoal.height && ball.y > homeGoal.y && ball.x > homeGoal.x - homeGoal.width / 2 && ball.x < homeGoal.x + homeGoal.width / 2) { 
+            endMatchAction(true);
+        }
         
-        const sidelineMargin = -10; // Allow ball to go slightly off screen before calling out
-        if (ball.x < sidelineMargin || ball.x > canvas.width - sidelineMargin || ball.y > canvas.height - sidelineMargin) { endMatchAction(false); }
-        if (ball.y < 0 && (ball.x < homeGoal.x - homeGoal.width / 2 || ball.x > homeGoal.x + homeGoal.width / 2)) { endMatchAction(false); }
+        const sidelineMargin = 5;
+        if (ball.x < sidelineMargin || ball.x > canvas.width - sidelineMargin || ball.y > canvas.height - sidelineMargin) {
+            resetBallAfterOutOfBounds('throw_in');
+        } else if (ball.y < 0 && (ball.x < homeGoal.x - homeGoal.width / 2 || ball.x > homeGoal.x + homeGoal.width / 2)) {
+            resetBallAfterOutOfBounds('goalkick');
+        }
 
         draw();
         gameLoop = requestAnimationFrame(updateGame);
@@ -468,53 +506,47 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // --- Field Markings with Perspective ---
-        ctx.strokeStyle = 'rgba(255,255,255,0.5)'; 
-        ctx.lineWidth = 3;
-        const topMargin = 0;
-        const bottomMargin = 10;
-        const topWidth = canvas.width * 0.5;
-        const topXStart = (canvas.width - topWidth) / 2;
 
-        // Penalty Area
-        const penaltyAreaTopWidth = 160;
-        const penaltyAreaHeight = 150;
-        const paTopX = (canvas.width - penaltyAreaTopWidth) / 2;
+        // --- Draw Field ---
+        for(let i = 0; i < 12; i++) {
+            ctx.fillStyle = i % 2 === 0 ? '#2e942e' : '#2a8c2a';
+            ctx.fillRect(0, i * canvas.height / 12, canvas.width, canvas.height / 12);
+        }
+        
+        // --- Draw Field Markings ---
+        ctx.strokeStyle = 'rgba(255,255,255,0.7)'; 
+        ctx.lineWidth = 2;
+
+        // Sidelines (Záróvonalak)
+        ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
+
+        // Center Line & Circle
         ctx.beginPath();
-        ctx.moveTo(paTopX, topMargin);
-        ctx.lineTo(paTopX + penaltyAreaTopWidth, topMargin);
-        ctx.lineTo(canvas.width, penaltyAreaHeight);
-        ctx.lineTo(0, penaltyAreaHeight);
-        ctx.closePath();
+        ctx.moveTo(5, canvas.height/2);
+        ctx.lineTo(canvas.width - 5, canvas.height/2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, canvas.height/2, 60, 0, 2*Math.PI);
         ctx.stroke();
 
-        // Center Circle (Ellipse)
-        ctx.beginPath();
-        ctx.ellipse(canvas.width / 2, canvas.height / 2, 80, 30, 0, 0, 2 * Math.PI);
-        ctx.stroke();
-        
-        // Center Line
-        ctx.beginPath();
-        ctx.moveTo(0, canvas.height/2);
-        ctx.lineTo(canvas.width, canvas.height/2);
-        ctx.stroke();
-        
+        // Penalty area
+        ctx.strokeRect(canvas.width/2 - 150, 5, 300, 120);
+
         // Goal
-        ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 4;
-        ctx.strokeRect(homeGoal.x - homeGoal.width/2, homeGoal.y, homeGoal.width, homeGoal.height);
-
+        ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 3;
+        ctx.strokeRect(homeGoal.x - homeGoal.width/2, homeGoal.y - 10, homeGoal.width, homeGoal.height);
+        
         drawBall(ball);
         opponents.forEach(drawPlayer);
         teammates.forEach(tm => drawPlayer(tm));
-        drawPlayer(player); // Draw player last to be on top
+        drawPlayer(player);
     }
 
     function drawWithShadow(drawFunction) {
         ctx.save();
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
-        ctx.shadowBlur = 15;
-        ctx.shadowOffsetY = 8;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetY = 5;
         drawFunction();
         ctx.restore();
     }
@@ -549,14 +581,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.beginPath();
             ctx.arc(entity.x, entity.y, entity.radius * 0.75, 0, Math.PI * 2);
             ctx.fill();
-
-            if (entity.type === 'goalkeeper') {
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 14px Inter';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('1', entity.x, entity.y);
-            }
             
             if(entity.isPlayer) {
                 if (ball.controlledBy !== player) {
@@ -579,10 +603,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function resizeCanvas() {
         const parent = matchGameOverlay;
-        const parentWidth = parent.clientWidth;
-        const parentHeight = parent.clientHeight;
-        canvas.width = parentWidth;
-        canvas.height = parentHeight;
+        canvas.width = parent.clientWidth;
+        canvas.height = parent.clientHeight;
+        homeGoal.width = canvas.width * 0.3; // A kapu méretét is frissítjük
+        homeGoal.x = canvas.width / 2;
     }
     
     // --- MOBILE CONTROLS ---
@@ -665,3 +689,4 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resizeCanvas);
     main();
 });
+
