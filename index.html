@@ -434,6 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const loadGameBtn = document.getElementById('loadGameBtn');
         if (loadedData) {
             loadGameBtn.style.pointerEvents = 'auto';
+            loadGameBtn.style.opacity = 1;
             loadGameBtn.addEventListener('click', () => {
                 const defaultState = { money: 0, goals: 0, assists: 0, matchesPlayed: 0, trophies: [], clubHistory: [], currentMatchday: 0, schedule: [], jerseyNumber: 10, transferOffers: [], age: 17 };
                 gameState = { ...defaultState, ...loadedData };
@@ -603,7 +604,8 @@ document.addEventListener('DOMContentLoaded', () => {
             currentMatchday: 0,
             jerseyNumber: Math.floor(Math.random() * 98) + 1,
             schedule: generateSchedule(leagueTeams.map(t => t.name)),
-            transferOffers: []
+            transferOffers: [],
+            diamonds: 10
         };
         saveGame(gameState);
         showMainHub();
@@ -1408,9 +1410,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('matchResultContinueBtn')?.addEventListener('click', showMainHub);
     document.getElementById('sim-pause-btn')?.addEventListener('click', togglePause);
     document.getElementById('newGameBtn')?.addEventListener('click', initializeCharacterCreator);
+    
+    // Kezelni a 'Folytatás' gombot
     document.getElementById('loadGameBtn')?.addEventListener('click', () => {
-        // Implement load game logic
-        alert("A mentett játék betöltése még nem érhető el.");
+        const loadedData = loadGame();
+        if (loadedData) {
+            // Betöltjük a játékot és átváltunk a főmenüre
+            const defaultState = { money: 0, goals: 0, assists: 0, matchesPlayed: 0, trophies: [], clubHistory: [], currentMatchday: 0, schedule: [], jerseyNumber: 10, transferOffers: [], age: 17, diamonds: 10 };
+            gameState = { ...defaultState, ...loadedData };
+            showMainHub();
+        }
     });
 
     window.addEventListener('resize', resizeCanvas);
