@@ -23,7 +23,7 @@
                 <div class="navigation-buttons" style="justify-content: flex-end;"><button class="button next-btn">Tovább &rarr;</button></div>
             </div>
             <div class="form-step">
-                 <h2>Válaszd ki a nemzetiséged</h2>
+                <h2>Válaszd ki a nemzetiséged</h2>
                 <p class="form-description">Melyik országot képviseled a nemzetközi porondon?</p>
                 <div class="custom-select-wrapper">
                     <div class="select-button" id="nationalitySelect">
@@ -34,7 +34,7 @@
             </div>
             <div class="form-step">
                 <h2>Állítsd be a kezdő erőnléted</h2>
-                 <p class="form-description">Ez határozza meg a kezdő képességeidet a pályán.</p>
+                <p class="form-description">Ez határozza meg a kezdő képességeidet a pályán.</p>
                 <div class="slider-group">
                     <div id="sliderValue" class="slider-value">60</div>
                     <input type="range" id="potentialSlider" min="20" max="100" value="60">
@@ -107,8 +107,8 @@
                 <div class="score-info">
                     <div id="gameScore">0 - 0</div>
                     <div class="score-timeline">
-                         <span id="homeProgress"></span>
-                         <span id="awayProgress"></span>
+                        <span id="homeProgress"></span>
+                        <span id="awayProgress"></span>
                     </div>
                 </div>
                 <div class="team-info right">
@@ -117,7 +117,7 @@
                 <div id="gameTime" style="display:none;">00:00</div>
             </div>
         </div>
-        <canvas id="gameCanvas"></canvas> <!-- Nincs fix méret, a JS és CSS kezeli -->
+        <canvas id="gameCanvas"></canvas>
         <div class="mobile-controls">
             <div id="joystick-zone" class="joystick-zone">
                 <div id="joystick-handle" class="joystick-handle"></div>
@@ -139,6 +139,7 @@
         <nav class="sidebar">
             <button class="nav-btn active" data-screen="dashboardScreen" data-tooltip="Irányítópult"><i class="fas fa-tachometer-alt"></i></button>
             <button class="nav-btn" data-screen="leagueScreen" data-tooltip="Bajnokság"><i class="fas fa-trophy"></i></button>
+            <button class="nav-btn" data-screen="transferScreen" data-tooltip="Átigazolások"><i class="fas fa-arrows-alt-h"></i></button>
         </nav>
         <div class="hub-content-wrapper">
             <header class="top-bar">
@@ -166,7 +167,7 @@
                             </div>
                             <p><strong>Értékelés:</strong> <span id="hubPlayerRating">85</span></p>
                         </div>
-                         <div class="dashboard-card">
+                        <div class="dashboard-card">
                             <div class="card-header">
                                 <i class="fas fa-calendar-alt"></i>
                                 <h3>Következő Meccs</h3>
@@ -208,14 +209,1062 @@
                         <div class="stat-card"><div class="stat-value" id="profileTrophies">0</div><div class="stat-label">Trófeák</div></div>
                     </div>
                 </div>
+                <div id="transferScreen" class="screen hidden">
+                    <div class="transfer-card">
+                        <h2>Átigazolási ajánlatok</h2>
+                        <div id="transferOffers">
+                            <p style="text-align: center; color: var(--text-muted);">Jelenleg nincsenek ajánlatok.</p>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
         <nav class="bottom-bar">
             <button class="nav-btn active" data-screen="dashboardScreen"><i class="fas fa-tachometer-alt"></i></button>
             <button class="nav-btn" data-screen="leagueScreen"><i class="fas fa-trophy"></i></button>
+            <button class="nav-btn" data-screen="transferScreen"><i class="fas fa-arrows-alt-h"></i></button>
         </nav>
     </div>
-    <script src="script.js"></script>
+    
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const SAVE_KEY = 'footballLegendSave';
+    let gameState = {};
+
+    // --- UI ELEMEK INICIALIZÁLÁSA ---
+    const matchSimulatorOverlay = document.getElementById('matchSimulatorOverlay');
+    const matchGameOverlay = document.getElementById('matchGameOverlay');
+    const matchResultOverlay = document.getElementById('matchResultOverlay');
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // --- JÁTÉK ÁLLAPOT VÁLTOZÓK ---
+    let gameLoop;
+    let player, ball, opponents, teammates, keys, homeGoal;
+    let currentMatchData;
+    let simulationInterval;
+    let miniGameActive = false;
+    let isPaused = false;
+    let opponentTeamColor = '#e74c3c';
+    let selectedLeague = null;
+    let selectedNationality = 'hu'; // Alapértelmezett nemzetiség
+
+    // --- FRISSÍTETT ÉS KIEGÉSZÍTETT BAJNOKSÁG ÉS CSAPAT ADATOK ---
+    const LEAGUES = {
+        'Premier League': [
+            { name: 'Manchester City', strength: 95, color: '#6CABDD' },
+            { name: 'Arsenal', strength: 93, color: '#EF0107' },
+            { name: 'Liverpool', strength: 92, color: '#C8102E' },
+            { name: 'Chelsea', strength: 89, color: '#034694' },
+            { name: 'Tottenham Hotspur', strength: 88, color: '#132257' },
+            { name: 'Manchester Utd', strength: 87, color: '#DA291C' },
+            { name: 'Newcastle Utd', strength: 86, color: '#241F20' },
+            { name: 'Aston Villa', strength: 85, color: '#670E36' },
+            { name: 'Brighton', strength: 83, color: '#0057B8' },
+            { name: 'West Ham Utd', strength: 82, color: '#7A263A' },
+            { name: 'Everton', strength: 81, color: '#003399' },
+            { name: 'Wolverhampton', strength: 80, color: '#FDB913' },
+            { name: 'Fulham', strength: 79, color: '#CCCCCC' },
+            { name: 'Crystal Palace', strength: 78, color: '#1B458F' },
+            { name: 'Brentford', strength: 77, color: '#C70000' },
+            { name: 'Bournemouth', strength: 76, color: '#B50024' },
+            { name: 'Nottingham Forest', strength: 75, color: '#DD0000' },
+            { name: 'Ipswich Town', strength: 73, color: '#003399' },
+            { name: 'Leicester City', strength: 74, color: '#0053A0' },
+            { name: 'Southampton', strength: 72, color: '#D71920' },
+        ],
+        'La Liga': [
+            { name: 'Real Madrid', strength: 96, color: '#FEBE10' },
+            { name: 'FC Barcelona', strength: 90, color: '#A50044' },
+            { name: 'Atlético Madrid', strength: 88, color: '#CB3524' },
+            { name: 'Sevilla', strength: 85, color: '#D31414' },
+            { name: 'Villarreal', strength: 84, color: '#005995' },
+            { name: 'Real Sociedad', strength: 83, color: '#0E73BC' },
+            { name: 'Athletic Bilbao', strength: 82, color: '#E4002B' },
+            { name: 'Valencia', strength: 80, color: '#F6872D' },
+            { name: 'Real Betis', strength: 79, color: '#00A35B' },
+            { name: 'Celta Vigo', strength: 78, color: '#88C0E7' },
+            { name: 'Alavés', strength: 77, color: '#000000' },
+            { name: 'Girona', strength: 76, color: '#E7002C' },
+            { name: 'Getafe', strength: 75, color: '#004792' },
+            { name: 'Osasuna', strength: 74, color: '#BA1626' },
+            { name: 'Mallorca', strength: 73, color: '#BA001F' },
+            { name: 'Rayo Vallecano', strength: 72, color: '#D92323' },
+            { name: 'Leganés', strength: 70, color: '#0044A9' },
+            { name: 'Espanyol', strength: 69, color: '#00A35B' },
+            { name: 'Valladolid', strength: 68, color: '#5E206A' },
+            { name: 'Las Palmas', strength: 71, color: '#FFCE00' },
+        ],
+        'Bundesliga': [
+            { name: 'Bayern München', strength: 94, color: '#DC052D' },
+            { name: 'Borussia Dortmund', strength: 90, color: '#FDE100' },
+            { name: 'Bayer Leverkusen', strength: 92, color: '#E32221' },
+            { name: 'RB Leipzig', strength: 87, color: '#001C46' },
+            { name: 'Eintracht Frankfurt', strength: 85, color: '#D80000' },
+            { name: 'SC Freiburg', strength: 84, color: '#000000' },
+            { name: 'Wolfsburg', strength: 82, color: '#65B32E' },
+            { name: 'Mainz 05', strength: 80, color: '#EB2D35' },
+            { name: 'Hoffenheim', strength: 79, color: '#005187' },
+            { name: 'Borussia Mönchengladbach', strength: 78, color: '#000000' },
+            { name: 'Köln', strength: 77, color: '#E82431' },
+            { name: 'Union Berlin', strength: 76, color: '#EE3344' },
+            { name: 'Heidenheim', strength: 75, color: '#DC052D' },
+            { name: 'Stuttgart', strength: 73, color: '#FF0000' },
+            { name: 'Werder Bremen', strength: 72, color: '#1B7330' },
+            { name: 'VfL Bochum', strength: 70, color: '#004D9D' },
+            { name: 'FC Augsburg', strength: 68, color: '#A00511' },
+            { name: 'Holstein Kiel', strength: 67, color: '#0054A6' },
+        ],
+        'Serie A': [
+            { name: 'Juventus', strength: 91, color: '#FFFFFF' },
+            { name: 'AC Milan', strength: 90, color: '#FB090B' },
+            { name: 'Inter Milan', strength: 89, color: '#0055A0' },
+            { name: 'Napoli', strength: 88, color: '#007FFF' },
+            { name: 'Roma', strength: 86, color: '#8E0013' },
+            { name: 'Lazio', strength: 84, color: '#0066CC' },
+            { name: 'Fiorentina', strength: 82, color: '#50208D' },
+            { name: 'Atalanta', strength: 81, color: '#003A89' },
+            { name: 'Torino', strength: 79, color: '#88001E' },
+            { name: 'Bologna', strength: 78, color: '#BD1F2D' },
+            { name: 'Sassuolo', strength: 77, color: '#00994D' },
+            { name: 'Monza', strength: 76, color: '#FF0000' },
+            { name: 'Empoli', strength: 75, color: '#003E92' },
+            { name: 'Lecce', strength: 74, color: '#E7C817' },
+            { name: 'Udinese', strength: 73, color: '#001D4B' },
+            { name: 'Verona', strength: 72, color: '#005E3D' },
+            { name: 'Como', strength: 68, color: '#31448A' },
+            { name: 'Parma', strength: 69, color: '#FFFF00' },
+            { name: 'Palermo', strength: 70, color: '#FFC800' },
+            { name: 'Genoa', strength: 71, color: '#CC0000' },
+        ],
+        'Ligue 1': [
+            { name: 'PSG', strength: 95, color: '#004171' },
+            { name: 'Marseille', strength: 87, color: '#002F6C' },
+            { name: 'Monaco', strength: 85, color: '#CE1126' },
+            { name: 'Nice', strength: 83, color: '#CC0000' },
+            { name: 'Lille', strength: 82, color: '#E2021A' },
+            { name: 'Lyon', strength: 81, color: '#003893' },
+            { name: 'Rennes', strength: 80, color: '#E51921' },
+            { name: 'Strasbourg', strength: 79, color: '#0054A6' },
+            { name: 'Reims', strength: 78, color: '#ED1B34' },
+            { name: 'Toulouse', strength: 77, color: '#5F3977' },
+            { name: 'Montpellier', strength: 76, color: '#002C5F' },
+            { name: 'Lens', strength: 75, color: '#FFCD00' },
+            { name: 'Brest', strength: 74, color: '#C00021' },
+            { name: 'Le Havre', strength: 73, color: '#003882' },
+            { name: 'Metz', strength: 72, color: '#00245E' },
+            { name: 'Nantes', strength: 71, color: '#009B3E' },
+            { name: 'Saint-Étienne', strength: 68, color: '#279D55' },
+            { name: 'Auxerre', strength: 67, color: '#003366' },
+        ],
+        'NB I': [
+            { name: 'Ferencváros', strength: 75, color: '#006633' },
+            { name: 'Puskás Akadémia', strength: 72, color: '#1B3079' },
+            { name: 'Fehérvár FC', strength: 70, color: '#C8010C' },
+            { name: 'Debreceni VSC', strength: 68, color: '#880D11' },
+            { name: 'Diósgyőri VTK', strength: 67, color: '#A60000' },
+            { name: 'Zalaegerszegi TE', strength: 66, color: '#0054A6' },
+            { name: 'Újpest FC', strength: 65, color: '#562D7E' },
+            { name: 'Kecskeméti TE', strength: 64, color: '#4B0082' },
+            { name: 'Paks', strength: 63, color: '#009C4C' },
+            { name: 'Kisvárda', strength: 62, color: '#003366' },
+            { name: 'MTK Budapest', strength: 60, color: '#003366' },
+            { name: 'Budaörsi SC', strength: 58, color: '#333333' },
+        ],
+    };
+    
+    // Nemzetiség adatok
+    const NATIONALITIES = {
+        'hu': 'Magyar', 'gb': 'Angol', 'es': 'Spanyol', 'de': 'Német', 'fr': 'Francia', 'it': 'Olasz', 'br': 'Brazil', 'ar': 'Argentin', 'pt': 'Portugál'
+    };
+    
+    const COUNTRY_FLAGS = {
+        'hu': 'https://flagcdn.com/w40/hu.png',
+        'gb': 'https://flagcdn.com/w40/gb.png',
+        'es': 'https://flagcdn.com/w40/es.png',
+        'de': 'https://flagcdn.com/w40/de.png',
+        'fr': 'https://flagcdn.com/w40/fr.png',
+        'it': 'https://flagcdn.com/w40/it.png',
+        'br': 'https://flagcdn.com/w40/br.png',
+        'ar': 'https://flagcdn.com/w40/ar.png',
+        'pt': 'https://flagcdn.com/w40/pt.png'
+    };
+
+    // --- SEGÉDFÜGGVÉNYEK ---
+    function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+    function getRandomElement(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+    // --- SAVE / LOAD ---
+    function saveGame(data) { try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); } catch (e) { console.error("Error saving game: ", e); } }
+    function loadGame() {
+        const savedData = localStorage.getItem(SAVE_KEY);
+        if (savedData) { try { return JSON.parse(savedData); } catch (e) { return null; } }
+        return null;
+    }
+
+    // --- FŐ INICIALIZÁLÁS ---
+    function main() {
+        const loadedData = loadGame();
+        if (loadedData && loadedData.playerName) {
+            const defaultState = { money: 0, goals: 0, assists: 0, matchesPlayed: 0, trophies: [], clubHistory: [], currentMatchday: 0, schedule: [], jerseyNumber: 10, transferOffers: [] };
+            gameState = { ...defaultState, ...loadedData };
+            const currentLeagueTeams = LEAGUES[gameState.leagueName];
+            if (!currentLeagueTeams) {
+                console.error("League data not found for saved game. Starting new.");
+                initializeCharacterCreator();
+                document.getElementById('characterCreator').classList.remove('hidden');
+            } else {
+                if (!gameState.schedule || gameState.schedule.length === 0 || gameState.currentMatchday >= gameState.schedule.length) {
+                    gameState.schedule = generateSchedule(currentLeagueTeams.map(t => t.name));
+                    gameState.currentMatchday = 0;
+                    gameState.league = currentLeagueTeams.map(t => ({ name: t.name, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0 }));
+                    saveGame(gameState);
+                }
+                showMainHub();
+            }
+        } else {
+            initializeCharacterCreator();
+            document.getElementById('characterCreator').classList.remove('hidden');
+        }
+        setTimeout(() => { document.getElementById('loadingScreen').classList.add('fade-out'); }, 500);
+    }
+
+    // --- KARAKTERLÉTREHOZÓ ---
+    function initializeCharacterCreator() {
+        const formCarousel = document.getElementById('formCarousel');
+        const totalSteps = formCarousel.children.length;
+        let currentStep = 0;
+        const playerNameInput = document.getElementById('playerName');
+
+        function updateCarousel() { formCarousel.style.transform = `translateX(-${currentStep * 100}%)`; }
+        
+        document.querySelectorAll('.next-btn').forEach(btn => btn.addEventListener('click', () => {
+            if (currentStep === 0 && playerNameInput.value.trim() === "") return;
+            if (currentStep < totalSteps - 1) { currentStep++; updateCarousel(); }
+        }));
+        
+        document.querySelectorAll('.prev-btn').forEach(btn => btn.addEventListener('click', () => {
+            if (currentStep > 0) { currentStep--; updateCarousel(); }
+        }));
+        
+        document.getElementById('startGameButton').addEventListener('click', startNewGame);
+        
+        const slider = document.getElementById('potentialSlider');
+        slider.addEventListener('input', (e) => {
+            const value = e.target.value;
+            const sliderValueElem = document.getElementById('sliderValue');
+            sliderValueElem.textContent = value;
+            const percentage = ((value - slider.min) / (slider.max - slider.min)) * 100;
+            sliderValueElem.style.left = `${percentage}%`;
+            sliderValueElem.style.transform = `translateX(-${percentage}%)`;
+        });
+    }
+
+    function startNewGame() {
+        if (!selectedLeague) {
+            const leagues = Object.keys(LEAGUES);
+            selectedLeague = getRandomElement(leagues);
+        }
+        const leagueTeams = LEAGUES[selectedLeague];
+        if (!leagueTeams) { return; }
+        
+        const smallTeams = leagueTeams.filter(t => t.strength <= 75);
+        const chosenTeam = getRandomElement(smallTeams.length > 0 ? smallTeams : leagueTeams);
+        
+        gameState = {
+            playerName: document.getElementById('playerName').value || "Játékos",
+            leagueName: selectedLeague,
+            rating: document.getElementById('potentialSlider').value,
+            team: chosenTeam,
+            money: 250000, salary: 15000, goals: 0, assists: 0, matchesPlayed: 0, trophies: [],
+            clubHistory: [{ name: chosenTeam.name, year: '2025-' }],
+            league: leagueTeams.map(t => ({ name: t.name, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0 })),
+            currentMatchday: 0,
+            jerseyNumber: Math.floor(Math.random() * 98) + 1,
+            schedule: generateSchedule(leagueTeams.map(t => t.name)),
+            transferOffers: []
+        };
+        saveGame(gameState);
+        showMainHub();
+    }
+
+    // --- MECCS LOGIKA ---
+    function playNextMatch() {
+        if (!gameState.schedule || !gameState.schedule[gameState.currentMatchday]) {
+            endSeason();
+            return;
+        }
+        startMatchSimulator();
+    }
+    
+    function startMatchSimulator() {
+        const leagueTeams = LEAGUES[gameState.leagueName];
+        if (!leagueTeams) return;
+        
+        const fixture = gameState.schedule[gameState.currentMatchday].find(f => f.home === gameState.team.name || f.away === gameState.team.name);
+        if (!fixture) { return; }
+        
+        const homeTeam = leagueTeams.find(t => t.name === fixture.home);
+        const awayTeam = leagueTeams.find(t => t.name === fixture.away);
+
+        if (!currentMatchData || currentMatchData.fixture.home !== fixture.home) {
+            currentMatchData = { fixture, time: 0, homeScore: 0, awayScore: 0, playerGoals: 0, assists: 0, events: [{time: 0, comment: "Kezdőrúgás!", icon: "fa-futbol"}] };
+        }
+        
+        document.getElementById('simHomeName').textContent = homeTeam.name;
+        document.getElementById('simAwayName').textContent = awayTeam.name;
+        document.getElementById('bannerPlayerName').textContent = gameState.playerName;
+        updateSimulatorUI();
+        
+        document.getElementById('mainHub').classList.add('hidden');
+        matchSimulatorOverlay.classList.remove('hidden');
+        
+        isPaused = false;
+        document.getElementById('sim-pause-btn').innerHTML = '<i class="fas fa-pause"></i>';
+        runSimulation();
+    }
+
+    function runSimulation() {
+        simulationInterval = setInterval(() => {
+            if (isPaused) return;
+            currentMatchData.time += 2;
+            
+            const leagueTeams = LEAGUES[gameState.leagueName];
+            const homeTeam = leagueTeams.find(t => t.name === currentMatchData.fixture.home);
+            const awayTeam = leagueTeams.find(t => t.name === currentMatchData.fixture.away);
+            
+            const playerTeam = gameState.team;
+            const playerIsHome = gameState.team.name === homeTeam.name;
+            const opponentTeam = playerIsHome ? awayTeam : homeTeam;
+            
+            const playerTeamStrength = playerTeam.strength;
+            const opponentStrength = opponentTeam.strength;
+            const chanceModifier = (playerTeamStrength - opponentStrength) / 250;
+
+            if (Math.random() < 0.15 + chanceModifier) {
+                clearInterval(simulationInterval);
+                addMatchEvent("HELYZET! A csapatod támad, most rajtad a sor!", "fa-star");
+                document.getElementById('pitch-enter-banner').classList.remove('hidden');
+                setTimeout(() => {
+                    matchSimulatorOverlay.classList.add('hidden');
+                    document.getElementById('pitch-enter-banner').classList.add('hidden');
+                    startMatchGame();
+                }, 2500);
+                return;
+            } 
+            
+            if (Math.random() < 0.04 - chanceModifier) {
+                 if(playerIsHome) currentMatchData.awayScore++; else currentMatchData.homeScore++;
+                 addMatchEvent(`GÓL! Az ellenfél szerzett vezetést! (${opponentTeam.name})`, "fa-futbol");
+            } else if (Math.random() < 0.2) {
+                addMatchEvent(getRandomCommentary(), "fa-running");
+            }
+
+            updateSimulatorUI();
+
+            if (currentMatchData.time >= 90) {
+                endMatchGame();
+            }
+        }, 1000);
+    }
+    
+    function togglePause() {
+        isPaused = !isPaused;
+        const pauseBtn = document.getElementById('sim-pause-btn');
+        pauseBtn.innerHTML = isPaused ? '<i class="fas fa-play"></i>' : '<i class="fas fa-pause"></i>';
+    }
+
+    function updateSimulatorUI() {
+        document.getElementById('simScore').textContent = `${currentMatchData.homeScore} - ${currentMatchData.awayScore}`;
+        document.getElementById('simTime').textContent = `${String(Math.floor(currentMatchData.time)).padStart(2, '0')}:00`;
+        const timeline = document.getElementById('commentary-timeline');
+        timeline.innerHTML = '';
+        currentMatchData.events.forEach(event => {
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'event';
+            eventDiv.innerHTML = `<i class="fas ${event.icon}"></i><span class="time">${String(event.time).padStart(2, '0')}'</span><span class="comment">${event.comment}</span>`;
+            timeline.appendChild(eventDiv);
+        });
+    }
+
+    function addMatchEvent(comment, icon) {
+        currentMatchData.events.unshift({time: Math.floor(currentMatchData.time), comment, icon});
+        updateSimulatorUI();
+    }
+    
+    function getRandomCommentary() {
+        const comments = ["A középpályán folyik a játék.", "Szép passz a szélen.", "Bedobás következik."];
+        return comments[Math.floor(Math.random() * comments.length)];
+    }
+
+    function updateScoreboardUI() {
+        const leagueTeams = LEAGUES[gameState.leagueName];
+        const homeTeam = leagueTeams.find(t => t.name === currentMatchData.fixture.home);
+        const awayTeam = leagueTeams.find(t => t.name === currentMatchData.fixture.away);
+
+        document.getElementById('gameHomeName').textContent = homeTeam.name.substring(0,3).toUpperCase();
+        document.getElementById('gameAwayName').textContent = awayTeam.name.substring(0,3).toUpperCase();
+        document.getElementById('gameScore').textContent = `${currentMatchData.homeScore} - ${currentMatchData.awayScore}`;
+        // document.getElementById('gameTime').textContent = `${String(Math.floor(currentMatchData.time)).padStart(2, '0')}:00`;
+
+        const homeP = document.getElementById('homeProgress');
+        const awayP = document.getElementById('awayProgress');
+        const homeScore = currentMatchData.homeScore;
+        const awayScore = currentMatchData.awayScore;
+        const totalScore = homeScore + awayScore;
+        
+        let homeFlex = 0.5;
+        if (totalScore > 0) {
+            homeFlex = homeScore / totalScore;
+        }
+        
+        homeFlex = Math.max(0.05, Math.min(0.95, homeFlex));
+
+        homeP.style.flex = homeFlex;
+        awayP.style.flex = 1 - homeFlex;
+    }
+
+    function startMatchGame() {
+        miniGameActive = true;
+        matchGameOverlay.classList.remove('hidden');
+        resizeCanvas();
+
+        const leagueTeams = LEAGUES[gameState.leagueName];
+        const homeTeam = leagueTeams.find(t => t.name === currentMatchData.fixture.home);
+        const awayTeam = leagueTeams.find(t => t.name === currentMatchData.fixture.away);
+        
+        const playerIsHome = gameState.team.name === homeTeam.name;
+        opponentTeamColor = playerIsHome ? awayTeam.color : homeTeam.color;
+
+        updateScoreboardUI();
+
+        keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, ' ': false, 'c': false };
+
+        const startX = canvas.width * (0.3 + Math.random() * 0.4);
+        player = { x: startX, y: canvas.height / 2 + 100, speed: 4, isPlayer: true, radius: 15, possessionRadius: 25 };
+        ball = { x: startX, y: canvas.height / 2, radius: 8, speedX: 0, speedY: 0, friction: 0.98, controlledBy: null };
+        homeGoal = { x: canvas.width / 2, y: 15, width: canvas.width * 0.3, height: 20 };
+        
+        teammates = [
+            { x: canvas.width * 0.25, y: canvas.height * 0.45, speed: 2.8, radius: 15, jerseyNumber: 8, decisionTimeout: 0 },
+            { x: canvas.width * 0.75, y: canvas.height * 0.45, speed: 2.8, radius: 15, jerseyNumber: 11, decisionTimeout: 0 }
+        ];
+
+        opponents = [
+            { x: canvas.width / 2, y: 70, speed: 1.8, radius: 16, type: 'goalkeeper', jerseyNumber: 1 },
+            { x: canvas.width * 0.35, y: 220, speed: 2.0, radius: 15, type: 'defender', jerseyNumber: 4 },
+            { x: canvas.width * 0.65, y: 220, speed: 2.0, radius: 15, type: 'defender', jerseyNumber: 5 }
+        ];
+        
+        document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('keyup', handleKeyUp);
+        setupMobileControls();
+
+        gameLoop = requestAnimationFrame(updateGame);
+    }
+    
+    function endMatchAction(isGoal, reason = 'tackle') {
+        if (!miniGameActive) return;
+        miniGameActive = false;
+
+        cancelAnimationFrame(gameLoop);
+        document.removeEventListener('keydown', handleKeyDown);
+        document.removeEventListener('keyup', handleKeyUp);
+        removeMobileControls();
+
+        const playerIsHome = gameState.team.name === currentMatchData.fixture.home;
+        let eventMessage = "";
+        let eventIcon = "fa-times-circle";
+
+        if (isGoal) {
+            if(playerIsHome) currentMatchData.homeScore++; else currentMatchData.awayScore++;
+            currentMatchData.playerGoals++;
+            eventMessage = `GÓÓÓÓL! Fantasztikus befejezés! (${gameState.playerName})`;
+            eventIcon = "fa-futbol";
+        } else {
+            switch(reason) {
+                case 'out_of_bounds':
+                    eventMessage = "A labda elhagyta a játékteret. Elhibázott támadás.";
+                    break;
+                case 'tackle':
+                default:
+                    eventMessage = "Szereltek! Az ellenfélhez került a labda.";
+                    break;
+            }
+        }
+        addMatchEvent(eventMessage, eventIcon);
+        
+        updateScoreboardUI();
+        matchGameOverlay.classList.add('hidden');
+        matchSimulatorOverlay.classList.remove('hidden');
+        updateSimulatorUI();
+        
+        setTimeout(() => {
+            if (currentMatchData.time < 90) {
+                runSimulation();
+            } else {
+                endMatchGame();
+            }
+        }, 1500);
+    }
+
+    function endMatchGame() {
+        clearInterval(simulationInterval);
+        addMatchEvent("VÉGE A MÉRKŐZÉSNEK!", "fa-stopwatch");
+
+        setTimeout(() => {
+            matchSimulatorOverlay.classList.add('hidden');
+            const finalResult = { ...currentMatchData, homeName: currentMatchData.fixture.home, awayName: currentMatchData.fixture.away };
+            processMatchResult(finalResult);
+            
+            const allFixtures = gameState.schedule[gameState.currentMatchday];
+            const otherFixtures = allFixtures.filter(f => f.home !== gameState.team.name && f.away !== gameState.team.name);
+            otherFixtures.forEach(fixture => { processMatchResult(simulateOtherMatch(fixture.home, fixture.away)); });
+
+            gameState.currentMatchday++;
+            checkTransferOffers();
+            saveGame(gameState);
+            showMatchResult(finalResult);
+            currentMatchData = null;
+        }, 2000);
+    }
+
+    function processMatchResult(result) {
+        const homeTeam = gameState.league.find(t => t.name === result.homeName);
+        const awayTeam = gameState.league.find(t => t.name === result.awayName);
+        if (!homeTeam || !awayTeam) return;
+
+        homeTeam.played++; awayTeam.played++;
+        homeTeam.gf += result.homeScore; homeTeam.ga += result.awayScore;
+        awayTeam.gf += result.awayScore; awayTeam.ga += result.homeScore;
+        homeTeam.gd = homeTeam.gf - homeTeam.ga;
+        awayTeam.gd = awayTeam.gf - awayTeam.ga;
+
+        if (result.homeScore > result.awayScore) { homeTeam.wins++; awayTeam.losses++; homeTeam.points += 3; } 
+        else if (result.awayScore > result.homeScore) { awayTeam.wins++; homeTeam.losses++; awayTeam.points += 3; } 
+        else { homeTeam.draws++; awayTeam.draws++; homeTeam.points++; awayTeam.points++; }
+    }
+
+    function showMatchResult(result) {
+        const leagueTeams = LEAGUES[gameState.leagueName];
+        document.getElementById('resultHomeLogo').src = leagueTeams.find(t => t.name === result.homeName).logo || '';
+        document.getElementById('resultHomeName').textContent = result.homeName;
+        document.getElementById('resultAwayLogo').src = leagueTeams.find(t => t.name === result.awayName).logo || '';
+        document.getElementById('resultAwayName').textContent = result.awayName;
+        document.getElementById('resultScore').textContent = `${result.homeScore} - ${result.awayScore}`;
+        
+        let bonus = 0;
+        const playerTeamWon = (gameState.team.name === result.homeName && result.homeScore > result.awayScore) || (gameState.team.name === result.awayName && result.awayScore > result.homeScore);
+        if (playerTeamWon) bonus += 20000;
+        if (result.homeScore === result.awayScore) bonus += 5000;
+        bonus += result.playerGoals * 10000;
+        gameState.money += (gameState.salary || 0) + bonus;
+        gameState.goals += result.playerGoals;
+        gameState.matchesPlayed++;
+        
+        document.getElementById('resultPlayerPerformance').textContent = `Gólok: ${result.playerGoals}, Gólpasszok: ${currentMatchData.assists}`;
+        document.getElementById('resultEarnings').textContent = `Fizetés: €${(gameState.salary || 0).toLocaleString()}, Bónusz: €${bonus.toLocaleString()}`;
+        matchResultOverlay.classList.remove('hidden');
+    }
+    
+    function simulateOtherMatch(homeName, awayName) {
+        const leagueTeams = LEAGUES[gameState.leagueName];
+        const homeTeam = leagueTeams.find(t => t.name === homeName);
+        const awayTeam = leagueTeams.find(t => t.name === awayName);
+        const homeScore = Math.floor(Math.random() * (homeTeam.strength / 28));
+        const awayScore = Math.floor(Math.random() * (awayTeam.strength / 28));
+        return { homeName, awayName, homeScore, awayScore, playerGoals: 0 };
+    }
+    
+    function endSeason() {
+        // Jelenleg csak újraindítjuk a bajnokságot
+        alert("A szezon véget ért!");
+        const leagueTeams = LEAGUES[gameState.leagueName];
+        gameState.schedule = generateSchedule(leagueTeams.map(t => t.name));
+        gameState.currentMatchday = 0;
+        gameState.league.forEach(team => { Object.assign(team, { played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0 }); });
+        saveGame(gameState);
+        showMainHub();
+    }
+
+    // --- ÁTIGAZOLÁSI RENDSZER ---
+    function checkTransferOffers() {
+        const playerRating = parseInt(gameState.rating);
+        const playerGoals = gameState.goals;
+        const playerTeamStrength = gameState.team.strength;
+        const leagueTeams = LEAGUES[gameState.leagueName];
+
+        const offerChance = Math.max(0, (playerRating - 70) * 0.05 + (playerGoals * 0.01));
+        if (Math.random() > offerChance) return;
+
+        const availableTeams = leagueTeams.filter(t => t.strength > playerTeamStrength + 5);
+        if (availableTeams.length === 0) return;
+
+        const offerTeam = getRandomElement(availableTeams);
+        const transferFee = Math.round(Math.random() * (playerRating * 100000) + 1000000);
+        const salary = Math.round(Math.random() * (playerRating * 5000) + 20000);
+        
+        const offer = {
+            teamName: offerTeam.name,
+            fee: transferFee,
+            salary: salary,
+            teamLogo: offerTeam.logo
+        };
+        
+        gameState.transferOffers.push(offer);
+        updateTransferUI();
+        saveGame(gameState);
+    }
+    
+    function updateTransferUI() {
+        const offersContainer = document.getElementById('transferOffers');
+        offersContainer.innerHTML = '';
+        if (gameState.transferOffers.length === 0) {
+            offersContainer.innerHTML = `<p style="text-align: center; color: var(--text-muted);">Jelenleg nincsenek ajánlatok.</p>`;
+            return;
+        }
+
+        gameState.transferOffers.forEach((offer, index) => {
+            const offerDiv = document.createElement('div');
+            offerDiv.className = 'dashboard-card';
+            offerDiv.style.marginBottom = '1rem';
+            offerDiv.innerHTML = `
+                <h3>${offer.teamName} ajánlata</h3>
+                <p><strong>Átigazolási díj:</strong> €${offer.fee.toLocaleString()}</p>
+                <p><strong>Heti fizetés:</strong> €${offer.salary.toLocaleString()}</p>
+                <div class="navigation-buttons">
+                    <button class="button" data-index="${index}" data-action="accept">Elfogad</button>
+                    <button class="button prev-btn" data-index="${index}" data-action="reject">Elutasít</button>
+                </div>
+            `;
+            offersContainer.appendChild(offerDiv);
+        });
+        
+        offersContainer.addEventListener('click', (e) => {
+            const target = e.target;
+            const action = target.dataset.action;
+            const index = parseInt(target.dataset.index);
+            if (!action || isNaN(index)) return;
+
+            const offer = gameState.transferOffers[index];
+            if (action === 'accept') {
+                gameState.money += offer.fee;
+                gameState.salary = offer.salary;
+                gameState.team = LEAGUES[gameState.leagueName].find(t => t.name === offer.teamName);
+                gameState.clubHistory.push({ name: gameState.team.name, year: '2025-' });
+                gameState.transferOffers = [];
+                gameState.goals = 0;
+                gameState.assists = 0;
+                gameState.matchesPlayed = 0;
+                saveGame(gameState);
+                showMainHub();
+            } else if (action === 'reject') {
+                gameState.transferOffers.splice(index, 1);
+                saveGame(gameState);
+                updateTransferUI();
+            }
+        });
+    }
+
+    // --- JÁTÉK LOGIKA ---
+    function handleKeyDown(e) { keys[e.key] = true; }
+    function handleKeyUp(e) { keys[e.key] = false; }
+
+    function updateGame() {
+        if(!miniGameActive) return;
+
+        // Player movement
+        let moveX = 0, moveY = 0;
+        if (keys.ArrowUp) moveY -= 1;
+        if (keys.ArrowDown) moveY += 1;
+        if (keys.ArrowLeft) moveX -= 1;
+        if (keys.ArrowRight) moveX += 1;
+        
+        if (moveX !== 0 || moveY !== 0) {
+            const angle = Math.atan2(moveY, moveX);
+            player.x += Math.cos(angle) * player.speed;
+            player.y += Math.sin(angle) * player.speed;
+        }
+        
+        player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x));
+        player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
+
+        if (ball.controlledBy === null) {
+            const distToPlayer = Math.hypot(player.x - ball.x, player.y - ball.y);
+            if (distToPlayer < player.possessionRadius) { ball.controlledBy = player; }
+            teammates.forEach(tm => {
+                const distToTm = Math.hypot(tm.x - ball.x, tm.y - ball.y);
+                if (distToTm < tm.radius + ball.radius + 5) { ball.controlledBy = tm; tm.decisionTimeout = 90; }
+            });
+        }
+        
+        if (ball.controlledBy === player) {
+            let targetX = player.x;
+            let targetY = player.y;
+            const dribbleDistance = 35;
+            let hasMovement = keys.ArrowUp || keys.ArrowDown || keys.ArrowLeft || keys.ArrowRight;
+
+            if (hasMovement) {
+                let moveAngle = Math.atan2(
+                    (keys.ArrowDown ? 1 : 0) - (keys.ArrowUp ? 1 : 0),
+                    (keys.ArrowRight ? 1 : 0) - (keys.ArrowLeft ? 1 : 0)
+                );
+                targetX = player.x + Math.cos(moveAngle) * dribbleDistance;
+                targetY = player.y + Math.sin(moveAngle) * dribbleDistance;
+            }
+            ball.x += (targetX - ball.x) * 0.2;
+            ball.y += (targetY - ball.y) * 0.2;
+
+            if (keys[' ']) { // SHOOT
+                ball.controlledBy = null;
+                const angle = Math.atan2((homeGoal.y + homeGoal.height / 2) - player.y, homeGoal.x - player.x);
+                ball.speedX = Math.cos(angle) * 20;
+                ball.speedY = Math.sin(angle) * 20;
+                keys[' '] = false;
+            } else if (keys['c']) { // PASS
+                ball.controlledBy = null;
+                let closestTm = null, minDist = Infinity;
+                teammates.forEach(tm => {
+                    const dist = Math.hypot(player.x - tm.x, player.y - tm.y);
+                    if (dist < minDist) { minDist = dist; closestTm = tm; }
+                });
+                if (closestTm) {
+                    const angle = Math.atan2(closestTm.y - player.y, closestTm.x - player.x);
+                    ball.speedX = Math.cos(angle) * 15;
+                    ball.speedY = Math.sin(angle) * 15;
+                    currentMatchData.assists++;
+                }
+                keys['c'] = false;
+            }
+        } else if (ball.controlledBy && !ball.controlledBy.isPlayer) { // Teammate AI
+            let tm = ball.controlledBy;
+            tm.decisionTimeout--;
+            const angleToGoal = Math.atan2(homeGoal.y - tm.y, homeGoal.x - tm.x);
+            tm.x += Math.cos(angleToGoal) * (tm.speed * 0.8);
+            tm.y += Math.sin(angleToGoal) * (tm.speed * 0.8);
+            ball.x += (tm.x - ball.x) * 0.3; ball.y += (tm.y - ball.y) * 0.3;
+
+            if (tm.decisionTimeout <= 0) {
+                ball.controlledBy = null;
+                if (tm.y < canvas.height / 2 && Math.random() < 0.5) { // Shoot
+                    const angle = Math.atan2((homeGoal.y + homeGoal.height / 2) - tm.y, homeGoal.x - tm.x);
+                    ball.speedX = Math.cos(angle) * 18;
+                    ball.speedY = Math.sin(angle) * 18;
+                } else { // Pass back
+                    const angle = Math.atan2(player.y - tm.y, player.x - tm.x);
+                    ball.speedX = Math.cos(angle) * 15;
+                    ball.speedY = Math.sin(angle) * 15;
+                }
+            }
+        }
+        
+        ball.x += ball.speedX; ball.y += ball.speedY;
+        ball.speedX *= ball.friction; ball.speedY *= ball.friction;
+
+        teammates.forEach(tm => {
+            if (ball.controlledBy !== tm) {
+                const idealX = player.x + (tm.jerseyNumber === 8 ? -120 : 120);
+                const idealY = player.y - 90;
+                const angle = Math.atan2(idealY - tm.y, idealX - tm.x);
+                tm.x += Math.cos(angle) * (tm.speed * 0.3);
+                tm.y += Math.sin(angle) * (tm.speed * 0.3);
+            }
+        });
+        
+        const defenders = opponents.filter(o => o.type === 'defender');
+        if (defenders.length > 0) {
+            const target = ball.controlledBy ? ball.controlledBy : ball;
+            defenders.sort((a, b) => Math.hypot(a.x - target.x, a.y - target.y) - Math.hypot(b.x - target.x, b.y - target.y));
+            
+            const presser = defenders[0];
+            const angleToTarget = Math.atan2(target.y - presser.y, target.x - presser.x);
+            presser.x += Math.cos(angleToTarget) * presser.speed;
+            presser.y += Math.sin(angleToTarget) * presser.speed;
+
+            if (defenders.length > 1) {
+                const cover = defenders[1];
+                const coverTargetX = homeGoal.x;
+                const coverTargetY = homeGoal.y + 150;
+                const angleToCover = Math.atan2(coverTargetY - cover.y, coverTargetX - cover.x);
+                cover.x += Math.cos(angleToCover) * (cover.speed * 0.8);
+                cover.y += Math.sin(angleToCover) * (cover.speed * 0.8);
+            }
+        }
+        const keeper = opponents.find(o => o.type === 'goalkeeper');
+        if(keeper) {
+            keeper.x += (ball.x - keeper.x) * 0.08;
+            keeper.x = Math.max(homeGoal.x - homeGoal.width / 2, Math.min(homeGoal.x + homeGoal.width / 2, keeper.x));
+        }
+
+        opponents.forEach(opp => {
+            const distToPlayer = Math.hypot(player.x - opp.x, player.y - opp.y);
+            if (ball.controlledBy === player && distToPlayer < player.radius + opp.radius) { endMatchAction(false, 'tackle'); }
+        });
+        
+        if (ball.y < homeGoal.y + homeGoal.height && ball.y > homeGoal.y && ball.x > homeGoal.x - homeGoal.width / 2 && ball.x < homeGoal.x + homeGoal.width / 2) { 
+            endMatchAction(true, 'goal');
+        }
+        
+        const sidelineMargin = 5;
+        if (ball.x < sidelineMargin || ball.x > canvas.width - sidelineMargin || ball.y > canvas.height - sidelineMargin || ball.y < 0) {
+            endMatchAction(false, 'out_of_bounds');
+        }
+
+        draw();
+        gameLoop = requestAnimationFrame(updateGame);
+    }
+    
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // --- Draw Field ---
+        ctx.fillStyle = '#2c5432';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // --- Draw Field Markings ---
+        ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+        ctx.lineWidth = 2;
+
+        // Sidelines
+        ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
+
+        // Center Line & Circle
+        ctx.beginPath();
+        ctx.moveTo(5, canvas.height/2);
+        ctx.lineTo(canvas.width - 5, canvas.height/2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, canvas.height/2, 60, 0, 2*Math.PI);
+        ctx.stroke();
+
+        // Penalty area
+        const penaltyBoxWidth = Math.min(400, canvas.width * 0.8);
+        ctx.strokeRect((canvas.width - penaltyBoxWidth) / 2, 5, penaltyBoxWidth, 120);
+
+        // Goal
+        ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 3;
+        ctx.strokeRect(homeGoal.x - homeGoal.width/2, homeGoal.y - 10, homeGoal.width, homeGoal.height);
+        
+        drawBall(ball);
+        opponents.forEach(drawPlayer);
+        teammates.forEach(tm => drawPlayer(tm));
+        drawPlayer(player);
+    }
+
+    function drawWithShadow(drawFunction) {
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetY = 5;
+        drawFunction();
+        ctx.restore();
+    }
+
+    function drawBall(b) {
+        drawWithShadow(() => {
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        });
+    }
+    
+    function drawPlayer(entity) {
+        drawWithShadow(() => {
+            let teamColor = opponentTeamColor;
+            if (entity.isPlayer || teammates.includes(entity)) {
+                teamColor = gameState.team.color || '#3498db';
+            } else if (entity.type === 'goalkeeper') {
+                teamColor = '#333333';
+            }
+            
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(entity.x, entity.y, entity.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = teamColor;
+            ctx.beginPath();
+            ctx.arc(entity.x, entity.y, entity.radius * 0.75, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = teamColor.toLowerCase() === '#ffffff' ? 'black' : 'white';
+            ctx.font = 'bold 12px Inter';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const number = entity.isPlayer ? gameState.jerseyNumber : entity.jerseyNumber;
+            ctx.fillText(number, entity.x, entity.y);
+            
+            if(entity.isPlayer) {
+                if (ball.controlledBy !== player) {
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(entity.x, entity.y, entity.possessionRadius, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                ctx.beginPath();
+                ctx.moveTo(entity.x, entity.y - entity.radius - 6);
+                ctx.lineTo(entity.x - 7, entity.y - entity.radius - 14);
+                ctx.lineTo(entity.x + 7, entity.y - entity.radius - 14);
+                ctx.closePath();
+                ctx.fillStyle = '#f1c40f';
+                ctx.fill();
+            }
+        });
+    }
+    
+    function resizeCanvas() {
+        const parent = matchGameOverlay;
+        canvas.width = parent.clientWidth;
+        canvas.height = parent.clientHeight;
+        if (homeGoal) { 
+            homeGoal.width = canvas.width * 0.4; 
+            homeGoal.x = canvas.width / 2;
+        }
+    }
+    
+    // --- MOBIL IRÁNYÍTÓK ---
+    const joystickZone = document.getElementById('joystick-zone');
+    const joystickHandle = document.getElementById('joystick-handle');
+    const shootBtn = document.getElementById('shoot-btn');
+    const passBtn = document.getElementById('pass-btn');
+    let joystickStart = {};
+
+    function handleJoystickStart(e) { e.preventDefault(); const touch = e.changedTouches[0]; joystickStart = { x: touch.clientX, y: touch.clientY }; }
+    function handleJoystickMove(e) { e.preventDefault(); const touch = e.changedTouches[0]; updateJoystick({ x: touch.clientX, y: touch.clientY }); }
+    function handleJoystickEnd(e) { e.preventDefault(); keys.ArrowUp = keys.ArrowDown = keys.ArrowLeft = keys.ArrowRight = false; joystickHandle.style.transform = `translate(0px, 0px)`;}
+    function updateJoystick(current) {
+        const dx = current.x - joystickStart.x;
+        const dy = current.y - joystickStart.y;
+        const angle = Math.atan2(dy, dx);
+        const distance = Math.min(32, Math.sqrt(dx * dx + dy * dy));
+        const x = distance * Math.cos(angle);
+        const y = distance * Math.sin(angle);
+        joystickHandle.style.transform = `translate(${x}px, ${y}px)`;
+        const deadZone = 10;
+        keys.ArrowUp = dy < -deadZone; keys.ArrowDown = dy > deadZone;
+        keys.ArrowLeft = dx < -deadZone; keys.ArrowRight = dx > deadZone;
+    }
+    const handleShoot = (e) => { e.preventDefault(); keys[' '] = true; setTimeout(() => keys[' '] = false, 100); };
+    const handlePass = (e) => { e.preventDefault(); keys['c'] = true; setTimeout(() => keys['c'] = false, 100); };
+    
+    function setupMobileControls() {
+        joystickZone.addEventListener('touchstart', handleJoystickStart, {passive: false});
+        joystickZone.addEventListener('touchmove', handleJoystickMove, {passive: false});
+        joystickZone.addEventListener('touchend', handleJoystickEnd, {passive: false});
+        shootBtn.addEventListener('touchstart', handleShoot, {passive: false});
+        passBtn.addEventListener('touchstart', handlePass, {passive: false});
+    }
+
+    function removeMobileControls() {
+        joystickZone.removeEventListener('touchstart', handleJoystickStart);
+        joystickZone.removeEventListener('touchmove', handleJoystickMove);
+        joystickZone.removeEventListener('touchend', handleJoystickEnd);
+        shootBtn.removeEventListener('touchstart', handleShoot);
+        passBtn.removeEventListener('touchstart', handlePass);
+    }
+    
+    // --- UI FUNKCIÓK ÉS ESEMÉNY FIGYELŐK ---
+    function showMainHub() {
+        document.querySelectorAll('.overlay, .character-creator-container').forEach(o => o.classList.add('hidden'));
+        document.getElementById('mainHub').classList.remove('hidden');
+        updateUI();
+    }
+    
+    const allScreens = document.querySelectorAll('.screen');
+    const allNavButtons = document.querySelectorAll('.nav-btn');
+
+    function showScreen(targetScreenId) {
+        allScreens.forEach(screen => screen.classList.add('hidden'));
+        document.getElementById(targetScreenId)?.classList.remove('hidden');
+        updateNavButtons(targetScreenId);
+    }
+    function updateNavButtons(activeScreenId) { allNavButtons.forEach(btn => { btn.classList.toggle('active', btn.dataset.screen === activeScreenId); }); }
+    
+    function updateUI() {
+        updateHeaderUI();
+        updateDashboardUI();
+        updateLeagueTable();
+        updateProfileUI();
+        updateTransferUI();
+        updateNavButtons('dashboardScreen');
+    }
+    function updateHeaderUI() { document.getElementById('headerPlayerName').textContent = gameState.playerName; document.getElementById('headerPlayerBalance').textContent = (gameState.money || 0).toLocaleString(); }
+    function updateDashboardUI() {
+        document.getElementById('hubPlayerName').textContent = gameState.playerName;
+        document.getElementById('hubPlayerTeamName').textContent = gameState.team.name;
+        document.getElementById('hubPlayerTeamLogo').src = gameState.team.logo;
+        document.getElementById('hubPlayerRating').textContent = gameState.rating;
+        
+        if (gameState.schedule && gameState.schedule[gameState.currentMatchday]) { 
+            const nextFixture = gameState.schedule[gameState.currentMatchday].find(f => f.home === gameState.team.name || f.away === gameState.team.name); 
+            if(nextFixture) { 
+                document.getElementById('hubNextOpponent').textContent = nextFixture.home === gameState.team.name ? nextFixture.away : nextFixture.home; 
+            }
+        }
+        
+        const playerLeaguePosition = gameState.league.sort((a, b) => b.points - a.points || (b.gd - a.gd)).findIndex(t => t.name === gameState.team.name) + 1;
+        document.getElementById('hubLeaguePosition').textContent = `${playerLeaguePosition}.`;
+        document.getElementById('hubMatchday').textContent = `Forduló: ${gameState.currentMatchday} / ${gameState.schedule.length}`;
+    }
+    
+    function updateLeagueTable() {
+        const tableBody = document.getElementById('leagueTableBody'); 
+        if (!tableBody) return; 
+        tableBody.innerHTML = ''; 
+        const leagueClone = [...(gameState.league || [])]; 
+        leagueClone.sort((a, b) => b.points - a.points || (b.gd - a.gd)); 
+        leagueClone.forEach((team, index) => { 
+            const row = document.createElement('tr');
+            row.className = 'league-table-row';
+            if(team.name === gameState.team.name) row.classList.add('player-team'); 
+            row.innerHTML = `<td>${index + 1}</td><td>${team.name}</td><td class="hide-on-mobile">${team.played}</td><td class="hide-on-mobile">${team.wins}</td><td class="hide-on-mobile">${team.draws}</td><td class="hide-on-mobile">${team.losses}</td><td>${team.gd}</td><td><strong>${team.points}</strong></td>`;
+            tableBody.appendChild(row);
+        });
+    }
+    
+    function updateProfileUI() { 
+        document.getElementById('profilePlayerName').textContent = `${gameState.playerName} Profilja`;
+        document.getElementById('profileGoals').textContent = gameState.goals || 0;
+        document.getElementById('profileAssists').textContent = gameState.assists || 0;
+        document.getElementById('profileMatches').textContent = gameState.matchesPlayed || 0;
+        document.getElementById('profileTrophies').textContent = (gameState.trophies || []).length;
+    }
+    
+    function generateSchedule(teamNames) {
+        const schedule = [];
+        const teams = [...teamNames];
+        if (teams.length % 2 !== 0) { teams.push(null); }
+        const numRounds = teams.length - 1;
+        const numMatchesPerRound = teams.length / 2;
+        for (let round = 0; round < numRounds; round++) {
+            const roundMatches = [];
+            for (let i = 0; i < numMatchesPerRound; i++) {
+                const home = teams[i];
+                const away = teams[teams.length - 1 - i];
+                if (home && away) { roundMatches.push({ home, away }); }
+            }
+            schedule.push(roundMatches);
+            const lastTeam = teams.pop();
+            teams.splice(1, 0, lastTeam);
+        }
+        const secondHalf = schedule.map(round => round.map(({ home, away }) => ({ home: away, away: home })));
+        return [...schedule, ...secondHalf];
+    }
+    
+    allNavButtons.forEach(button => button.addEventListener('click', () => showScreen(button.dataset.screen)));
+    document.getElementById('profileBtn')?.addEventListener('click', () => showScreen('profileScreen'));
+    document.getElementById('playMatchBtn')?.addEventListener('click', playNextMatch);
+    document.getElementById('matchResultContinueBtn')?.addEventListener('click', showMainHub);
+    document.getElementById('sim-pause-btn')?.addEventListener('click', togglePause);
+
+    window.addEventListener('resize', resizeCanvas);
+    main();
+});
+    </script>
 </body>
 </html>
-
