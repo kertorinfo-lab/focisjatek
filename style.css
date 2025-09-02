@@ -13,6 +13,11 @@
 --goal-color: #9cd4ff;
 --goal-shadow-color: #5ab1ff;
 --net-color: rgba(255, 255, 255, 0.4);
+--event-goal-color: #2ecc71;
+--event-star-color: #f1c40f;
+--event-running-color: #a0a0a0;
+--event-stopwatch-color: #e74c3c;
+--diamond-color: #00bcd4;
 }
 
 body {
@@ -460,6 +465,61 @@ padding-top: 5px;
 .stat-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 25px; text-align: center; }
 .stat-card .stat-value { font-size: 2.5em; font-weight: 900; color: var(--primary-color); }
 .stat-card .stat-label { font-size: 1em; color: var(--text-muted); margin-top: 5px; }
+
+.profile-stats-container {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 25px;
+margin-bottom: 25px;
+}
+
+.profile-upgrade-card {
+background: var(--card-bg);
+border: 1px solid var(--border-color);
+border-radius: 16px;
+padding: 25px;
+text-align: center;
+}
+
+.upgrade-grid {
+display: flex;
+flex-direction: column;
+gap: 15px;
+margin-top: 20px;
+}
+
+.upgrade-item {
+display: flex;
+justify-content: space-between;
+align-items: center;
+background: rgba(0,0,0,0.2);
+border-radius: 8px;
+padding: 10px 15px;
+}
+
+.upgrade-info {
+text-align: left;
+}
+
+.upgrade-info h4 {
+margin: 0;
+font-weight: 600;
+}
+
+.upgrade-info p {
+margin: 0;
+font-size: 0.9em;
+color: var(--text-muted);
+}
+
+.upgrade-cost {
+display: flex;
+align-items: center;
+gap: 8px;
+font-weight: 700;
+color: var(--diamond-color);
+}
+
 .bottom-bar { display: none; }
 
 /* === MOBIL NÉZET === */
@@ -476,4 +536,9 @@ body { height: -webkit-fill-available; }
 .screen { padding: 15px; }
 .dashboard-grid { grid-template-columns: 1fr; }
 .character-creator-container { width: 100%; height: 100%; border-radius: 0; }
+
+.profile-stats-container {
+    grid-template-columns: 1fr;
+}
+
 }
