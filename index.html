@@ -12,6 +12,17 @@
     <div class="loading-screen" id="loadingScreen">
         <svg class="football-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#ffffff" d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM152 352h32v32c0 17.7-14.3 32-32 32s-32-14.3-32-32V320c0-17.7 14.3-32 32-32h64c17.7 0 32 14.3 32 32v64c0 17.7-14.3 32-32 32s-32-14.3-32-32V352H152zM280 288c-17.7 0-32 14.3-32 32v96c0 17.7 14.3 32 32 32h96c17.7 0 32-14.3 32-32V320c0-17.7-14.3-32-32-32H280zm64-224c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32h64c17.7 0 32-14.3 32-32V96c0-17.7-14.3-32-32-32H344zM120 96c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32s32-14.3 32-32V128c0-17.7-14.3-32-32-32zm88 64c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32h64c17.7 0 32-14.3 32-32V192c0-17.7-14.3-32-32-32H208z"/></svg>
         <h1 class="loading-title">Football Legend</h1>
+        <div class="loading-bar-container">
+            <div class="loading-bar" id="loadingBar"></div>
+        </div>
+    </div>
+
+    <div class="main-menu-container hidden" id="mainMenu">
+        <h1 class="menu-title">Football Legend</h1>
+        <div class="menu-buttons">
+            <button class="button next-btn" id="newGameBtn">Új karrier indítása</button>
+            <button class="button prev-btn" id="loadGameBtn" style="pointer-events: none;">Folytatás</button>
+        </div>
     </div>
 
     <div class="character-creator-container hidden" id="characterCreator">
@@ -175,6 +186,7 @@
                                 </div>
                             </div>
                             <p><strong>Értékelés:</strong> <span id="hubPlayerRating">85</span></p>
+                            <p><strong>Életkor:</strong> <span id="hubPlayerAge">17</span></p>
                         </div>
                         <div class="dashboard-card">
                             <div class="card-header">
@@ -217,6 +229,10 @@
                         <div class="stat-card"><div class="stat-value" id="profileMatches">0</div><div class="stat-label">Játszott Meccsek</div></div>
                         <div class="stat-card"><div class="stat-value" id="profileTrophies">0</div><div class="stat-label">Trófeák</div></div>
                     </div>
+                    <div class="transfer-card" style="margin-top: 25px;">
+                        <h2>Képességfejlesztés</h2>
+                        <p style="text-align: center; color: var(--text-muted);">Gyémántokért fejlesztheted a játékosod képességeit. A funkció a következő frissítésben érkezik!</p>
+                    </div>
                 </div>
                 <div id="transferScreen" class="screen hidden">
                     <div class="transfer-card">
@@ -241,6 +257,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let gameState = {};
 
     // --- UI ELEMEK INICIALIZÁLÁSA ---
+    const loadingScreen = document.getElementById('loadingScreen');
+    const mainMenu = document.getElementById('mainMenu');
+    const characterCreator = document.getElementById('characterCreator');
     const matchSimulatorOverlay = document.getElementById('matchSimulatorOverlay');
     const matchGameOverlay = document.getElementById('matchGameOverlay');
     const matchResultOverlay = document.getElementById('matchResultOverlay');
@@ -257,6 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let opponentTeamColor = '#e74c3c';
     let selectedLeague = null;
     let selectedNationality = 'hu';
+    let initialLoading = true;
 
     // --- FRISSÍTETT ÉS KIEGÉSZÍTETT BAJNOKSÁG ÉS CSAPAT ADATOK ---
     const LEAGUES = {
@@ -410,32 +430,58 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- FŐ INICIALIZÁLÁS ---
     function main() {
         const loadedData = loadGame();
-        if (loadedData && loadedData.playerName) {
-            const defaultState = { money: 0, goals: 0, assists: 0, matchesPlayed: 0, trophies: [], clubHistory: [], currentMatchday: 0, schedule: [], jerseyNumber: 10, transferOffers: [] };
-            gameState = { ...defaultState, ...loadedData };
-            const currentLeagueTeams = LEAGUES[gameState.leagueName];
-            if (!currentLeagueTeams) {
-                console.error("League data not found for saved game. Starting new.");
-                initializeCharacterCreator();
-                document.getElementById('characterCreator').classList.remove('hidden');
-            } else {
-                if (!gameState.schedule || gameState.schedule.length === 0 || gameState.currentMatchday >= gameState.schedule.length) {
-                    gameState.schedule = generateSchedule(currentLeagueTeams.map(t => t.name));
-                    gameState.currentMatchday = 0;
-                    gameState.league = currentLeagueTeams.map(t => ({ name: t.name, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0 }));
-                    saveGame(gameState);
+        
+        const loadGameBtn = document.getElementById('loadGameBtn');
+        if (loadedData) {
+            loadGameBtn.style.pointerEvents = 'auto';
+            loadGameBtn.addEventListener('click', () => {
+                const defaultState = { money: 0, goals: 0, assists: 0, matchesPlayed: 0, trophies: [], clubHistory: [], currentMatchday: 0, schedule: [], jerseyNumber: 10, transferOffers: [], age: 17 };
+                gameState = { ...defaultState, ...loadedData };
+                const currentLeagueTeams = LEAGUES[gameState.leagueName];
+                if (!currentLeagueTeams) {
+                    console.error("League data not found for saved game. Starting new.");
+                    showMainMenu();
+                } else {
+                    if (!gameState.schedule || gameState.schedule.length === 0 || gameState.currentMatchday >= gameState.schedule.length) {
+                        gameState.schedule = generateSchedule(currentLeagueTeams.map(t => t.name));
+                        gameState.currentMatchday = 0;
+                        gameState.league = currentLeagueTeams.map(t => ({ name: t.name, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0 }));
+                        saveGame(gameState);
+                    }
+                    showMainHub();
                 }
-                showMainHub();
-            }
+            });
         } else {
-            initializeCharacterCreator();
-            document.getElementById('characterCreator').classList.remove('hidden');
+            loadGameBtn.style.opacity = 0.5;
+            loadGameBtn.style.cursor = 'not-allowed';
         }
-        setTimeout(() => { document.getElementById('loadingScreen').classList.add('fade-out'); }, 500);
+
+
+        let progress = 0;
+        const loadingBar = document.getElementById('loadingBar');
+        const loadingInterval = setInterval(() => {
+            progress += 5;
+            loadingBar.style.width = `${progress}%`;
+            if (progress >= 100) {
+                clearInterval(loadingInterval);
+                loadingScreen.classList.add('fade-out');
+                setTimeout(() => {
+                    loadingScreen.classList.add('hidden');
+                    showMainMenu();
+                }, 500);
+            }
+        }, 50);
+    }
+
+    function showMainMenu() {
+        mainMenu.classList.remove('hidden');
     }
 
     // --- KARAKTERLÉTREHOZÓ ---
     function initializeCharacterCreator() {
+        mainMenu.classList.add('hidden');
+        characterCreator.classList.remove('hidden');
+        
         const formCarousel = document.getElementById('formCarousel');
         const totalSteps = formCarousel.children.length;
         let currentStep = 0;
@@ -444,28 +490,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function updateCarousel() { formCarousel.style.transform = `translateX(-${currentStep * 100}%)`; }
         
-        document.querySelectorAll('.next-btn').forEach(btn => btn.addEventListener('click', () => {
+        document.querySelectorAll('.next-btn').forEach(btn => btn.addEventListener('click', (e) => {
+            e.stopPropagation();
             if (currentStep === 0 && playerNameInput.value.trim() === "") return;
             if (currentStep === 1 && selectedNationality === null) return;
             if (currentStep === 2 && selectedLeague === null) return;
             if (currentStep < totalSteps - 1) { 
                 currentStep++;
-                if (currentStep === totalSteps - 1) {
+                if (currentStep === 3) {
                     generateContractOffers();
                 }
                 updateCarousel();
             }
         }));
         
-        document.querySelectorAll('.prev-btn').forEach(btn => btn.addEventListener('click', () => {
+        document.querySelectorAll('.prev-btn').forEach(btn => btn.addEventListener('click', (e) => {
+            e.stopPropagation();
             if (currentStep > 0) { currentStep--; updateCarousel(); }
         }));
 
         // Nationality selector
         const nationalitySelectBtn = document.getElementById('nationalitySelect');
         const nationalityOptions = document.getElementById('nationalityOptions');
-        nationalitySelectBtn.addEventListener('click', () => {
+        nationalitySelectBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             nationalityOptions.classList.toggle('hidden');
+        });
+        document.addEventListener('click', () => {
+            nationalityOptions.classList.add('hidden');
         });
         nationalityOptions.addEventListener('click', (e) => {
             if (e.target.closest('.option')) {
@@ -478,6 +530,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // League selector
+        leagueSelectGrid.innerHTML = '';
         Object.keys(LEAGUES).forEach(leagueName => {
             const button = document.createElement('button');
             button.className = 'league-select-btn';
@@ -498,18 +551,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const leagueTeams = LEAGUES[selectedLeague];
         const smallTeams = leagueTeams.filter(t => t.strength <= 70);
         
-        if (smallTeams.length < 2) {
-             const offers = getRandomElement(leagueTeams, 2);
-             showOffers(offers);
-             return;
-        }
-
         const offers = [];
-        const chosenTeams = [];
+        const chosenTeams = new Set();
         while (offers.length < 2) {
-            const team = getRandomElement(smallTeams);
-            if (!chosenTeams.includes(team.name)) {
-                chosenTeams.push(team.name);
+            const team = getRandomElement(smallTeams.length > 0 ? smallTeams : leagueTeams);
+            if (!chosenTeams.has(team.name)) {
+                chosenTeams.add(team.name);
                 offers.push(team);
             }
         }
@@ -545,6 +592,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         gameState = {
             playerName: document.getElementById('playerName').value || "Játékos",
+            age: 17,
+            nationality: selectedNationality,
             leagueName: selectedLeague,
             rating: 60,
             team: chosenTeam,
@@ -653,8 +702,9 @@ document.addEventListener('DOMContentLoaded', () => {
         timeline.innerHTML = '';
         currentMatchData.events.forEach(event => {
             const eventDiv = document.createElement('div');
-            eventDiv.className = 'event';
-            eventDiv.innerHTML = `<i class="fas ${event.icon}"></i><span class="time">${String(event.time).padStart(2, '0')}'</span><span class="comment">${event.comment}</span>`;
+            eventDiv.className = `event-item ${event.icon.replace('fa-', '')}`;
+            eventDiv.innerHTML = `<div class="event-icon"><i class="fas ${event.icon}"></i></div>
+                                  <div class="event-text"><span class="time">${String(event.time).padStart(2, '0')}'</span> <span class="comment">${event.comment}</span></div>`;
             timeline.appendChild(eventDiv);
         });
     }
@@ -1265,7 +1315,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- UI FUNKCIÓK ÉS ESEMÉNY FIGYELŐK ---
     function showMainHub() {
-        document.querySelectorAll('.overlay, .character-creator-container').forEach(o => o.classList.add('hidden'));
+        document.querySelectorAll('.overlay, .character-creator-container, .main-menu-container').forEach(o => o.classList.add('hidden'));
         document.getElementById('mainHub').classList.remove('hidden');
         updateUI();
     }
@@ -1294,6 +1344,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('hubPlayerTeamName').textContent = gameState.team.name;
         document.getElementById('hubPlayerTeamLogo').src = gameState.team.logo;
         document.getElementById('hubPlayerRating').textContent = gameState.rating;
+        document.getElementById('hubPlayerAge').textContent = gameState.age;
         
         if (gameState.schedule && gameState.schedule[gameState.currentMatchday]) { 
             const nextFixture = gameState.schedule[gameState.currentMatchday].find(f => f.home === gameState.team.name || f.away === gameState.team.name); 
@@ -1356,6 +1407,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('playMatchBtn')?.addEventListener('click', playNextMatch);
     document.getElementById('matchResultContinueBtn')?.addEventListener('click', showMainHub);
     document.getElementById('sim-pause-btn')?.addEventListener('click', togglePause);
+    document.getElementById('newGameBtn')?.addEventListener('click', initializeCharacterCreator);
+    document.getElementById('loadGameBtn')?.addEventListener('click', () => {
+        // Implement load game logic
+        alert("A mentett játék betöltése még nem érhető el.");
+    });
 
     window.addEventListener('resize', resizeCanvas);
     main();
