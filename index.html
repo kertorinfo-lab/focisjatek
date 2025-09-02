@@ -29,25 +29,34 @@
                     <div class="select-button" id="nationalitySelect">
                         <div class="selected-option" data-value="hu"><img src="https://flagcdn.com/w40/hu.png" alt="Magyar zászló"><span>Magyar</span></div><span>&#9660;</span>
                     </div>
+                    <div class="select-options hidden" id="nationalityOptions">
+                        <div class="option" data-value="hu"><img src="https://flagcdn.com/w40/hu.png" alt="Magyar zászló"><span>Magyar</span></div>
+                        <div class="option" data-value="es"><img src="https://flagcdn.com/w40/es.png" alt="Spanyol zászló"><span>Spanyol</span></div>
+                        <div class="option" data-value="de"><img src="https://flagcdn.com/w40/de.png" alt="Német zászló"><span>Német</span></div>
+                        <div class="option" data-value="fr"><img src="https://flagcdn.com/w40/fr.png" alt="Francia zászló"><span>Francia</span></div>
+                        <div class="option" data-value="it"><img src="https://flagcdn.com/w40/it.png" alt="Olasz zászló"><span>Olasz</span></div>
+                        <div class="option" data-value="br"><img src="https://flagcdn.com/w40/br.png" alt="Brazil zászló"><span>Brazil</span></div>
+                        <div class="option" data-value="ar"><img src="https://flagcdn.com/w40/ar.png" alt="Argentin zászló"><span>Argentin</span></div>
+                        <div class="option" data-value="gb"><img src="https://flagcdn.com/w40/gb.png" alt="Angol zászló"><span>Angol</span></div>
+                    </div>
                 </div>
                 <div class="navigation-buttons"><button class="button prev-btn">&larr; Vissza</button><button class="button next-btn">Tovább &rarr;</button></div>
             </div>
             <div class="form-step">
-                <h2>Állítsd be a kezdő erőnléted</h2>
-                <p class="form-description">Ez határozza meg a kezdő képességeidet a pályán.</p>
-                <div class="slider-group">
-                    <div id="sliderValue" class="slider-value">60</div>
-                    <input type="range" id="potentialSlider" min="20" max="100" value="60">
+                <h2>Válaszd ki a bajnokságot</h2>
+                <p class="form-description">Válassz egy bajnokságot, ahol elindítod a karriered.</p>
+                <div class="league-select-grid" id="leagueSelectGrid">
+                    <!-- Dinamikusan generálva JS-ből -->
                 </div>
                 <div class="navigation-buttons"><button class="button prev-btn">&larr; Vissza</button><button class="button next-btn">Tovább &rarr;</button></div>
             </div>
             <div class="form-step">
-                <h2>Készen állsz a nagy lépésre?</h2>
-                <p style="text-align: center; color: var(--text-muted);">Egy top csapat szerződést ajánl. Fogadd el, hogy elindítsd a karriered!</p>
-                <div class="navigation-buttons">
-                    <button class="button prev-btn">&larr; Vissza</button>
-                    <button class="button submit-btn" id="startGameButton">Szerződés Aláírása</button>
+                <h2>Aláírnád a szerződést?</h2>
+                <p style="text-align: center; color: var(--text-muted);">Válassz a két felajánlott csapat közül, és indítsd el a karriered!</p>
+                <div class="contract-offers-container" id="contractOffersContainer">
+                    <!-- Ajánlatok generálása JS-ből -->
                 </div>
+                <div class="navigation-buttons" style="justify-content: flex-start;"><button class="button prev-btn">&larr; Vissza</button></div>
             </div>
         </div>
     </div>
@@ -247,147 +256,143 @@ document.addEventListener('DOMContentLoaded', () => {
     let isPaused = false;
     let opponentTeamColor = '#e74c3c';
     let selectedLeague = null;
-    let selectedNationality = 'hu'; // Alapértelmezett nemzetiség
+    let selectedNationality = 'hu';
 
     // --- FRISSÍTETT ÉS KIEGÉSZÍTETT BAJNOKSÁG ÉS CSAPAT ADATOK ---
     const LEAGUES = {
         'Premier League': [
-            { name: 'Manchester City', strength: 95, color: '#6CABDD' },
-            { name: 'Arsenal', strength: 93, color: '#EF0107' },
-            { name: 'Liverpool', strength: 92, color: '#C8102E' },
-            { name: 'Chelsea', strength: 89, color: '#034694' },
-            { name: 'Tottenham Hotspur', strength: 88, color: '#132257' },
-            { name: 'Manchester Utd', strength: 87, color: '#DA291C' },
-            { name: 'Newcastle Utd', strength: 86, color: '#241F20' },
-            { name: 'Aston Villa', strength: 85, color: '#670E36' },
-            { name: 'Brighton', strength: 83, color: '#0057B8' },
-            { name: 'West Ham Utd', strength: 82, color: '#7A263A' },
-            { name: 'Everton', strength: 81, color: '#003399' },
-            { name: 'Wolverhampton', strength: 80, color: '#FDB913' },
-            { name: 'Fulham', strength: 79, color: '#CCCCCC' },
-            { name: 'Crystal Palace', strength: 78, color: '#1B458F' },
-            { name: 'Brentford', strength: 77, color: '#C70000' },
-            { name: 'Bournemouth', strength: 76, color: '#B50024' },
-            { name: 'Nottingham Forest', strength: 75, color: '#DD0000' },
-            { name: 'Ipswich Town', strength: 73, color: '#003399' },
-            { name: 'Leicester City', strength: 74, color: '#0053A0' },
-            { name: 'Southampton', strength: 72, color: '#D71920' },
+            { name: 'Manchester City', strength: 95, color: '#6CABDD', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/e/eb/Manchester_City_FC_logo.svg/1200px-Manchester_City_FC_logo.svg.png' },
+            { name: 'Arsenal', strength: 93, color: '#EF0107', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/53/Arsenal_FC.svg/1200px-Arsenal_FC.svg.png' },
+            { name: 'Liverpool', strength: 92, color: '#C8102E', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/0/0c/Liverpool_FC.svg/1200px-Liverpool_FC.svg.png' },
+            { name: 'Chelsea', strength: 89, color: '#034694', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/c/cc/Chelsea_FC.svg/1200px-Chelsea_FC.svg.png' },
+            { name: 'Tottenham Hotspur', strength: 88, color: '#132257', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/b4/Tottenham_Hotspur.svg/1200px-Tottenham_Hotspur.svg.png' },
+            { name: 'Manchester Utd', strength: 87, color: '#DA291C', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/7/7a/Manchester_United_FC_crest.svg/1200px-Manchester_United_FC_crest.svg.png' },
+            { name: 'Newcastle Utd', strength: 86, color: '#241F20', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Newcastle_United_F.C._logo.svg/1200px-Newcastle_United_F.C._logo.svg.png' },
+            { name: 'Aston Villa', strength: 85, color: '#670E36', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/9/9f/Aston_Villa_FC_logo.svg/1200px-Aston_Villa_FC_logo.svg.png' },
+            { name: 'Brighton', strength: 83, color: '#0057B8', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/8/87/Brighton_%26_Hove_Albion_logo.svg/1200px-Brighton_%26_Hove_Albion_logo.svg.png' },
+            { name: 'West Ham Utd', strength: 82, color: '#7A263A', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/c/c2/West_Ham_United_FC_logo.svg/1200px-West_Ham_United_FC_logo.svg.png' },
+            { name: 'Everton', strength: 81, color: '#003399', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/7/7c/Everton_FC_logo.svg/1200px-Everton_FC_logo.svg.png' },
+            { name: 'Wolverhampton', strength: 80, color: '#FDB913', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/fd/Wolverhampton_Wanderers.svg/1200px-Wolverhampton_Wanderers.svg.png' },
+            { name: 'Fulham', strength: 79, color: '#CCCCCC', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/e/e0/Fulham_FC_logo.svg/1200px-Fulham_FC_logo.svg.png' },
+            { name: 'Crystal Palace', strength: 78, color: '#1B458F', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/Crystal_Palace_FC_logo.svg/1200px-Crystal_Palace_FC_logo.svg.png' },
+            { name: 'Brentford', strength: 77, color: '#C70000', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f8/Brentford_FC_crest.svg/1200px-Brentford_FC_crest.svg.png' },
+            { name: 'Bournemouth', strength: 76, color: '#B50024', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/3/30/A.F.C._Bournemouth_%282013%29.svg/1200px-A.F.C._Bournemouth_%282013%29.svg.png' },
+            { name: 'Nottingham Forest', strength: 75, color: '#DD0000', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/e/e5/Nottingham_Forest_F.C._logo.svg/1200px-Nottingham_Forest_F.C._logo.svg.png' },
+            { name: 'Ipswich Town', strength: 73, color: '#003399', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/e/ef/Ipswich_Town_FC_logo.svg/1200px-Ipswich_Town_FC_logo.svg.png' },
+            { name: 'Leicester City', strength: 74, color: '#0053A0', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2d/Leicester_City_F.C._logo.svg/1200px-Leicester_City_F.C._logo.svg.png' },
+            { name: 'Southampton', strength: 72, color: '#D71920', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/c/c9/Southampton_FC.svg/1200px-Southampton_FC.svg.png' },
         ],
         'La Liga': [
-            { name: 'Real Madrid', strength: 96, color: '#FEBE10' },
-            { name: 'FC Barcelona', strength: 90, color: '#A50044' },
-            { name: 'Atlético Madrid', strength: 88, color: '#CB3524' },
-            { name: 'Sevilla', strength: 85, color: '#D31414' },
-            { name: 'Villarreal', strength: 84, color: '#005995' },
-            { name: 'Real Sociedad', strength: 83, color: '#0E73BC' },
-            { name: 'Athletic Bilbao', strength: 82, color: '#E4002B' },
-            { name: 'Valencia', strength: 80, color: '#F6872D' },
-            { name: 'Real Betis', strength: 79, color: '#00A35B' },
-            { name: 'Celta Vigo', strength: 78, color: '#88C0E7' },
-            { name: 'Alavés', strength: 77, color: '#000000' },
-            { name: 'Girona', strength: 76, color: '#E7002C' },
-            { name: 'Getafe', strength: 75, color: '#004792' },
-            { name: 'Osasuna', strength: 74, color: '#BA1626' },
-            { name: 'Mallorca', strength: 73, color: '#BA001F' },
-            { name: 'Rayo Vallecano', strength: 72, color: '#D92323' },
-            { name: 'Leganés', strength: 70, color: '#0044A9' },
-            { name: 'Espanyol', strength: 69, color: '#00A35B' },
-            { name: 'Valladolid', strength: 68, color: '#5E206A' },
-            { name: 'Las Palmas', strength: 71, color: '#FFCE00' },
+            { name: 'Real Madrid', strength: 96, color: '#FEBE10', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/1200px-Real_Madrid_CF.svg.png' },
+            { name: 'FC Barcelona', strength: 90, color: '#A50044', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/1200px-FC_Barcelona_%28crest%29.svg.png' },
+            { name: 'Atlético Madrid', strength: 88, color: '#CB3524', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f4/Atletico_Madrid_2017_logo.svg/1200px-Atletico_Madrid_2017_logo.svg.png' },
+            { name: 'Sevilla', strength: 85, color: '#D31414', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/3/35/Sevilla_FC_logo.svg/1200px-Sevilla_FC_logo.svg.png' },
+            { name: 'Villarreal', strength: 84, color: '#005995', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/7/70/Villarreal_CF_logo.svg/1200px-Villarreal_CF_logo.svg.png' },
+            { name: 'Real Sociedad', strength: 83, color: '#0E73BC', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/52/Real_Sociedad_logo.svg/1200px-Real_Sociedad_logo.svg.png' },
+            { name: 'Athletic Bilbao', strength: 82, color: '#E4002B', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/3/38/Athletic_Bilbao_logo.svg/1200px-Athletic_Bilbao_logo.svg.png' },
+            { name: 'Valencia', strength: 80, color: '#F6872D', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/c/c3/Valencia_CF_logo.svg/1200px-Valencia_CF_logo.svg.png' },
+            { name: 'Real Betis', strength: 79, color: '#00A35B', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/1/1a/Real_Betis_logo.svg/1200px-Real_Betis_logo.svg.png' },
+            { name: 'Celta Vigo', strength: 78, color: '#88C0E7', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/59/Celta_de_Vigo_logo.svg/1200px-Celta_de_Vigo_logo.svg.png' },
+            { name: 'Alavés', strength: 77, color: '#000000', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/d/d7/Deportivo_Alav%C3%A9s_logo.svg/1200px-Deportivo_Alav%C3%A9s_logo.svg.png' },
+            { name: 'Girona', strength: 76, color: '#E7002C', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/3/31/Girona_FC_logo.svg/1200px-Girona_FC_logo.svg.png' },
+            { name: 'Getafe', strength: 75, color: '#004792', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/8/82/Getafe_CF_logo.svg/1200px-Getafe_CF_logo.svg.png' },
+            { name: 'Osasuna', strength: 74, color: '#BA1626', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/c/c5/CA_Osasuna_logo.svg/1200px-CA_Osasuna_logo.svg.png' },
+            { name: 'Mallorca', strength: 73, color: '#BA001F', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/c/c8/RCD_Mallorca_logo.svg/1200px-RCD_Mallorca_logo.svg.png' },
+            { name: 'Rayo Vallecano', strength: 72, color: '#D92323', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/4/4c/Rayo_Vallecano_logo.svg/1200px-Rayo_Vallecano_logo.svg.png' },
+            { name: 'Leganés', strength: 70, color: '#0044A9', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3a/CD_Legan%C3%A9s_logo.svg/1200px-CD_Legan%C3%A9s_logo.svg.png' },
+            { name: 'Espanyol', strength: 69, color: '#00A35B', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/d/d6/RCD_Espanyol_logo.svg/1200px-RCD_Espanyol_logo.svg.png' },
+            { name: 'Valladolid', strength: 68, color: '#5E206A', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/b5/Real_Valladolid_logo.svg/1200px-Real_Valladolid_logo.svg.png' },
+            { name: 'Las Palmas', strength: 71, color: '#FFCE00', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/ae/UD_Las_Palmas_logo.svg/1200px-UD_Las_Palmas_logo.svg.png' },
         ],
         'Bundesliga': [
-            { name: 'Bayern München', strength: 94, color: '#DC052D' },
-            { name: 'Borussia Dortmund', strength: 90, color: '#FDE100' },
-            { name: 'Bayer Leverkusen', strength: 92, color: '#E32221' },
-            { name: 'RB Leipzig', strength: 87, color: '#001C46' },
-            { name: 'Eintracht Frankfurt', strength: 85, color: '#D80000' },
-            { name: 'SC Freiburg', strength: 84, color: '#000000' },
-            { name: 'Wolfsburg', strength: 82, color: '#65B32E' },
-            { name: 'Mainz 05', strength: 80, color: '#EB2D35' },
-            { name: 'Hoffenheim', strength: 79, color: '#005187' },
-            { name: 'Borussia Mönchengladbach', strength: 78, color: '#000000' },
-            { name: 'Köln', strength: 77, color: '#E82431' },
-            { name: 'Union Berlin', strength: 76, color: '#EE3344' },
-            { name: 'Heidenheim', strength: 75, color: '#DC052D' },
-            { name: 'Stuttgart', strength: 73, color: '#FF0000' },
-            { name: 'Werder Bremen', strength: 72, color: '#1B7330' },
-            { name: 'VfL Bochum', strength: 70, color: '#004D9D' },
-            { name: 'FC Augsburg', strength: 68, color: '#A00511' },
-            { name: 'Holstein Kiel', strength: 67, color: '#0054A6' },
+            { name: 'Bayern München', strength: 94, color: '#DC052D', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg/1200px-FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg.png' },
+            { name: 'Borussia Dortmund', strength: 90, color: '#FDE100', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Borussia_Dortmund_logo.svg/1200px-Borussia_Dortmund_logo.svg.png' },
+            { name: 'Bayer Leverkusen', strength: 92, color: '#E32221', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/59/Bayer_04_Leverkusen_logo.svg/1200px-Bayer_04_Leverkusen_logo.svg.png' },
+            { name: 'RB Leipzig', strength: 87, color: '#001C46', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/c/c1/RB_Leipzig_logo.svg/1200px-RB_Leipzig_logo.svg.png' },
+            { name: 'Eintracht Frankfurt', strength: 85, color: '#D80000', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Eintracht_Frankfurt_Logo.svg/1200px-Eintracht_Frankfurt_Logo.svg.png' },
+            { name: 'SC Freiburg', strength: 84, color: '#000000', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/1/1f/SC_Freiburg_logo.svg/1200px-SC_Freiburg_logo.svg.png' },
+            { name: 'Wolfsburg', strength: 82, color: '#65B32E', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/VfL_Wolfsburg_logo.svg/1200px-VfL_Wolfsburg_logo.svg.png' },
+            { name: 'Mainz 05', strength: 80, color: '#EB2D35', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/1._FSV_Mainz_05_logo.svg/1200px-1._FSV_Mainz_05_logo.svg.png' },
+            { name: 'Hoffenheim', strength: 79, color: '#005187', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/5a/TSG_1899_Hoffenheim_logo.svg/1200px-TSG_1899_Hoffenheim_logo.svg.png' },
+            { name: 'Borussia Mönchengladbach', strength: 78, color: '#000000', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Borussia_M%C3%B6nchengladbach_logo.svg/1200px-Borussia_M%C3%B6nchengladbach_logo.svg.png' },
+            { name: 'Köln', strength: 77, color: '#E82431', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/53/1._FC_Cologne_logo.svg/1200px-1._FC_Cologne_logo.svg.png' },
+            { name: 'Union Berlin', strength: 76, color: '#EE3344', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/Union_Berlin_logo.svg/1200px-Union_Berlin_logo.svg.png' },
+            { name: 'Heidenheim', strength: 75, color: '#DC052D', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/7/7b/1._FC_Heidenheim_logo.svg/1200px-1._FC_Heidenheim_logo.svg.png' },
+            { name: 'Stuttgart', strength: 73, color: '#FF0000', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/d/d2/VfB_Stuttgart_logo.svg/1200px-VfB_Stuttgart_logo.svg.png' },
+            { name: 'Werder Bremen', strength: 72, color: '#1B7330', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/be/SV_Werder_Bremen_logo.svg/1200px-SV_Werder_Bremen_logo.svg.png' },
+            { name: 'VfL Bochum', strength: 70, color: '#004D9D', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/VfL_Bochum_logo.svg/1200px-VfL_Bochum_logo.svg.png' },
+            { name: 'FC Augsburg', strength: 68, color: '#A00511', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/c/ca/FC_Augsburg_logo.svg/1200px-FC_Augsburg_logo.svg.png' },
+            { name: 'Holstein Kiel', strength: 67, color: '#0054A6', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/e/e5/Holstein_Kiel_logo.svg/1200px-Holstein_Kiel_logo.svg.png' },
         ],
         'Serie A': [
-            { name: 'Juventus', strength: 91, color: '#FFFFFF' },
-            { name: 'AC Milan', strength: 90, color: '#FB090B' },
-            { name: 'Inter Milan', strength: 89, color: '#0055A0' },
-            { name: 'Napoli', strength: 88, color: '#007FFF' },
-            { name: 'Roma', strength: 86, color: '#8E0013' },
-            { name: 'Lazio', strength: 84, color: '#0066CC' },
-            { name: 'Fiorentina', strength: 82, color: '#50208D' },
-            { name: 'Atalanta', strength: 81, color: '#003A89' },
-            { name: 'Torino', strength: 79, color: '#88001E' },
-            { name: 'Bologna', strength: 78, color: '#BD1F2D' },
-            { name: 'Sassuolo', strength: 77, color: '#00994D' },
-            { name: 'Monza', strength: 76, color: '#FF0000' },
-            { name: 'Empoli', strength: 75, color: '#003E92' },
-            { name: 'Lecce', strength: 74, color: '#E7C817' },
-            { name: 'Udinese', strength: 73, color: '#001D4B' },
-            { name: 'Verona', strength: 72, color: '#005E3D' },
-            { name: 'Como', strength: 68, color: '#31448A' },
-            { name: 'Parma', strength: 69, color: '#FFFF00' },
-            { name: 'Palermo', strength: 70, color: '#FFC800' },
-            { name: 'Genoa', strength: 71, color: '#CC0000' },
+            { name: 'Juventus', strength: 91, color: '#FFFFFF', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Juventus_FC_2017_logo.svg/1200px-Juventus_FC_2017_logo.svg.png' },
+            { name: 'AC Milan', strength: 90, color: '#FB090B', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/1200px-Logo_of_AC_Milan.svg.png' },
+            { name: 'Inter Milan', strength: 89, color: '#0055A0', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Inter_Milan_logo.svg/1200px-Inter_Milan_logo.svg.png' },
+            { name: 'Napoli', strength: 88, color: '#007FFF', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Societ%C3%A0_Sportiva_Calcio_Napoli_logo.svg/1200px-Societ%C3%A0_Sportiva_Calcio_Napoli_logo.svg.png' },
+            { name: 'Roma', strength: 86, color: '#8E0013', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/7/7b/AS_Roma_logo_%282017%29.svg/1200px-AS_Roma_logo_%282017%29.svg.png' },
+            { name: 'Lazio', strength: 84, color: '#0066CC', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/3/36/S.S._Lazio_logo.svg/1200px-S.S._Lazio_logo.svg.png' },
+            { name: 'Fiorentina', strength: 82, color: '#50208D', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/b3/ACF_Fiorentina_logo.svg/1200px-ACF_Fiorentina_logo.svg.png' },
+            { name: 'Atalanta', strength: 81, color: '#003A89', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/6/66/Atalanta_BC_logo.svg/1200px-Atalanta_BC_logo.svg.png' },
+            { name: 'Torino', strength: 79, color: '#88001E', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/Torino_FC_logo.svg/1200px-Torino_FC_logo.svg.png' },
+            { name: 'Bologna', strength: 78, color: '#BD1F2D', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/d/d3/Bologna_FC_1909_logo.svg/1200px-Bologna_FC_1909_logo.svg.png' },
+            { name: 'Sassuolo', strength: 77, color: '#00994D', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/1/1c/US_Sassuolo_Calcio_logo.svg/1200px-US_Sassuolo_Calcio_logo.svg.png' },
+            { name: 'Monza', strength: 76, color: '#FF0000', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/1/1d/A.C._Monza_logo.svg/1200px-A.C._Monza_logo.svg.png' },
+            { name: 'Empoli', strength: 75, color: '#003E92', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/d/d0/Empoli_FC_logo.svg/1200px-Empoli_FC_logo.svg.png' },
+            { name: 'Lecce', strength: 74, color: '#E7C817', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/d/d9/U.S._Lecce_logo.svg/1200px-U.S._Lecce_logo.svg.png' },
+            { name: 'Udinese', strength: 73, color: '#001D4B', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/1/14/Udinese_Calcio_logo.svg/1200px-Udinese_Calcio_logo.svg.png' },
+            { name: 'Verona', strength: 72, color: '#005E3D', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/8/87/Hellas_Verona_FC_logo.svg/1200px-Hellas_Verona_FC_logo.svg.png' },
+            { name: 'Como', strength: 68, color: '#31448A', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/2/23/Como_1907_logo.svg/1200px-Como_1907_logo.svg.png' },
+            { name: 'Parma', strength: 69, color: '#FFFF00', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f6/Parma_Calcio_1913_logo.svg/1200px-Parma_Calcio_1913_logo.svg.png' },
+            { name: 'Palermo', strength: 70, color: '#FFC800', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/6/61/Palermo_F.C._logo.svg/1200px-Palermo_F.C._logo.svg.png' },
+            { name: 'Genoa', strength: 71, color: '#CC0000', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/c/c5/Genoa_C.F.C._logo.svg/1200px-Genoa_C.F.C._logo.svg.png' },
         ],
         'Ligue 1': [
-            { name: 'PSG', strength: 95, color: '#004171' },
-            { name: 'Marseille', strength: 87, color: '#002F6C' },
-            { name: 'Monaco', strength: 85, color: '#CE1126' },
-            { name: 'Nice', strength: 83, color: '#CC0000' },
-            { name: 'Lille', strength: 82, color: '#E2021A' },
-            { name: 'Lyon', strength: 81, color: '#003893' },
-            { name: 'Rennes', strength: 80, color: '#E51921' },
-            { name: 'Strasbourg', strength: 79, color: '#0054A6' },
-            { name: 'Reims', strength: 78, color: '#ED1B34' },
-            { name: 'Toulouse', strength: 77, color: '#5F3977' },
-            { name: 'Montpellier', strength: 76, color: '#002C5F' },
-            { name: 'Lens', strength: 75, color: '#FFCD00' },
-            { name: 'Brest', strength: 74, color: '#C00021' },
-            { name: 'Le Havre', strength: 73, color: '#003882' },
-            { name: 'Metz', strength: 72, color: '#00245E' },
-            { name: 'Nantes', strength: 71, color: '#009B3E' },
-            { name: 'Saint-Étienne', strength: 68, color: '#279D55' },
-            { name: 'Auxerre', strength: 67, color: '#003366' },
+            { name: 'PSG', strength: 95, color: '#004171', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a7/Paris_Saint-Germain_F.C..svg/1200px-Paris_Saint-Germain_F.C..svg.png' },
+            { name: 'Marseille', strength: 87, color: '#002F6C', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Olympique_Marseille_logo.svg/1200px-Olympique_Marseille_logo.svg.png' },
+            { name: 'Monaco', strength: 85, color: '#CE1126', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/fe/AS_Monaco_FC_logo.svg/1200px-AS_Monaco_FC_logo.svg.png' },
+            { name: 'Nice', strength: 83, color: '#CC0000', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/e/e0/OGC_Nice_logo.svg/1200px-OGC_Nice_logo.svg.png' },
+            { name: 'Lille', strength: 82, color: '#E2021A', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a7/Lille_OSC_logo.svg/1200px-Lille_OSC_logo.svg.png' },
+            { name: 'Lyon', strength: 81, color: '#003893', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/c/c8/Olympique_Lyonnais_logo.svg/1200px-Olympique_Lyonnais_logo.svg.png' },
+            { name: 'Rennes', strength: 80, color: '#E51921', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/1/1a/Stade_Rennais_F.C._logo.svg/1200px-Stade_Rennais_F.C._logo.svg.png' },
+            { name: 'Strasbourg', strength: 79, color: '#0054A6', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a8/RC_Strasbourg_Alsace_logo.svg/1200px-RC_Strasbourg_Alsace_logo.svg.png' },
+            { name: 'Reims', strength: 78, color: '#ED1B34', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/d/d4/Stade_de_Reims_logo.svg/1200px-Stade_de_Reims_logo.svg.png' },
+            { name: 'Toulouse', strength: 77, color: '#5F3977', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/ae/Toulouse_FC_logo.svg/1200px-Toulouse_FC_logo.svg.png' },
+            { name: 'Montpellier', strength: 76, color: '#002C5F', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/6/6f/Montpellier_HSC_logo.svg/1200px-Montpellier_HSC_logo.svg.png' },
+            { name: 'Lens', strength: 75, color: '#FFCD00', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/1/1b/RC_Lens_logo.svg/1200px-RC_Lens_logo.svg.png' },
+            { name: 'Brest', strength: 74, color: '#C00021', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a8/Stade_Brestois_29_logo.svg/1200px-Stade_Brestois_29_logo.svg.png' },
+            { name: 'Le Havre', strength: 73, color: '#003882', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/b3/Le_Havre_AC_logo.svg/1200px-Le_Havre_AC_logo.svg.png' },
+            { name: 'Metz', strength: 72, color: '#00245E', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/7/7b/FC_Metz_logo.svg/1200px-FC_Metz_logo.svg.png' },
+            { name: 'Nantes', strength: 71, color: '#009B3E', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/e/ef/FC_Nantes_logo.svg/1200px-FC_Nantes_logo.svg.png' },
+            { name: 'Saint-Étienne', strength: 68, color: '#279D55', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/b1/AS_Saint-%C3%89tienne_logo.svg/1200px-AS_Saint-%C3%89tienne_logo.svg.png' },
+            { name: 'Auxerre', strength: 67, color: '#003366', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/53/AJ_Auxerre_logo.svg/1200px-AJ_Auxerre_logo.svg.png' },
         ],
         'NB I': [
-            { name: 'Ferencváros', strength: 75, color: '#006633' },
-            { name: 'Puskás Akadémia', strength: 72, color: '#1B3079' },
-            { name: 'Fehérvár FC', strength: 70, color: '#C8010C' },
-            { name: 'Debreceni VSC', strength: 68, color: '#880D11' },
-            { name: 'Diósgyőri VTK', strength: 67, color: '#A60000' },
-            { name: 'Zalaegerszegi TE', strength: 66, color: '#0054A6' },
-            { name: 'Újpest FC', strength: 65, color: '#562D7E' },
-            { name: 'Kecskeméti TE', strength: 64, color: '#4B0082' },
-            { name: 'Paks', strength: 63, color: '#009C4C' },
-            { name: 'Kisvárda', strength: 62, color: '#003366' },
-            { name: 'MTK Budapest', strength: 60, color: '#003366' },
-            { name: 'Budaörsi SC', strength: 58, color: '#333333' },
+            { name: 'Ferencváros', strength: 75, color: '#006633', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Ferencv%C3%A1rosi_Torna_Club_logo.svg/1200px-Ferencv%C3%A1rosi_Torna_Club_logo.svg.png' },
+            { name: 'Puskás Akadémia', strength: 72, color: '#1B3079', logo: 'https://upload.wikimedia.org/wikipedia/hu/thumb/f/f6/Puskas_Akademia_FC_logo.svg/1200px-Puskas_Akademia_FC_logo.svg.png' },
+            { name: 'Fehérvár FC', strength: 70, color: '#C8010C', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Fehervar_FC.svg/1200px-Fehervar_FC.svg.png' },
+            { name: 'Debreceni VSC', strength: 68, color: '#880D11', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a9/Debreceni_VSC_logo.svg/1200px-Debreceni_VSC_logo.svg.png' },
+            { name: 'Diósgyőri VTK', strength: 67, color: '#A60000', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/DVTK_logo_2016.svg/1200px-DVTK_logo_2016.svg.png' },
+            { name: 'Zalaegerszegi TE', strength: 66, color: '#0054A6', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Zalaegerszegi_TE_logo.svg/1200px-Zalaegerszegi_TE_logo.svg.png' },
+            { name: 'Újpest FC', strength: 65, color: '#562D7E', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Ujpest_FC_logo.svg/1200px-Ujpest_FC_logo.svg.png' },
+            { name: 'Kecskeméti TE', strength: 64, color: '#4B0082', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/8/8e/Kecskem%C3%A9ti_TE_logo.svg/1200px-Kecskem%C3%A9ti_TE_logo.svg.png' },
+            { name: 'Paks', strength: 63, color: '#009C4C', logo: 'https://upload.wikimedia.org/wikipedia/hu/thumb/5/56/Paksi_FC_c%C3%ADmere.svg/1200px-Paksi_FC_c%C3%ADmere.svg.png' },
+            { name: 'Kisvárda', strength: 62, color: '#003366', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/0/07/Kisvarda_FC_logo.svg/1200px-Kisvarda_FC_logo.svg.png' },
+            { name: 'MTK Budapest', strength: 60, color: '#003366', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/MTK_Budapest_FC_logo.svg/1200px-MTK_Budapest_FC_logo.svg.png' },
+            { name: 'Budaörsi SC', strength: 58, color: '#333333', logo: 'https://upload.wikimedia.org/wikipedia/hu/thumb/4/4e/BudaorsiSC.svg/1200px-BudaorsiSC.svg.png' },
         ],
     };
     
     // Nemzetiség adatok
     const NATIONALITIES = {
-        'hu': 'Magyar', 'gb': 'Angol', 'es': 'Spanyol', 'de': 'Német', 'fr': 'Francia', 'it': 'Olasz', 'br': 'Brazil', 'ar': 'Argentin', 'pt': 'Portugál'
-    };
-    
-    const COUNTRY_FLAGS = {
-        'hu': 'https://flagcdn.com/w40/hu.png',
-        'gb': 'https://flagcdn.com/w40/gb.png',
-        'es': 'https://flagcdn.com/w40/es.png',
-        'de': 'https://flagcdn.com/w40/de.png',
-        'fr': 'https://flagcdn.com/w40/fr.png',
-        'it': 'https://flagcdn.com/w40/it.png',
-        'br': 'https://flagcdn.com/w40/br.png',
-        'ar': 'https://flagcdn.com/w40/ar.png',
-        'pt': 'https://flagcdn.com/w40/pt.png'
+        'hu': { name: 'Magyar', flag: 'https://flagcdn.com/w40/hu.png' },
+        'gb': { name: 'Angol', flag: 'https://flagcdn.com/w40/gb.png' },
+        'es': { name: 'Spanyol', flag: 'https://flagcdn.com/w40/es.png' },
+        'de': { name: 'Német', flag: 'https://flagcdn.com/w40/de.png' },
+        'fr': { name: 'Francia', flag: 'https://flagcdn.com/w40/fr.png' },
+        'it': { name: 'Olasz', flag: 'https://flagcdn.com/w40/it.png' },
+        'br': { name: 'Brazil', flag: 'https://flagcdn.com/w40/br.png' },
+        'ar': { name: 'Argentin', flag: 'https://flagcdn.com/w40/ar.png' },
+        'pt': { name: 'Portugál', flag: 'https://flagcdn.com/w40/pt.png' }
     };
 
     // --- SEGÉDFÜGGVÉNYEK ---
@@ -435,46 +440,113 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalSteps = formCarousel.children.length;
         let currentStep = 0;
         const playerNameInput = document.getElementById('playerName');
+        const leagueSelectGrid = document.getElementById('leagueSelectGrid');
 
         function updateCarousel() { formCarousel.style.transform = `translateX(-${currentStep * 100}%)`; }
         
         document.querySelectorAll('.next-btn').forEach(btn => btn.addEventListener('click', () => {
             if (currentStep === 0 && playerNameInput.value.trim() === "") return;
-            if (currentStep < totalSteps - 1) { currentStep++; updateCarousel(); }
+            if (currentStep === 1 && selectedNationality === null) return;
+            if (currentStep === 2 && selectedLeague === null) return;
+            if (currentStep < totalSteps - 1) { 
+                currentStep++;
+                if (currentStep === totalSteps - 1) {
+                    generateContractOffers();
+                }
+                updateCarousel();
+            }
         }));
         
         document.querySelectorAll('.prev-btn').forEach(btn => btn.addEventListener('click', () => {
             if (currentStep > 0) { currentStep--; updateCarousel(); }
         }));
-        
-        document.getElementById('startGameButton').addEventListener('click', startNewGame);
-        
-        const slider = document.getElementById('potentialSlider');
-        slider.addEventListener('input', (e) => {
-            const value = e.target.value;
-            const sliderValueElem = document.getElementById('sliderValue');
-            sliderValueElem.textContent = value;
-            const percentage = ((value - slider.min) / (slider.max - slider.min)) * 100;
-            sliderValueElem.style.left = `${percentage}%`;
-            sliderValueElem.style.transform = `translateX(-${percentage}%)`;
+
+        // Nationality selector
+        const nationalitySelectBtn = document.getElementById('nationalitySelect');
+        const nationalityOptions = document.getElementById('nationalityOptions');
+        nationalitySelectBtn.addEventListener('click', () => {
+            nationalityOptions.classList.toggle('hidden');
+        });
+        nationalityOptions.addEventListener('click', (e) => {
+            if (e.target.closest('.option')) {
+                const option = e.target.closest('.option');
+                selectedNationality = option.dataset.value;
+                const selectedOptionDisplay = document.querySelector('#nationalitySelect .selected-option');
+                selectedOptionDisplay.innerHTML = `<img src="${NATIONALITIES[selectedNationality].flag}" alt="${NATIONALITIES[selectedNationality].name} zászló"><span>${NATIONALITIES[selectedNationality].name}</span>`;
+                nationalityOptions.classList.add('hidden');
+            }
+        });
+
+        // League selector
+        Object.keys(LEAGUES).forEach(leagueName => {
+            const button = document.createElement('button');
+            button.className = 'league-select-btn';
+            button.textContent = leagueName;
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.league-select-btn').forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+                selectedLeague = leagueName;
+            });
+            leagueSelectGrid.appendChild(button);
         });
     }
 
-    function startNewGame() {
-        if (!selectedLeague) {
-            const leagues = Object.keys(LEAGUES);
-            selectedLeague = getRandomElement(leagues);
-        }
-        const leagueTeams = LEAGUES[selectedLeague];
-        if (!leagueTeams) { return; }
+    function generateContractOffers() {
+        const offersContainer = document.getElementById('contractOffersContainer');
+        offersContainer.innerHTML = '';
         
-        const smallTeams = leagueTeams.filter(t => t.strength <= 75);
-        const chosenTeam = getRandomElement(smallTeams.length > 0 ? smallTeams : leagueTeams);
+        const leagueTeams = LEAGUES[selectedLeague];
+        const smallTeams = leagueTeams.filter(t => t.strength <= 70);
+        
+        if (smallTeams.length < 2) {
+             const offers = getRandomElement(leagueTeams, 2);
+             showOffers(offers);
+             return;
+        }
+
+        const offers = [];
+        const chosenTeams = [];
+        while (offers.length < 2) {
+            const team = getRandomElement(smallTeams);
+            if (!chosenTeams.includes(team.name)) {
+                chosenTeams.push(team.name);
+                offers.push(team);
+            }
+        }
+
+        showOffers(offers);
+    }
+    
+    function showOffers(offers) {
+        const offersContainer = document.getElementById('contractOffersContainer');
+        offers.forEach(team => {
+            const teamOfferCard = document.createElement('div');
+            teamOfferCard.className = 'contract-offer-card';
+            teamOfferCard.innerHTML = `
+                <img src="${team.logo}" alt="${team.name} logó">
+                <h3>${team.name}</h3>
+                <p><strong>Fizetés:</strong> €15.000 /hét</p>
+                <button class="button submit-btn accept-offer-btn" data-team="${team.name}">Szerződés aláírása</button>
+            `;
+            offersContainer.appendChild(teamOfferCard);
+        });
+
+        document.querySelectorAll('.accept-offer-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const teamName = e.target.dataset.team;
+                startNewGame(teamName);
+            });
+        });
+    }
+
+    function startNewGame(teamName) {
+        const leagueTeams = LEAGUES[selectedLeague];
+        const chosenTeam = leagueTeams.find(t => t.name === teamName);
         
         gameState = {
             playerName: document.getElementById('playerName').value || "Játékos",
             leagueName: selectedLeague,
-            rating: document.getElementById('potentialSlider').value,
+            rating: 60,
             team: chosenTeam,
             money: 250000, salary: 15000, goals: 0, assists: 0, matchesPlayed: 0, trophies: [],
             clubHistory: [{ name: chosenTeam.name, year: '2025-' }],
@@ -777,7 +849,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function endSeason() {
-        // Jelenleg csak újraindítjuk a bajnokságot
         alert("A szezon véget ért!");
         const leagueTeams = LEAGUES[gameState.leagueName];
         gameState.schedule = generateSchedule(leagueTeams.map(t => t.name));
@@ -1018,8 +1089,11 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // --- Draw Field ---
-        ctx.fillStyle = '#2c5432';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const grassStripes = 12;
+        for (let i = 0; i < grassStripes; i++) {
+            ctx.fillStyle = i % 2 === 0 ? '#1a511a' : '#1e5e1e';
+            ctx.fillRect(0, i * canvas.height / grassStripes, canvas.width, canvas.height / grassStripes);
+        }
         
         // --- Draw Field Markings ---
         ctx.strokeStyle = 'rgba(255,255,255,0.7)';
@@ -1041,9 +1115,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const penaltyBoxWidth = Math.min(400, canvas.width * 0.8);
         ctx.strokeRect((canvas.width - penaltyBoxWidth) / 2, 5, penaltyBoxWidth, 120);
 
-        // Goal
-        ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 3;
-        ctx.strokeRect(homeGoal.x - homeGoal.width/2, homeGoal.y - 10, homeGoal.width, homeGoal.height);
+        // Goal frame
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(homeGoal.x - homeGoal.width/2 - 5, homeGoal.y - 15, 5, 25);
+        ctx.fillRect(homeGoal.x + homeGoal.width/2, homeGoal.y - 15, 5, 25);
+        ctx.fillRect(homeGoal.x - homeGoal.width/2 - 5, homeGoal.y - 15, homeGoal.width + 10, 5);
+
+        // Goal net
+        const netSpacing = 5;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 1;
+        // Horizontal lines
+        for (let i = 0; i <= 20; i += netSpacing) {
+            ctx.beginPath();
+            ctx.moveTo(homeGoal.x - homeGoal.width / 2, homeGoal.y + i);
+            ctx.lineTo(homeGoal.x + homeGoal.width / 2, homeGoal.y + i);
+            ctx.stroke();
+        }
+        // Vertical lines
+        for (let i = -homeGoal.width / 2; i <= homeGoal.width / 2; i += netSpacing) {
+            ctx.beginPath();
+            ctx.moveTo(homeGoal.x + i, homeGoal.y);
+            ctx.lineTo(homeGoal.x + i, homeGoal.y + 20);
+            ctx.stroke();
+        }
         
         drawBall(ball);
         opponents.forEach(drawPlayer);
