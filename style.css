@@ -536,9 +536,7 @@ body { height: -webkit-fill-available; }
 .screen { padding: 15px; }
 .dashboard-grid { grid-template-columns: 1fr; }
 .character-creator-container { width: 100%; height: 100%; border-radius: 0; }
-
 .profile-stats-container {
-    grid-template-columns: 1fr;
+grid-template-columns: 1fr;
 }
-
 }
