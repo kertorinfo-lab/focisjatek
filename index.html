@@ -277,8 +277,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedLeague = null;
     let selectedNationality = 'hu';
     let initialLoading = true;
+    // CHANGE START: Opponent strength variable for minigame
+    let currentOpponentStrength = 70; 
+    // CHANGE END: Opponent strength variable for minigame
 
     // --- FRISSÍTETT ÉS KIEGÉSZÍTETT BAJNOKSÁG ÉS CSAPAT ADATOK ---
+    // CHANGE START: 1. Logo Fixes - Corrected multiple team logo URLs
     const LEAGUES = {
         'Premier League': [
             { name: 'Manchester City', strength: 95, color: '#6CABDD', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/382.png' },
@@ -337,12 +341,12 @@ document.addEventListener('DOMContentLoaded', () => {
             { name: 'Borussia Mönchengladbach', strength: 78, color: '#000000', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/133.png' },
             { name: 'Köln', strength: 77, color: '#E82431', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/125.png' },
             { name: 'Union Berlin', strength: 76, color: '#EE3344', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/138.png' },
-            { name: 'Heidenheim', strength: 75, color: '#DC052D', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/139.png' },
+            { name: 'Heidenheim', strength: 75, color: '#DC052D', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/6882.png' },
             { name: 'Stuttgart', strength: 73, color: '#FF0000', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/128.png' },
             { name: 'Werder Bremen', strength: 72, color: '#1B7330', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/131.png' },
             { name: 'VfL Bochum', strength: 70, color: '#004D9D', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/140.png' },
             { name: 'FC Augsburg', strength: 68, color: '#A00511', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/126.png' },
-            { name: 'Holstein Kiel', strength: 67, color: '#0054A6', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/141.png' },
+            { name: 'Holstein Kiel', strength: 67, color: '#0054A6', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/2179.png' },
         ],
         'Serie A': [
             { name: 'Juventus', strength: 91, color: '#FFFFFF', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/111.png' },
@@ -361,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { name: 'Lecce', strength: 74, color: '#E7C817', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/108.png' },
             { name: 'Udinese', strength: 73, color: '#001D4B', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/115.png' },
             { name: 'Verona', strength: 72, color: '#005E3D', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/107.png' },
-            { name: 'Como', strength: 68, color: '#31448A', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/119.png' },
+            { name: 'Como', strength: 68, color: '#31448A', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/6900.png' },
             { name: 'Parma', strength: 69, color: '#FFFF00', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/112.png' },
             { name: 'Palermo', strength: 70, color: '#FFC800', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/105.png' },
             { name: 'Genoa', strength: 71, color: '#CC0000', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/109.png' },
@@ -380,11 +384,11 @@ document.addEventListener('DOMContentLoaded', () => {
             { name: 'Montpellier', strength: 76, color: '#002C5F', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/153.png' },
             { name: 'Lens', strength: 75, color: '#FFCD00', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/154.png' },
             { name: 'Brest', strength: 74, color: '#C00021', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/155.png' },
-            { name: 'Le Havre', strength: 73, color: '#003882', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/156.png' },
-            { name: 'Metz', strength: 72, color: '#00245E', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/157.png' },
+            { name: 'Le Havre', strength: 73, color: '#003882', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/162.png' },
+            { name: 'Metz', strength: 72, color: '#00245E', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/161.png' },
             { name: 'Nantes', strength: 71, color: '#009B3E', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/158.png' },
             { name: 'Saint-Étienne', strength: 68, color: '#279D55', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/159.png' },
-            { name: 'Auxerre', strength: 67, color: '#003366', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/160.png' },
+            { name: 'Auxerre', strength: 67, color: '#003366', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/147.png' },
         ],
         'NB I': [
             { name: 'Ferencváros', strength: 75, color: '#006633', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/6902.png' },
@@ -398,9 +402,10 @@ document.addEventListener('DOMContentLoaded', () => {
             { name: 'Paks', strength: 63, color: '#009C4C', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/6860.png' },
             { name: 'Kisvárda', strength: 62, color: '#003366', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/6861.png' },
             { name: 'MTK Budapest', strength: 60, color: '#003366', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/6862.png' },
-            { name: 'Budaörsi SC', strength: 58, color: '#333333', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/6863.png' },
+            { name: 'Nyíregyháza', strength: 58, color: '#D50032', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/8/82/Ny%C3%ADregyh%C3%A1za_Spartacus_FC_logo.svg/200px-Ny%C3%ADregyh%C3%A1za_Spartacus_FC_logo.svg.png' },
         ],
     };
+    // CHANGE END: 1. Logo Fixes
     
     // Nemzetiség adatok
     const NATIONALITIES = {
@@ -671,7 +676,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     matchSimulatorOverlay.classList.add('hidden');
                     document.getElementById('pitch-enter-banner').classList.add('hidden');
-                    startMatchGame();
+                    // CHANGE START: 3. Team Strength - Pass opponent strength to minigame
+                    startMatchGame(opponentStrength);
+                    // CHANGE END
                 }, 2500);
                 return;
             } 
@@ -706,7 +713,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const eventDiv = document.createElement('div');
             eventDiv.className = `event-item ${event.icon.replace('fa-', '')}`;
             eventDiv.innerHTML = `<div class="event-icon"><i class="fas ${event.icon}"></i></div>
-                                  <div class="event-text"><span class="time">${String(event.time).padStart(2, '0')}'</span> <span class="comment">${event.comment}</span></div>`;
+                                    <div class="event-text"><span class="time">${String(event.time).padStart(2, '0')}'</span> <span class="comment">${event.comment}</span></div>`;
             timeline.appendChild(eventDiv);
         });
     }
@@ -729,7 +736,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('gameHomeName').textContent = homeTeam.name.substring(0,3).toUpperCase();
         document.getElementById('gameAwayName').textContent = awayTeam.name.substring(0,3).toUpperCase();
         document.getElementById('gameScore').textContent = `${currentMatchData.homeScore} - ${currentMatchData.awayScore}`;
-        // document.getElementById('gameTime').textContent = `${String(Math.floor(currentMatchData.time)).padStart(2, '0')}:00`;
 
         const homeP = document.getElementById('homeProgress');
         const awayP = document.getElementById('awayProgress');
@@ -748,8 +754,11 @@ document.addEventListener('DOMContentLoaded', () => {
         awayP.style.flex = 1 - homeFlex;
     }
 
-    function startMatchGame() {
+    // CHANGE START: 3. Team Strength - Accept opponent strength
+    function startMatchGame(opponentStrength) {
+    // CHANGE END
         miniGameActive = true;
+        currentOpponentStrength = opponentStrength; // Store for use in AI logic
         matchGameOverlay.classList.remove('hidden');
         resizeCanvas();
 
@@ -764,9 +773,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, ' ': false, 'c': false };
 
-        const startX = canvas.width * (0.3 + Math.random() * 0.4);
-        player = { x: startX, y: canvas.height / 2 + 100, speed: 4, isPlayer: true, radius: 15, possessionRadius: 25 };
-        ball = { x: startX, y: canvas.height / 2, radius: 8, speedX: 0, speedY: 0, friction: 0.98, controlledBy: null };
+        // CHANGE START: 2. Gameplay Adjustments - Better starting positions
+        const startX = canvas.width * (0.25 + Math.random() * 0.5);
+        player = { x: startX, y: canvas.height * 0.85, speed: 4, isPlayer: true, radius: 15, possessionRadius: 25 };
+        ball = { x: startX, y: canvas.height * 0.65, radius: 8, speedX: 0, speedY: 0, friction: 0.98, controlledBy: null };
+        // CHANGE END
+
         homeGoal = { x: canvas.width / 2, y: 15, width: canvas.width * 0.3, height: 20 };
         
         teammates = [
@@ -774,11 +786,29 @@ document.addEventListener('DOMContentLoaded', () => {
             { x: canvas.width * 0.75, y: canvas.height * 0.45, speed: 2.8, radius: 15, jerseyNumber: 11, decisionTimeout: 0 }
         ];
 
+        // CHANGE START: 3. Team Strength - AI speed based on strength
+        const defenderBaseSpeed = 1.6;
+        const keeperBaseSpeed = 1.5;
+        // Scale speed between a min/max value based on team strength (e.g., 60-100)
+        const defenderSpeed = defenderBaseSpeed + ((opponentStrength - 60) / 40) * 1.0;
+        const keeperSpeed = keeperBaseSpeed + ((opponentStrength - 60) / 40) * 0.8;
+        // CHANGE END
+
         opponents = [
-            { x: canvas.width / 2, y: 70, speed: 1.8, radius: 16, type: 'goalkeeper', jerseyNumber: 1 },
-            { x: canvas.width * 0.35, y: 220, speed: 2.0, radius: 15, type: 'defender', jerseyNumber: 4 },
-            { x: canvas.width * 0.65, y: 220, speed: 2.0, radius: 15, type: 'defender', jerseyNumber: 5 }
+            // CHANGE START: 2. Gameplay Adjustments - Opponent delay & strength-based speed
+            { x: canvas.width / 2, y: 70, speed: keeperSpeed, radius: 16, type: 'goalkeeper', jerseyNumber: 1, isActive: false },
+            { x: canvas.width * 0.35, y: 220, speed: defenderSpeed, radius: 15, type: 'defender', jerseyNumber: 4, isActive: false },
+            { x: canvas.width * 0.65, y: 220, speed: defenderSpeed, radius: 15, type: 'defender', jerseyNumber: 5, isActive: false }
+            // CHANGE END
         ];
+
+        // CHANGE START: 2. Gameplay Adjustments - Delay opponent activation
+        setTimeout(() => {
+            if (opponents) { // Check if minigame is still active
+                opponents.forEach(o => o.isActive = true);
+            }
+        }, 1200); // 1.2 second delay
+        // CHANGE END
         
         document.addEventListener('keydown', handleKeyDown);
         document.addEventListener('keyup', handleKeyUp);
@@ -787,10 +817,45 @@ document.addEventListener('DOMContentLoaded', () => {
         gameLoop = requestAnimationFrame(updateGame);
     }
     
+    // CHANGE START: 2. Gameplay Adjustments - New function for tackle animation
+    function handleTackleAndEnd() {
+        // Find the tackler (closest opponent to the ball)
+        let tackler = opponents[0];
+        let minDist = Infinity;
+        opponents.forEach(opp => {
+            const dist = Math.hypot(opp.x - ball.x, opp.y - ball.y);
+            if (dist < minDist) {
+                minDist = dist;
+                tackler = opp;
+            }
+        });
+        
+        // Opponent kicks the ball away
+        ball.controlledBy = null;
+        const angleAwayFromGoal = Math.atan2(canvas.height - tackler.y, (canvas.width / 2) - tackler.x);
+        ball.speedX = Math.cos(angleAwayFromGoal) * 15;
+        ball.speedY = Math.sin(angleAwayFromGoal) * 15;
+
+        // Wait for the animation to play out, then end the action
+        setTimeout(() => {
+            endMatchAction(false, 'tackle');
+        }, 1200);
+    }
+    // CHANGE END
+
     function endMatchAction(isGoal, reason = 'tackle') {
         if (!miniGameActive) return;
-        miniGameActive = false;
+        
+        // CHANGE START: 2. Gameplay Adjustments - Handle tackle animation
+        // If it's a tackle, the new animation function will call this one after a delay.
+        // We add a check to prevent the animation from re-triggering.
+        if (reason === 'tackle_animation') {
+             handleTackleAndEnd();
+             return;
+        }
+        // CHANGE END
 
+        miniGameActive = false;
         cancelAnimationFrame(gameLoop);
         document.removeEventListener('keydown', handleKeyDown);
         document.removeEventListener('keyup', handleKeyUp);
@@ -1094,34 +1159,35 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        const defenders = opponents.filter(o => o.type === 'defender');
-        if (defenders.length > 0) {
-            const target = ball.controlledBy ? ball.controlledBy : ball;
-            defenders.sort((a, b) => Math.hypot(a.x - target.x, a.y - target.y) - Math.hypot(b.x - target.x, b.y - target.y));
-            
-            const presser = defenders[0];
-            const angleToTarget = Math.atan2(target.y - presser.y, target.x - presser.x);
-            presser.x += Math.cos(angleToTarget) * presser.speed;
-            presser.y += Math.sin(angleToTarget) * presser.speed;
+        opponents.forEach(opp => {
+            // CHANGE START: 2. Gameplay Adjustments - Only run AI if active
+            if (!opp.isActive) return;
+            // CHANGE END
 
-            if (defenders.length > 1) {
-                const cover = defenders[1];
-                const coverTargetX = homeGoal.x;
-                const coverTargetY = homeGoal.y + 150;
-                const angleToCover = Math.atan2(coverTargetY - cover.y, coverTargetX - cover.x);
-                cover.x += Math.cos(angleToCover) * (cover.speed * 0.8);
-                cover.y += Math.sin(angleToCover) * (cover.speed * 0.8);
+            if (opp.type === 'defender') {
+                const target = ball.controlledBy ? ball.controlledBy : ball;
+                const angleToTarget = Math.atan2(target.y - opp.y, target.x - opp.x);
+                opp.x += Math.cos(angleToTarget) * opp.speed;
+                opp.y += Math.sin(angleToTarget) * opp.speed;
             }
-        }
+        });
+        
         const keeper = opponents.find(o => o.type === 'goalkeeper');
-        if(keeper) {
-            keeper.x += (ball.x - keeper.x) * 0.08;
+        if(keeper && keeper.isActive) {
+            // CHANGE START: 3. Team Strength - Keeper agility based on strength
+            const keeperAgility = 0.07 + ((currentOpponentStrength - 60) / 40) * 0.05;
+            keeper.x += (ball.x - keeper.x) * keeperAgility;
+            // CHANGE END
             keeper.x = Math.max(homeGoal.x - homeGoal.width / 2, Math.min(homeGoal.x + homeGoal.width / 2, keeper.x));
         }
 
         opponents.forEach(opp => {
             const distToPlayer = Math.hypot(player.x - opp.x, player.y - opp.y);
-            if (ball.controlledBy === player && distToPlayer < player.radius + opp.radius) { endMatchAction(false, 'tackle'); }
+            // CHANGE START: 2. Gameplay Adjustments - Trigger tackle animation
+            if (ball.controlledBy === player && distToPlayer < player.radius + opp.radius) { 
+                endMatchAction(false, 'tackle_animation');
+            }
+            // CHANGE END
         });
         
         if (ball.y < homeGoal.y + homeGoal.height && ball.y > homeGoal.y && ball.x > homeGoal.x - homeGoal.width / 2 && ball.x < homeGoal.x + homeGoal.width / 2) { 
