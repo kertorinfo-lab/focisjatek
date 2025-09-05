@@ -744,7 +744,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const awayTeam = leagueTeams.find(t => t.name === fixture.away);
 
         if (!currentMatchData || currentMatchData.fixture.home !== fixture.home) {
-            currentMatchData = { fixture, time: 0, homeScore: 0, awayScore: 0, playerGoals: 0, assists: 0, events: [{time: 0, comment: "Kezdőrúgás!", icon: "fa-futbol"}] };
+            currentMatchData = { fixture, time: 0, homeScore: 0, awayScore: 0, playerGoals: 0, playerAssists: 0, events: [{time: 0, comment: "Kezdőrúgás!", icon: "fa-futbol"}] };
         }
         
         document.getElementById('simHomeName').textContent = homeTeam.name;
@@ -879,7 +879,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const startX = canvas.width * (0.25 + Math.random() * 0.5);
         player = { x: startX, y: canvas.height * 0.85, speed: 4, isPlayer: true, radius: 15, possessionRadius: 25 };
-        ball = { x: startX, y: canvas.height * 0.65, radius: 8, speedX: 0, speedY: 0, friction: 0.98, controlledBy: null };
+        ball = { x: startX, y: canvas.height * 0.65, radius: 8, speedX: 0, speedY: 0, friction: 0.98, controlledBy: null, shotBy: null, passedBy: null };
         
         homeGoal = { x: canvas.width / 2, y: 15, width: canvas.width * 0.3, height: 20 };
         
@@ -953,8 +953,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (isGoal) {
             if(playerIsHome) currentMatchData.homeScore++; else currentMatchData.awayScore++;
-            currentMatchData.playerGoals++;
-            eventMessage = `GÓÓÓÓL! Fantasztikus befejezés! (${gameState.playerName})`;
+
+            if (ball.shotBy && ball.shotBy.isPlayer) {
+                currentMatchData.playerGoals++;
+                eventMessage = `GÓÓÓÓL! Fantasztikus befejezés! (${gameState.playerName})`;
+            } else {
+                const scorer = ball.shotBy;
+                eventMessage = `GÓL! Szép csapatmunka! (${scorer ? `${scorer.jerseyNumber} szerezte a gólt!` : 'A csapatod betalált!'})`;
+                if (ball.passedBy && ball.passedBy.isPlayer) {
+                    currentMatchData.playerAssists++;
+                }
+            }
             eventIcon = "fa-futbol";
         } else {
             switch(reason) {
@@ -967,6 +976,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
             }
         }
+        
+        ball.shotBy = null;
+        ball.passedBy = null;
+
         addMatchEvent(eventMessage, eventIcon);
         
         updateScoreboardUI();
@@ -1044,9 +1057,10 @@ document.addEventListener('DOMContentLoaded', () => {
         bonus += result.playerGoals * 10000;
         gameState.money += (gameState.salary || 0) + bonus;
         gameState.goals += result.playerGoals;
+        gameState.assists += result.playerAssists;
         gameState.matchesPlayed++;
         
-        document.getElementById('resultPlayerPerformance').textContent = `Gólok: ${result.playerGoals}, Gólpasszok: ${currentMatchData.assists}`;
+        document.getElementById('resultPlayerPerformance').textContent = `Gólok: ${result.playerGoals}, Gólpasszok: ${result.playerAssists}`;
         document.getElementById('resultEarnings').textContent = `Fizetés: €${(gameState.salary || 0).toLocaleString()}, Bónusz: €${bonus.toLocaleString()}`;
         matchResultOverlay.classList.remove('hidden');
     }
@@ -1182,7 +1196,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (distToPlayer < player.possessionRadius) { ball.controlledBy = player; }
             teammates.forEach(tm => {
                 const distToTm = Math.hypot(tm.x - ball.x, tm.y - ball.y);
-                if (distToTm < tm.radius + ball.radius + 5) { ball.controlledBy = tm; tm.decisionTimeout = 90; }
+                if (distToTm < tm.radius + ball.radius + 5) { ball.controlledBy = tm; }
             });
         }
         
@@ -1205,12 +1219,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (keys[' ']) { // SHOOT
                 ball.controlledBy = null;
+                ball.shotBy = player;
+                ball.passedBy = null; 
                 const angle = Math.atan2((homeGoal.y + homeGoal.height / 2) - player.y, homeGoal.x - player.x);
                 ball.speedX = Math.cos(angle) * 20;
                 ball.speedY = Math.sin(angle) * 20;
                 keys[' '] = false;
             } else if (keys['c']) { // PASS
                 ball.controlledBy = null;
+                ball.passedBy = player;
                 let closestTm = null, minDist = Infinity;
                 teammates.forEach(tm => {
                     const dist = Math.hypot(player.x - tm.x, player.y - tm.y);
@@ -1220,7 +1237,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const angle = Math.atan2(closestTm.y - player.y, closestTm.x - player.x);
                     ball.speedX = Math.cos(angle) * 15;
                     ball.speedY = Math.sin(angle) * 15;
-                    currentMatchData.assists++;
                 }
                 keys['c'] = false;
             }
@@ -1235,10 +1251,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (tm.decisionTimeout <= 0) {
                 ball.controlledBy = null;
                 if (tm.y < canvas.height / 2 && Math.random() < 0.5) { // Shoot
+                    ball.shotBy = tm;
                     const angle = Math.atan2((homeGoal.y + homeGoal.height / 2) - tm.y, homeGoal.x - tm.x);
                     ball.speedX = Math.cos(angle) * 18;
                     ball.speedY = Math.sin(angle) * 18;
                 } else { // Pass back
+                    ball.passedBy = tm;
                     const angle = Math.atan2(player.y - tm.y, player.x - tm.x);
                     ball.speedX = Math.cos(angle) * 15;
                     ball.speedY = Math.sin(angle) * 15;
