@@ -960,6 +960,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const leagueTeams = LEAGUES[gameState.leagueName];
         const homeTeam = leagueTeams.find(t => t.name === homeName);
         const awayTeam = leagueTeams.find(t => t.name === awayName);
+        if (!homeTeam || !awayTeam) {
+            return { homeName, awayName, homeScore: 0, awayScore: 0, playerGoals: 0 };
+        }
         const homeScore = Math.floor(Math.random() * (homeTeam.strength / 28));
         const awayScore = Math.floor(Math.random() * (awayTeam.strength / 28));
         return { homeName, awayName, homeScore, awayScore, playerGoals: 0 };
@@ -1494,3 +1497,4 @@ document.addEventListener('DOMContentLoaded', () => {
     </script>
 </body>
 </html>
+
