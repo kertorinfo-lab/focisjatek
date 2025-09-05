@@ -540,3 +540,43 @@ body { height: -webkit-fill-available; }
 grid-template-columns: 1fr;
 }
 }
+
+@media (max-width: 480px) {
+    #matchResultOverlay .card {
+        padding: 20px;
+        width: 95%;
+    }
+    .match-result-header {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    }
+    .match-result-score {
+        font-size: 3.5em;
+        width: 100%;
+        text-align: center;
+        order: -1;
+    }
+    .match-result-team {
+       flex: 1;
+       min-width: 100px;
+    }
+    .match-result-team img {
+        width: 60px;
+        height: 60px;
+    }
+    .match-result-team h3 {
+        font-size: 1.1em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+    }
+    .match-summary h4 {
+        font-size: 1.3em;
+    }
+    .match-summary p {
+        font-size: 1em;
+    }
+}
