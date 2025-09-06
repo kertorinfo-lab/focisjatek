@@ -101,6 +101,55 @@ flex-direction: column;
 gap: 15px;
 }
 
+.save-slots-container {
+    margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 40vh;
+    overflow-y: auto;
+}
+
+.save-slot {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.save-slot:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.save-slot-info h4 {
+    margin: 0;
+    font-size: 1.1em;
+}
+
+.save-slot-info p {
+    margin: 4px 0 0;
+    color: var(--text-muted);
+    font-size: 0.9em;
+}
+
+.delete-save-btn {
+    background: transparent;
+    border: none;
+    color: #999;
+    font-size: 1.5em;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.delete-save-btn:hover {
+    color: #e74c3c;
+}
+
+
 /* --- KARAKTERKÉSZÍTŐ --- */
 .character-creator-container { background-color: rgba(30, 30, 30, 0.9); backdrop-filter: blur(15px); border-radius: 20px; width: 100%; max-width: 500px; overflow: hidden; border: 1px solid var(--border-color); }
 .form-carousel { display: flex; transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1); }
@@ -202,7 +251,7 @@ color: var(--dark-bg);
 
 .contract-offers-container {
 display: grid;
-grid-template-columns: 1fr;
+grid-template-columns: 1fr 1fr;
 gap: 20px;
 width: 100%;
 }
@@ -234,7 +283,7 @@ padding: 5px;
 }
 
 .contract-offer-card h3 {
-font-size: 1.5em;
+font-size: 1.2em;
 margin: 0 0 10px 0;
 }
 
@@ -539,6 +588,9 @@ body { height: -webkit-fill-available; }
 .profile-stats-container {
 grid-template-columns: 1fr;
 }
+.contract-offers-container {
+grid-template-columns: 1fr;
+}
 }
 
 @media (max-width: 480px) {
@@ -580,3 +632,4 @@ grid-template-columns: 1fr;
         font-size: 1em;
     }
 }
+
