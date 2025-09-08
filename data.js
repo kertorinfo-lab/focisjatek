@@ -70,7 +70,6 @@ export function generateAllPlayers() {
     }
 }
 
-// HIÁNYZÓ FÜGGVÉNY HOZZÁADVA
 export function generateRosterForTeam(teamName) {
     const teamPlayers = allPlayers.filter(p => p.teamName === teamName);
 
@@ -95,18 +94,16 @@ export function generateRosterForTeam(teamName) {
 
     gameState.team.players = roster;
 
-    // A felhasználó játékosának hozzáadása a kerethez
     const userPlayer = {
         id: 'user_player',
         name: gameState.playerName,
-        position: 'CS', // Alapértelmezett pozíció
+        position: 'CS',
         age: gameState.age,
         rating: gameState.rating,
         teamName: gameState.team.name,
         isUser: true
     };
 
-    // Lecserélünk egy csatárt, ha van, ha nincs, egy középpályást
     const fwds = gameState.team.players.filter(p => p.position === 'CS');
     if (fwds.length > 0) {
         const playerToReplaceIndex = gameState.team.players.findIndex(p => p.id === fwds[0].id);
