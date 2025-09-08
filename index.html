@@ -99,12 +99,6 @@
         </div>
     </div>
     
-    <div class="overlay hidden" id="playerSwapModalOverlay">
-        <div class="card" id="playerSwapModalCard">
-             <!-- Tartalom dinamikusan generálva JS-ből -->
-        </div>
-    </div>
-
     <div id="matchSimulatorOverlay" class="overlay hidden">
         <div class="simulator-container">
             <div class="sim-header">
@@ -172,7 +166,6 @@
     <div class="main-hub hidden" id="mainHub">
         <nav class="sidebar">
             <button class="nav-btn active" data-screen="dashboardScreen" data-tooltip="Irányítópult"><i class="fas fa-tachometer-alt"></i></button>
-            <button class="nav-btn" data-screen="squadScreen" data-tooltip="Csapat"><i class="fas fa-users"></i></button>
             <button class="nav-btn" data-screen="leagueScreen" data-tooltip="Bajnokság"><i class="fas fa-trophy"></i></button>
             <button class="nav-btn" data-screen="playerTransferScreen" data-tooltip="Saját Ajánlatok"><i class="fas fa-arrows-alt-h"></i></button>
             <button class="nav-btn" data-screen="globalTransferScreen" data-tooltip="Igazolások"><i class="fas fa-globe-europe"></i></button>
@@ -197,7 +190,7 @@
             <main class="main-content">
                 <div id="dashboardScreen" class="screen">
                     <div class="dashboard-grid">
-                        <div class="dashboard-card player-profile-card" id="dashboardProfileCard">
+                        <div class="dashboard-card player-profile-card">
                             <div class="card-header">
                                 <img id="hubPlayerTeamLogo" class="team-logo" src="" alt="Csapat Logó">
                                 <div class="player-info">
@@ -223,42 +216,6 @@
                             </div>
                             <p><strong>Helyezés:</strong> <span id="hubLeaguePosition">-.</span></p>
                             <p><strong>Forduló:</strong> <span id="hubMatchday">0 / 14</span></p>
-                        </div>
-                    </div>
-                </div>
-                <div id="squadScreen" class="screen hidden">
-                    <div class="squad-header">
-                        <h2 id="squadTeamName">Csapatom</h2>
-                        <div id="formationSelector" class="formation-selector"></div>
-                        <div class="squad-avg-rating">Átl. Értékelés: <span id="squadAvgRating">0</span></div>
-                    </div>
-                    <div class="squad-container">
-                        <div class="pitch">
-                            <div class="pitch-lines"></div>
-                            <div class="formation" id="formation-forwards">
-                                <div class="player-slot" data-pos="CS"></div><div class="player-slot" data-pos="CS"></div>
-                                <div class="player-slot" data-pos="CS"></div><div class="player-slot" data-pos="CS"></div>
-                                <div class="player-slot" data-pos="CS"></div>
-                            </div>
-                            <div class="formation" id="formation-midfielders">
-                                <div class="player-slot" data-pos="KP"></div><div class="player-slot" data-pos="KP"></div>
-                                <div class="player-slot" data-pos="KP"></div><div class="player-slot" data-pos="KP"></div>
-                                <div class="player-slot" data-pos="KP"></div>
-                            </div>
-                            <div class="formation" id="formation-defenders">
-                                <div class="player-slot" data-pos="V"></div><div class="player-slot" data-pos="V"></div>
-                                <div class="player-slot" data-pos="V"></div><div class="player-slot" data-pos="V"></div>
-                                <div class="player-slot" data-pos="V"></div>
-                            </div>
-                            <div class="formation" id="formation-goalkeeper">
-                                <div class="player-slot" data-pos="K"></div>
-                            </div>
-                        </div>
-                        <div class="squad-bench">
-                            <h3>Cserék</h3>
-                            <div class="bench-players" id="bench-players">
-                                <!-- Bench player slots will be dynamically managed -->
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -334,7 +291,6 @@
         </div>
         <nav class="bottom-bar">
             <button class="nav-btn active" data-screen="dashboardScreen"><i class="fas fa-tachometer-alt"></i></button>
-            <button class="nav-btn" data-screen="squadScreen"><i class="fas fa-users"></i></button>
             <button class="nav-btn" data-screen="leagueScreen"><i class="fas fa-trophy"></i></button>
             <button class="nav-btn" data-screen="playerTransferScreen"><i class="fas fa-arrows-alt-h"></i></button>
             <button class="nav-btn" data-screen="globalTransferScreen"><i class="fas fa-globe-europe"></i></button>
@@ -371,37 +327,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return `€${value}`;
     }
-    
-    // ÚJ FÜGGVÉNY: Csapaterősség számítása a kezdő alapján
-    function calculateTeamStrength() {
-        if (!gameState.team || !gameState.team.lineup || !gameState.team.players) {
-            return 70; // Alapértelmezett érték, ha valami hiba történik
-        }
-
-        let totalRating = 0;
-        let playerCount = 0;
-        
-        const startingLineup = Object.values(gameState.team.lineup).filter(id => id !== null);
-
-        for (const slotId in gameState.team.lineup) {
-             if (!slotId.startsWith('slot-bench') && gameState.team.lineup[slotId]) {
-                 const player = gameState.team.players.find(p => p.id === gameState.team.lineup[slotId]);
-                 if(player) {
-                    totalRating += player.rating;
-                    playerCount++;
-                 }
-             }
-        }
-       
-        if(playerCount !== 11 && playerCount > 0) {
-            console.warn(`Warning: Starting lineup has ${playerCount} players instead of 11.`);
-        }
-
-        const averageRating = playerCount > 0 ? Math.round(totalRating / playerCount) : 60;
-        gameState.team.strength = averageRating; // Frissítjük a gameState-et
-        return averageRating;
-    }
-
 
     function generateAllPlayers() {
         allPlayers = [];
@@ -419,7 +344,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         const natCode = getRandomElement(natCodes);
 
                         allPlayers.push({
-                            id: `player_${Date.now()}_${Math.random()}`,
                             name: generatePlayerName(natCode),
                             position: getRandomElement(positions),
                             age: age,
@@ -524,9 +448,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             if (amount >= player.value) {
+                alert(`Az ajánlatodat elfogadták! ${formatValue(amount)} levonva. A keretmenedzsment a következő frissítésben érkezik.`);
                 gameState.money -= amount;
                 updateHeaderUI();
-                initiatePlayerSwap(player);
             } else {
                 alert(`Az ajánlatodat elutasították. Túl alacsony.`);
             }
@@ -571,7 +495,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateLeagueTable();
         updateProfileUI();
         updateTransferUI();
-        updateSquadScreen();
         if (!document.getElementById('globalTransferScreen').classList.contains('hidden')) {
             populateTransferMarket();
         }
@@ -587,9 +510,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (targetScreenId === 'globalTransferScreen') {
             populateTransferMarket();
-        }
-         if (targetScreenId === 'squadScreen') {
-            updateSquadScreen();
         }
     }
 
@@ -674,12 +594,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (selectedSave) {
             currentSaveId = saveId;
             gameState = selectedSave;
-
-            if (!gameState.team.players || gameState.team.players.length === 0 || !gameState.team.lineup) {
-                 generateRosterForTeam(gameState.team.name);
-                 saveAllSaves();
-            }
-
             const leagueData = getLeagueData(gameState.leagueName);
             if (!leagueData) {
                 console.error("A mentett játékhoz tartozó bajnokság nem található.");
@@ -868,61 +782,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function generateRosterForTeam(teamName) {
-        const teamPlayers = allPlayers.filter(p => p.teamName === teamName);
-        
-        const positions = { 'K': [], 'V': [], 'KP': [], 'CS': [] };
-        teamPlayers.forEach(p => {
-            if (positions[p.position]) {
-                positions[p.position].push(p);
-            }
-        });
-        
-        const roster = [
-            ...positions['K'].slice(0, 2), ...positions['V'].slice(0, 6),
-            ...positions['KP'].slice(0, 6), ...positions['CS'].slice(0, 4)
-        ].slice(0, 18);
-        gameState.team.players = roster;
-
-        const userPlayer = {
-            id: 'user_player', name: gameState.playerName, position: 'CS',
-            age: gameState.age, rating: gameState.rating, teamName: gameState.team.name, isUser: true
-        };
-        
-        const startingLineup = {
-            'slot-k1': (positions['K'][0] || roster.find(p => p.position === 'K'))?.id,
-            'slot-v1': (positions['V'][0] || roster.find(p => p.position === 'V'))?.id,
-            'slot-v2': (positions['V'][1] || roster.filter(p => p.position === 'V')[1])?.id,
-            'slot-v3': (positions['V'][2] || roster.filter(p => p.position === 'V')[2])?.id,
-            'slot-v4': (positions['V'][3] || roster.filter(p => p.position === 'V')[3])?.id,
-            'slot-kp1': (positions['KP'][0] || roster.find(p => p.position === 'KP'))?.id,
-            'slot-kp2': (positions['KP'][1] || roster.filter(p => p.position === 'KP')[1])?.id,
-            'slot-kp3': (positions['KP'][2] || roster.filter(p => p.position === 'KP')[2])?.id,
-            'slot-cs1': (positions['CS'][0] || roster.find(p => p.position === 'CS'))?.id,
-            'slot-cs2': (positions['CS'][1] || roster.filter(p => p.position === 'CS')[1])?.id,
-            'slot-cs3': (positions['CS'][2] || roster.filter(p => p.position === 'CS')[2])?.id
-        };
-
-        const playerToReplaceId = startingLineup['slot-cs1'];
-        const playerToReplaceIndex = gameState.team.players.findIndex(p => p.id === playerToReplaceId);
-        if (playerToReplaceIndex !== -1) {
-            gameState.team.players.splice(playerToReplaceIndex, 1, userPlayer);
-        } else {
-             gameState.team.players.pop();
-             gameState.team.players.push(userPlayer);
-        }
-        startingLineup['slot-cs1'] = userPlayer.id;
-
-        const startingIds = new Set(Object.values(startingLineup));
-        const reserves = gameState.team.players.filter(p => !startingIds.has(p.id));
-
-        for(let i=1; i<=7; i++) {
-            startingLineup[`slot-bench${i}`] = reserves[i-1]?.id || null;
-        }
-        
-        gameState.team.lineup = startingLineup;
-    }
-
     function startNewGame(chosenTeam) {
         const leagueData = getLeagueData(selectedLeagueName);
         const leagueTeams = leagueData.teams;
@@ -930,17 +789,25 @@ document.addEventListener('DOMContentLoaded', () => {
         gameState = {
             id: Date.now(),
             playerName: document.getElementById('playerName').value || "Játékos",
-            age: 17, nationality: selectedNationality, leagueName: selectedLeagueName,
-            rating: 60, team: chosenTeam, money: 250000, salary: 15000, 
-            goals: 0, assists: 0, matchesPlayed: 0, trophies: [],
+            age: 17,
+            nationality: selectedNationality,
+            leagueName: selectedLeagueName,
+            rating: 60,
+            team: chosenTeam,
+            money: 250000, 
+            salary: 15000, 
+            goals: 0, 
+            assists: 0, 
+            matchesPlayed: 0, 
+            trophies: [],
             clubHistory: [{ name: chosenTeam.name, year: new Date().getFullYear() + '-' }],
             league: leagueTeams.map(t => ({ name: t.name, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0 })),
-            currentMatchday: 0, jerseyNumber: Math.floor(Math.random() * 98) + 1,
+            currentMatchday: 0,
+            jerseyNumber: Math.floor(Math.random() * 98) + 1,
             schedule: generateSchedule(leagueTeams.map(t => t.name)),
-            transferOffers: [], coins: 10, team: { ...chosenTeam, formation: '4-3-3' }
+            transferOffers: [],
+            coins: 10
         };
-
-        generateRosterForTeam(chosenTeam.name);
         
         currentSaveId = gameState.id;
         allSaves.push(gameState);
@@ -979,8 +846,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!currentMatchData || currentMatchData.fixture.home !== fixture.home) {
             currentMatchData = { 
-                fixture, time: 0, homeScore: 0, awayScore: 0, playerGoals: 0, 
-                playerAssists: 0, events: [{time: 0, comment: "Kezdőrúgás!", icon: "fa-futbol"}],
+                fixture, 
+                time: 0, 
+                homeScore: 0, 
+                awayScore: 0, 
+                playerGoals: 0, 
+                playerAssists: 0, 
+                events: [{time: 0, comment: "Kezdőrúgás!", icon: "fa-futbol"}],
                 halfTimeReached: false 
             };
         }
@@ -995,15 +867,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         isPaused = false;
         document.getElementById('sim-pause-btn').innerHTML = '<i class="fas fa-pause"></i>';
-        runSimulation(homeTeam, awayTeam);
+        runSimulation();
     }
 
-    function runSimulation(homeTeam, awayTeam) {
-        const playerIsHome = gameState.team.name === homeTeam.name;
-        const playerTeamStrength = calculateTeamStrength();
-        const opponentTeamStrength = playerIsHome ? awayTeam.strength : homeTeam.strength;
-        const chanceModifier = (playerTeamStrength - opponentTeamStrength) / 200; // Növeltem a hatást
-
+    function runSimulation() {
         simulationInterval = setInterval(() => {
             if (isPaused) return;
             currentMatchData.time += 2;
@@ -1017,29 +884,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 setTimeout(() => {
                     document.getElementById('half-time-banner').classList.add('hidden');
-                    runSimulation(homeTeam, awayTeam); // Folytatás ugyanazokkal az értékekkel
+                    runSimulation();
                 }, 4000);
                 return;
             }
             
-            // Player's team chance
-            if (Math.random() < (playerIsHome ? (0.05 + chanceModifier) : (0.04 + chanceModifier))) {
+            const leagueTeams = getLeagueData(gameState.leagueName).teams;
+            const homeTeam = leagueTeams.find(t => t.name === currentMatchData.fixture.home);
+            const awayTeam = leagueTeams.find(t => t.name === currentMatchData.fixture.away);
+            
+            const playerTeam = gameState.team;
+            const playerIsHome = gameState.team.name === homeTeam.name;
+            const opponentTeam = playerIsHome ? awayTeam : homeTeam;
+            
+            const playerTeamStrength = playerTeam.strength;
+            const opponentStrength = opponentTeam.strength;
+            const chanceModifier = (playerTeamStrength - opponentStrength) / 250;
+
+            if (Math.random() < 0.15 + chanceModifier) {
                 clearInterval(simulationInterval);
                 addMatchEvent("HELYZET! A csapatod támad, most rajtad a sor!", "fa-star");
                 document.getElementById('pitch-enter-banner').classList.remove('hidden');
                 setTimeout(() => {
                     matchSimulatorOverlay.classList.add('hidden');
                     document.getElementById('pitch-enter-banner').classList.add('hidden');
-                    startMatchGame(opponentTeamStrength);
+                    startMatchGame(opponentStrength);
                 }, 2500);
                 return;
             } 
             
-            // Opponent's team chance
-            if (Math.random() < (playerIsHome ? (0.04 - chanceModifier) : (0.05 - chanceModifier))) {
+            if (Math.random() < 0.04 - chanceModifier) {
                  if(playerIsHome) currentMatchData.awayScore++; else currentMatchData.homeScore++;
-                 const opponentName = playerIsHome ? awayTeam.name : homeTeam.name;
-                 addMatchEvent(`GÓL! Az ellenfél szerzett vezetést! (${opponentName})`, "fa-futbol");
+                 addMatchEvent(`GÓL! Az ellenfél szerzett vezetést! (${opponentTeam.name})`, "fa-futbol");
             } else if (Math.random() < 0.2) {
                 addMatchEvent(getRandomCommentary(), "fa-running");
             }
@@ -1237,10 +1113,8 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSimulatorUI();
         
         setTimeout(() => {
-            const homeTeam = getLeagueData(gameState.leagueName).teams.find(t => t.name === currentMatchData.fixture.home);
-            const awayTeam = getLeagueData(gameState.leagueName).teams.find(t => t.name === currentMatchData.fixture.away);
             if (currentMatchData.time < 90) {
-                runSimulation(homeTeam, awayTeam);
+                runSimulation();
             } else {
                 endMatchGame();
             }
@@ -1399,14 +1273,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (action === 'accept') {
                 gameState.money += offer.fee;
                 gameState.salary = offer.salary;
-                const newTeamData = getTeamData(offer.teamName);
-                gameState.team.name = newTeamData.name;
-                gameState.team.logo = newTeamData.logo;
-                gameState.team.strength = newTeamData.strength;
-                gameState.team.color = newTeamData.color;
-
-                generateRosterForTeam(newTeamData.name);
-                
+                gameState.team = getTeamData(offer.teamName);
                 gameState.clubHistory.push({ name: gameState.team.name, year: '2025-' });
                 gameState.transferOffers = [];
                 gameState.goals = 0;
@@ -1478,171 +1345,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const playerTeamRow = [...gameState.league].sort((a, b) => b.points - a.points || (b.gd - a.gd)).findIndex(t => t.name === gameState.team.name) + 1;
         document.getElementById('hubLeaguePosition').textContent = playerTeamRow > 0 ? `${playerTeamRow}.` : '-';
         document.getElementById('hubMatchday').textContent = `Forduló: ${gameState.currentMatchday} / ${gameState.schedule.length}`;
-    }
-
-    let draggedSlotId = null;
-
-    function handleDragStart(e) {
-        const card = e.target.closest('.squad-player-card');
-        draggedSlotId = card.parentElement.id;
-        setTimeout(() => {
-            card.classList.add('dragging');
-        }, 0);
-    }
-
-    function handleDragEnd(e) {
-        const card = e.target.closest('.squad-player-card');
-        if(card) card.classList.remove('dragging');
-        draggedSlotId = null;
-    }
-
-    function handleDragOver(e) {
-        e.preventDefault();
-        const slot = e.target.closest('.player-slot');
-        if(slot) {
-            document.querySelectorAll('.drop-hover').forEach(el => el.classList.remove('drop-hover'));
-            slot.classList.add('drop-hover');
-        }
-    }
-
-    function handleDrop(e) {
-        e.preventDefault();
-        document.querySelectorAll('.drop-hover').forEach(el => el.classList.remove('drop-hover'));
-        const targetSlot = e.target.closest('.player-slot');
-        if (!targetSlot || !draggedSlotId) return;
-
-        const targetSlotId = targetSlot.id;
-
-        const draggedPlayerId = gameState.team.lineup[draggedSlotId];
-        const targetPlayerId = gameState.team.lineup[targetSlotId];
-        
-        gameState.team.lineup[draggedSlotId] = targetPlayerId;
-        gameState.team.lineup[targetSlotId] = draggedPlayerId;
-
-        saveAllSaves();
-        updateSquadScreen();
-    }
-
-
-    function updateSquadScreen() {
-        if (!gameState || !gameState.team || !gameState.team.players || !gameState.team.lineup) return;
-        
-        document.getElementById('squadTeamName').textContent = `${gameState.team.name} - Felállás`;
-        
-        const allSlots = document.querySelectorAll('.player-slot');
-        allSlots.forEach(slot => {
-            slot.innerHTML = '';
-            slot.addEventListener('dragover', handleDragOver);
-            slot.addEventListener('drop', handleDrop);
-        });
-
-        let totalRating = 0;
-        let playerCount = 0;
-
-        for (const slotId in gameState.team.lineup) {
-            const playerId = gameState.team.lineup[slotId];
-            const slotElement = document.getElementById(slotId);
-
-            if (playerId && slotElement) {
-                const player = gameState.team.players.find(p => p.id === playerId);
-                if (player) {
-                    if(!slotId.includes('bench')) {
-                        totalRating += player.rating;
-                        playerCount++;
-                    }
-
-                    const card = document.createElement('div');
-                    card.className = 'squad-player-card';
-                    card.draggable = true;
-                    if (player.isUser) card.classList.add('user-player-card');
-
-                    card.innerHTML = `
-                        <div class="rating">${player.rating}</div>
-                        <div class="position">${player.position}</div>
-                        <div class="name">${player.name.split(' ').pop()}</div>
-                    `;
-                    
-                    card.addEventListener('dragstart', handleDragStart);
-                    card.addEventListener('dragend', handleDragEnd);
-                    
-                    slotElement.appendChild(card);
-                }
-            }
-        }
-        document.getElementById('squadAvgRating').textContent = playerCount > 0 ? Math.round(totalRating / playerCount) : 0;
-    }
-
-    function initiatePlayerSwap(newPlayer) {
-        const overlay = document.getElementById('playerSwapModalOverlay');
-        const card = document.getElementById('playerSwapModalCard');
-        
-        gameState.team.players.push(newPlayer);
-
-        let rosterHTML = gameState.team.players.map((p, index) => {
-            if (!p) return '';
-            const isStarting = Object.values(gameState.team.lineup).includes(p.id);
-            return `
-                <div class="swap-player-row ${p.isUser ? 'is-user' : ''}">
-                    <span>(${p.position}) ${p.name}</span>
-                    <span class="stat-rating"><i class="fas fa-star"></i> ${p.rating}</span>
-                    <button class="button swap-btn" data-player-id="${p.id}">Csere</button>
-                </div>
-            `;
-        }).join('');
-
-        card.innerHTML = `
-            <h3>Játékoscsere</h3>
-            <p>Válaszd ki, kire cseréled az új igazolásodat:</p>
-            <div class="offer-player-info" style="margin-bottom: 1rem;">
-                <!-- Itt lehetne a megvett játékos kártyája -->
-                <strong>Új játékos: ${newPlayer.name} (${newPlayer.rating})</strong>
-            </div>
-            <div class="swap-roster-list">${rosterHTML}</div>
-             <button class="button prev-btn" id="cancelSwapBtn" style="margin-top: 1rem;">Mégse</button>
-        `;
-
-        overlay.classList.remove('hidden');
-
-        const cancelBtn = card.querySelector('#cancelSwapBtn');
-        const swapButtons = card.querySelectorAll('.swap-btn');
-
-        const closeHandler = () => {
-            const newPlayerIndex = gameState.team.players.findIndex(p => p.id === newPlayer.id);
-            if(newPlayerIndex !== -1) gameState.team.players.splice(newPlayerIndex, 1);
-            overlay.classList.add('hidden');
-        };
-
-        const swapHandler = (e) => {
-            const playerIdToReplace = e.target.dataset.playerId;
-            const playerIndexToReplace = gameState.team.players.findIndex(p => p.id === playerIdToReplace);
-
-            if (playerIndexToReplace !== -1) {
-                
-                // Find which slot the old player was in
-                let slotToReplace = null;
-                for (const slotId in gameState.team.lineup) {
-                    if (gameState.team.lineup[slotId] === playerIdToReplace) {
-                        slotToReplace = slotId;
-                        break;
-                    }
-                }
-                
-                // Replace in main player array
-                gameState.team.players.splice(playerIndexToReplace, 1, newPlayer);
-
-                // Update lineup if the replaced player was in it
-                if (slotToReplace) {
-                    gameState.team.lineup[slotToReplace] = newPlayer.id;
-                }
-                
-                saveAllSaves();
-                updateUI();
-                overlay.classList.add('hidden');
-            }
-        };
-
-        cancelBtn.addEventListener('click', closeHandler);
-        swapButtons.forEach(btn => btn.addEventListener('click', swapHandler));
     }
     
     function updateLeagueTable() {
@@ -1722,7 +1424,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event Listenerek
     allNavButtons.forEach(button => button.addEventListener('click', () => showScreen(button.dataset.screen)));
     document.getElementById('profileBtn')?.addEventListener('click', () => showScreen('profileScreen'));
-    document.getElementById('dashboardProfileCard')?.addEventListener('click', () => showScreen('squadScreen'));
     document.getElementById('playMatchBtn')?.addEventListener('click', playNextMatch);
     document.getElementById('matchResultContinueBtn')?.addEventListener('click', showMainHub);
     document.getElementById('sim-pause-btn')?.addEventListener('click', togglePause);
