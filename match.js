@@ -83,9 +83,9 @@ function processMatchResult(result) {
 
 function showMatchResult(result) {
     const leagueTeams = getLeagueData(gameState.leagueName).teams;
-    document.getElementById('resultHomeLogo').src = leagueTeams.find(t => t.name === result.homeName) ? .logo || '';
+    document.getElementById('resultHomeLogo').src = leagueTeams.find(t => t.name === result.homeName)?.logo || '';
     document.getElementById('resultHomeName').textContent = result.homeName;
-    document.getElementById('resultAwayLogo').src = leagueTeams.find(t => t.name === result.awayName) ? .logo || '';
+    document.getElementById('resultAwayLogo').src = leagueTeams.find(t => t.name === result.awayName)?.logo || '';
     document.getElementById('resultAwayName').textContent = result.awayName;
     document.getElementById('resultScore').textContent = `${result.homeScore} - ${result.awayScore}`;
     let bonus = 0;
