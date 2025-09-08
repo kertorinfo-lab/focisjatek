@@ -229,41 +229,35 @@
                 <div id="squadScreen" class="screen hidden">
                     <div class="squad-header">
                         <h2 id="squadTeamName">Csapatom</h2>
+                        <div id="formationSelector" class="formation-selector"></div>
                         <div class="squad-avg-rating">Átl. Értékelés: <span id="squadAvgRating">0</span></div>
                     </div>
                     <div class="squad-container">
                         <div class="pitch">
                             <div class="pitch-lines"></div>
                             <div class="formation" id="formation-forwards">
-                                <div class="player-slot" id="slot-cs1"></div>
-                                <div class="player-slot" id="slot-cs2"></div>
-                                <div class="player-slot" id="slot-cs3"></div>
+                                <div class="player-slot" data-pos="CS"></div><div class="player-slot" data-pos="CS"></div>
+                                <div class="player-slot" data-pos="CS"></div><div class="player-slot" data-pos="CS"></div>
+                                <div class="player-slot" data-pos="CS"></div>
                             </div>
                             <div class="formation" id="formation-midfielders">
-                                <div class="player-slot" id="slot-kp1"></div>
-                                <div class="player-slot" id="slot-kp2"></div>
-                                <div class="player-slot" id="slot-kp3"></div>
+                                <div class="player-slot" data-pos="KP"></div><div class="player-slot" data-pos="KP"></div>
+                                <div class="player-slot" data-pos="KP"></div><div class="player-slot" data-pos="KP"></div>
+                                <div class="player-slot" data-pos="KP"></div>
                             </div>
                             <div class="formation" id="formation-defenders">
-                                <div class="player-slot" id="slot-v1"></div>
-                                <div class="player-slot" id="slot-v2"></div>
-                                <div class="player-slot" id="slot-v3"></div>
-                                <div class="player-slot" id="slot-v4"></div>
+                                <div class="player-slot" data-pos="V"></div><div class="player-slot" data-pos="V"></div>
+                                <div class="player-slot" data-pos="V"></div><div class="player-slot" data-pos="V"></div>
+                                <div class="player-slot" data-pos="V"></div>
                             </div>
                             <div class="formation" id="formation-goalkeeper">
-                                <div class="player-slot" id="slot-k1"></div>
+                                <div class="player-slot" data-pos="K"></div>
                             </div>
                         </div>
                         <div class="squad-bench">
                             <h3>Cserék</h3>
                             <div class="bench-players" id="bench-players">
-                                <div class="player-slot" id="slot-bench1"></div>
-                                <div class="player-slot" id="slot-bench2"></div>
-                                <div class="player-slot" id="slot-bench3"></div>
-                                <div class="player-slot" id="slot-bench4"></div>
-                                <div class="player-slot" id="slot-bench5"></div>
-                                <div class="player-slot" id="slot-bench6"></div>
-                                <div class="player-slot" id="slot-bench7"></div>
+                                <!-- Bench player slots will be dynamically managed -->
                             </div>
                         </div>
                     </div>
@@ -377,6 +371,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return `€${value}`;
     }
+    
+    // ÚJ FÜGGVÉNY: Csapaterősség számítása a kezdő alapján
+    function calculateTeamStrength() {
+        if (!gameState.team || !gameState.team.lineup || !gameState.team.players) {
+            return 70; // Alapértelmezett érték, ha valami hiba történik
+        }
+
+        let totalRating = 0;
+        let playerCount = 0;
+        
+        const startingLineup = Object.values(gameState.team.lineup).filter(id => id !== null);
+
+        for (const slotId in gameState.team.lineup) {
+             if (!slotId.startsWith('slot-bench') && gameState.team.lineup[slotId]) {
+                 const player = gameState.team.players.find(p => p.id === gameState.team.lineup[slotId]);
+                 if(player) {
+                    totalRating += player.rating;
+                    playerCount++;
+                 }
+             }
+        }
+       
+        if(playerCount !== 11 && playerCount > 0) {
+            console.warn(`Warning: Starting lineup has ${playerCount} players instead of 11.`);
+        }
+
+        const averageRating = playerCount > 0 ? Math.round(totalRating / playerCount) : 60;
+        gameState.team.strength = averageRating; // Frissítjük a gameState-et
+        return averageRating;
+    }
+
 
     function generateAllPlayers() {
         allPlayers = [];
@@ -912,7 +937,7 @@ document.addEventListener('DOMContentLoaded', () => {
             league: leagueTeams.map(t => ({ name: t.name, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0 })),
             currentMatchday: 0, jerseyNumber: Math.floor(Math.random() * 98) + 1,
             schedule: generateSchedule(leagueTeams.map(t => t.name)),
-            transferOffers: [], coins: 10
+            transferOffers: [], coins: 10, team: { ...chosenTeam, formation: '4-3-3' }
         };
 
         generateRosterForTeam(chosenTeam.name);
@@ -970,10 +995,15 @@ document.addEventListener('DOMContentLoaded', () => {
         
         isPaused = false;
         document.getElementById('sim-pause-btn').innerHTML = '<i class="fas fa-pause"></i>';
-        runSimulation();
+        runSimulation(homeTeam, awayTeam);
     }
 
-    function runSimulation() {
+    function runSimulation(homeTeam, awayTeam) {
+        const playerIsHome = gameState.team.name === homeTeam.name;
+        const playerTeamStrength = calculateTeamStrength();
+        const opponentTeamStrength = playerIsHome ? awayTeam.strength : homeTeam.strength;
+        const chanceModifier = (playerTeamStrength - opponentTeamStrength) / 200; // Növeltem a hatást
+
         simulationInterval = setInterval(() => {
             if (isPaused) return;
             currentMatchData.time += 2;
@@ -987,38 +1017,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 setTimeout(() => {
                     document.getElementById('half-time-banner').classList.add('hidden');
-                    runSimulation();
+                    runSimulation(homeTeam, awayTeam); // Folytatás ugyanazokkal az értékekkel
                 }, 4000);
                 return;
             }
             
-            const leagueTeams = getLeagueData(gameState.leagueName).teams;
-            const homeTeam = leagueTeams.find(t => t.name === currentMatchData.fixture.home);
-            const awayTeam = leagueTeams.find(t => t.name === currentMatchData.fixture.away);
-            
-            const playerTeam = gameState.team;
-            const playerIsHome = gameState.team.name === homeTeam.name;
-            const opponentTeam = playerIsHome ? awayTeam : homeTeam;
-            
-            const playerTeamStrength = playerTeam.strength;
-            const opponentStrength = opponentTeam.strength;
-            const chanceModifier = (playerTeamStrength - opponentStrength) / 250;
-
-            if (Math.random() < 0.15 + chanceModifier) {
+            // Player's team chance
+            if (Math.random() < (playerIsHome ? (0.05 + chanceModifier) : (0.04 + chanceModifier))) {
                 clearInterval(simulationInterval);
                 addMatchEvent("HELYZET! A csapatod támad, most rajtad a sor!", "fa-star");
                 document.getElementById('pitch-enter-banner').classList.remove('hidden');
                 setTimeout(() => {
                     matchSimulatorOverlay.classList.add('hidden');
                     document.getElementById('pitch-enter-banner').classList.add('hidden');
-                    startMatchGame(opponentStrength);
+                    startMatchGame(opponentTeamStrength);
                 }, 2500);
                 return;
             } 
             
-            if (Math.random() < 0.04 - chanceModifier) {
+            // Opponent's team chance
+            if (Math.random() < (playerIsHome ? (0.04 - chanceModifier) : (0.05 - chanceModifier))) {
                  if(playerIsHome) currentMatchData.awayScore++; else currentMatchData.homeScore++;
-                 addMatchEvent(`GÓL! Az ellenfél szerzett vezetést! (${opponentTeam.name})`, "fa-futbol");
+                 const opponentName = playerIsHome ? awayTeam.name : homeTeam.name;
+                 addMatchEvent(`GÓL! Az ellenfél szerzett vezetést! (${opponentName})`, "fa-futbol");
             } else if (Math.random() < 0.2) {
                 addMatchEvent(getRandomCommentary(), "fa-running");
             }
@@ -1216,8 +1237,10 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSimulatorUI();
         
         setTimeout(() => {
+            const homeTeam = getLeagueData(gameState.leagueName).teams.find(t => t.name === currentMatchData.fixture.home);
+            const awayTeam = getLeagueData(gameState.leagueName).teams.find(t => t.name === currentMatchData.fixture.away);
             if (currentMatchData.time < 90) {
-                runSimulation();
+                runSimulation(homeTeam, awayTeam);
             } else {
                 endMatchGame();
             }
@@ -1457,61 +1480,112 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('hubMatchday').textContent = `Forduló: ${gameState.currentMatchday} / ${gameState.schedule.length}`;
     }
 
+    let draggedSlotId = null;
+
+    function handleDragStart(e) {
+        const card = e.target.closest('.squad-player-card');
+        draggedSlotId = card.parentElement.id;
+        setTimeout(() => {
+            card.classList.add('dragging');
+        }, 0);
+    }
+
+    function handleDragEnd(e) {
+        const card = e.target.closest('.squad-player-card');
+        if(card) card.classList.remove('dragging');
+        draggedSlotId = null;
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        const slot = e.target.closest('.player-slot');
+        if(slot) {
+            document.querySelectorAll('.drop-hover').forEach(el => el.classList.remove('drop-hover'));
+            slot.classList.add('drop-hover');
+        }
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        document.querySelectorAll('.drop-hover').forEach(el => el.classList.remove('drop-hover'));
+        const targetSlot = e.target.closest('.player-slot');
+        if (!targetSlot || !draggedSlotId) return;
+
+        const targetSlotId = targetSlot.id;
+
+        const draggedPlayerId = gameState.team.lineup[draggedSlotId];
+        const targetPlayerId = gameState.team.lineup[targetSlotId];
+        
+        gameState.team.lineup[draggedSlotId] = targetPlayerId;
+        gameState.team.lineup[targetSlotId] = draggedPlayerId;
+
+        saveAllSaves();
+        updateSquadScreen();
+    }
+
+
     function updateSquadScreen() {
-        if (!gameState || !gameState.team || !gameState.team.players) return;
+        if (!gameState || !gameState.team || !gameState.team.players || !gameState.team.lineup) return;
         
         document.getElementById('squadTeamName').textContent = `${gameState.team.name} - Felállás`;
-
-        const formation = {
-            'goalkeeper': document.getElementById('formation-goalkeeper'),
-            'defenders': document.getElementById('formation-defenders'),
-            'midfielders': document.getElementById('formation-midfielders'),
-            'forwards': document.getElementById('formation-forwards'),
-        };
-
-        // Clear previous players
-        Object.values(formation).forEach(el => el.innerHTML = '');
-
-        const playersByPos = { 'K': [], 'V': [], 'KP': [], 'CS': [] };
-        gameState.team.players.forEach(p => {
-             if(p && playersByPos[p.position]) {
-                playersByPos[p.position].push(p);
-             }
+        
+        const allSlots = document.querySelectorAll('.player-slot');
+        allSlots.forEach(slot => {
+            slot.innerHTML = '';
+            slot.addEventListener('dragover', handleDragOver);
+            slot.addEventListener('drop', handleDrop);
         });
 
-        const appendPlayer = (player, container) => {
-             const playerDiv = document.createElement('div');
-             playerDiv.className = 'squad-player';
-             if (player.isUser) {
-                 playerDiv.classList.add('user-player');
-             }
-             playerDiv.innerHTML = `
-                <div class="squad-player-jersey">
-                    <i class="fas fa-tshirt"></i>
-                    <span class="squad-player-rating">${player.rating}</span>
-                </div>
-                <div class="squad-player-name">${player.name.split(' ').pop()}</div>
-             `;
-             container.appendChild(playerDiv);
-        };
-        
-        playersByPos['K'].forEach(p => appendPlayer(p, formation.goalkeeper));
-        playersByPos['V'].forEach(p => appendPlayer(p, formation.defenders));
-        playersByPos['KP'].forEach(p => appendPlayer(p, formation.midfielders));
-        playersByPos['CS'].forEach(p => appendPlayer(p, formation.forwards));
+        let totalRating = 0;
+        let playerCount = 0;
+
+        for (const slotId in gameState.team.lineup) {
+            const playerId = gameState.team.lineup[slotId];
+            const slotElement = document.getElementById(slotId);
+
+            if (playerId && slotElement) {
+                const player = gameState.team.players.find(p => p.id === playerId);
+                if (player) {
+                    if(!slotId.includes('bench')) {
+                        totalRating += player.rating;
+                        playerCount++;
+                    }
+
+                    const card = document.createElement('div');
+                    card.className = 'squad-player-card';
+                    card.draggable = true;
+                    if (player.isUser) card.classList.add('user-player-card');
+
+                    card.innerHTML = `
+                        <div class="rating">${player.rating}</div>
+                        <div class="position">${player.position}</div>
+                        <div class="name">${player.name.split(' ').pop()}</div>
+                    `;
+                    
+                    card.addEventListener('dragstart', handleDragStart);
+                    card.addEventListener('dragend', handleDragEnd);
+                    
+                    slotElement.appendChild(card);
+                }
+            }
+        }
+        document.getElementById('squadAvgRating').textContent = playerCount > 0 ? Math.round(totalRating / playerCount) : 0;
     }
 
     function initiatePlayerSwap(newPlayer) {
         const overlay = document.getElementById('playerSwapModalOverlay');
         const card = document.getElementById('playerSwapModalCard');
         
+        gameState.team.players.push(newPlayer);
+
         let rosterHTML = gameState.team.players.map((p, index) => {
             if (!p) return '';
+            const isStarting = Object.values(gameState.team.lineup).includes(p.id);
             return `
-                <div class="swap-player-row">
+                <div class="swap-player-row ${p.isUser ? 'is-user' : ''}">
                     <span>(${p.position}) ${p.name}</span>
                     <span class="stat-rating"><i class="fas fa-star"></i> ${p.rating}</span>
-                    <button class="button swap-btn" data-index="${index}">Csere</button>
+                    <button class="button swap-btn" data-player-id="${p.id}">Csere</button>
                 </div>
             `;
         }).join('');
@@ -1520,11 +1594,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <h3>Játékoscsere</h3>
             <p>Válaszd ki, kire cseréled az új igazolásodat:</p>
             <div class="offer-player-info" style="margin-bottom: 1rem;">
-                <img src="${newPlayer.teamLogo}" alt="${newPlayer.teamName}">
-                <div>
-                    <strong>${newPlayer.name} (${newPlayer.position})</strong>
-                    <p class="stat-rating"><i class="fas fa-star"></i> ${newPlayer.rating}</p>
-                </div>
+                <!-- Itt lehetne a megvett játékos kártyája -->
+                <strong>Új játékos: ${newPlayer.name} (${newPlayer.rating})</strong>
             </div>
             <div class="swap-roster-list">${rosterHTML}</div>
              <button class="button prev-btn" id="cancelSwapBtn" style="margin-top: 1rem;">Mégse</button>
@@ -1532,24 +1603,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
         overlay.classList.remove('hidden');
 
-        card.addEventListener('click', (e) => {
-            if (e.target.classList.contains('swap-btn')) {
-                const index = parseInt(e.target.dataset.index, 10);
+        const cancelBtn = card.querySelector('#cancelSwapBtn');
+        const swapButtons = card.querySelectorAll('.swap-btn');
+
+        const closeHandler = () => {
+            const newPlayerIndex = gameState.team.players.findIndex(p => p.id === newPlayer.id);
+            if(newPlayerIndex !== -1) gameState.team.players.splice(newPlayerIndex, 1);
+            overlay.classList.add('hidden');
+        };
+
+        const swapHandler = (e) => {
+            const playerIdToReplace = e.target.dataset.playerId;
+            const playerIndexToReplace = gameState.team.players.findIndex(p => p.id === playerIdToReplace);
+
+            if (playerIndexToReplace !== -1) {
                 
-                // Add correct team info to the new player
-                newPlayer.teamName = gameState.team.name;
-                newPlayer.teamLogo = gameState.team.logo;
+                // Find which slot the old player was in
+                let slotToReplace = null;
+                for (const slotId in gameState.team.lineup) {
+                    if (gameState.team.lineup[slotId] === playerIdToReplace) {
+                        slotToReplace = slotId;
+                        break;
+                    }
+                }
+                
+                // Replace in main player array
+                gameState.team.players.splice(playerIndexToReplace, 1, newPlayer);
 
-                gameState.team.players[index] = newPlayer;
-
+                // Update lineup if the replaced player was in it
+                if (slotToReplace) {
+                    gameState.team.lineup[slotToReplace] = newPlayer.id;
+                }
+                
                 saveAllSaves();
-                updateSquadScreen();
+                updateUI();
                 overlay.classList.add('hidden');
             }
-             if (e.target.id === 'cancelSwapBtn') {
-                overlay.classList.add('hidden');
-            }
-        });
+        };
+
+        cancelBtn.addEventListener('click', closeHandler);
+        swapButtons.forEach(btn => btn.addEventListener('click', swapHandler));
     }
     
     function updateLeagueTable() {
