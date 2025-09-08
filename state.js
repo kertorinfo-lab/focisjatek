@@ -43,7 +43,8 @@ export function loadSelectedGame(saveId) {
         gameState = selectedSave;
 
         if (!gameState.team.players || gameState.team.players.length === 0) {
-            generateRosterForTeam(gameState.team.name);
+            // JAVÍTVA: Átadjuk a gameState-et paraméterként
+            generateRosterForTeam(gameState.team.name, gameState);
         }
 
         if (!gameState.schedule || gameState.schedule.length === 0 || gameState.currentMatchday >= gameState.schedule.length) {
@@ -107,7 +108,8 @@ export function startNewGame(playerName, nationality, leagueName, chosenTeam) {
         coins: 10
     };
 
-    generateRosterForTeam(chosenTeam.name);
+    // JAVÍTVA: Átadjuk az újonnan létrehozott gameState-et paraméterként
+    generateRosterForTeam(chosenTeam.name, gameState);
 
     currentSaveId = gameState.id;
     allSaves.push(gameState);
