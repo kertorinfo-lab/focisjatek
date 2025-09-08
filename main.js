@@ -1,46 +1,35 @@
-import { initEventListeners, showMainMenu } from './ui.js';
 import { loadAllSaves } from './state.js';
 import { generateAllPlayers } from './data.js';
+import { showMainMenu, initEventListeners } from './ui.js';
 
-// --- A JÁTÉK FŐ BELÉPÉSI PONTJA ---
-
-// Globális DOM elemek
-const loadingScreen = document.getElementById('loadingScreen');
-const loadingBar = document.getElementById('loadingBar');
-
-/**
- * A játék fő inicializáló függvénye.
- * Lefut, miután a HTML DOM teljesen betöltődött.
- */
 function main() {
-    // Korábbi mentések betöltése a local storage-ből
     loadAllSaves();
-    
-    // Minden UI eseményfigyelő (gombnyomás, stb.) beállítása
-    initEventListeners();
+    let progress = 0;
+    const loadingBar = document.getElementById('loadingBar');
+    const loadingScreen = document.getElementById('loadingScreen');
 
-    // A játékvilág összes játékosának generálása a háttérben
+    // Generate players after a short delay to allow other scripts to load
+    // This is part of the loading simulation
     setTimeout(() => {
         generateAllPlayers();
     }, 100);
 
-    // Betöltőképernyő animációja és elrejtése
-    let progress = 0;
     const loadingInterval = setInterval(() => {
-        progress += 5;
+        progress += 5; // Simulate loading progress
         loadingBar.style.width = `${progress}%`;
         if (progress >= 100) {
             clearInterval(loadingInterval);
             loadingScreen.classList.add('fade-out');
             setTimeout(() => {
                 loadingScreen.classList.add('hidden');
-                // A betöltés után a főmenü megjelenítése
                 showMainMenu();
+                initEventListeners(); // Initialize listeners AFTER everything is ready
             }, 500);
         }
     }, 50);
 }
 
-// Az alkalmazás indítása
+// JAVÍTVA: A `main` függvényt csak akkor hívjuk meg, ha a DOM teljesen betöltődött.
+// Ez biztosítja, hogy a leagues.js, names.js stb. fájlok már betöltődtek és elérhetőek.
 document.addEventListener('DOMContentLoaded', main);
 
