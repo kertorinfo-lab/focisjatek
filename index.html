@@ -118,7 +118,6 @@
                 <i class="fas fa-running"></i>
                 <span id="bannerPlayerName"></span> is on the pitch!
             </div>
-            <!-- ÚJ ELEM: Félidő banner -->
             <div id="half-time-banner" class="pitch-enter-banner hidden">
                 <i class="fas fa-coffee"></i>
                 <span>Félidő</span>
@@ -178,9 +177,13 @@
                     <span id="headerPlayerName">Játékos Neve</span>
                 </button>
                 <div class="currency-display">
-                    <div class="currency-item" id="coinStoreBtn">
-                        <i class="fas fa-coins"></i>
-                        <span id="headerPlayerBalance">0</span>
+                    <div class="currency-item">
+                        <i class="fas fa-money-bill-wave" style="color: #2ecc71;"></i>
+                        <span id="headerPlayerMoney">0</span>
+                    </div>
+                    <div class="currency-item">
+                        <i class="fas fa-coins" style="color: #f1c40f;"></i>
+                        <span id="headerPlayerCoins">0</span>
                     </div>
                 </div>
             </header>
@@ -309,9 +312,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return arr[Math.floor(Math.random() * arr.length)];
     }
 
-    // ÚJ FÜGGVÉNY: Névgenerátor
     function generatePlayerName(nationalityCode) {
-        const nameData = NAMES[nationalityCode] || NAMES['en']; // Alapértelmezett angol, ha nincs a listában
+        const nameData = NAMES[nationalityCode] || NAMES['en'];
         const firstName = getRandomElement(nameData.firstNames);
         const lastName = getRandomElement(nameData.lastNames);
         return `${firstName} ${lastName}`;
@@ -342,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const natCode = getRandomElement(natCodes);
 
                         allPlayers.push({
-                            name: generatePlayerName(natCode), // MÓDOSÍTÁS: Név generálása
+                            name: generatePlayerName(natCode),
                             position: getRandomElement(positions),
                             age: age,
                             rating: playerStrength,
@@ -792,14 +794,19 @@ document.addEventListener('DOMContentLoaded', () => {
             leagueName: selectedLeagueName,
             rating: 60,
             team: chosenTeam,
-            money: 250000, salary: 15000, goals: 0, assists: 0, matchesPlayed: 0, trophies: [],
+            money: 250000, 
+            salary: 15000, 
+            goals: 0, 
+            assists: 0, 
+            matchesPlayed: 0, 
+            trophies: [],
             clubHistory: [{ name: chosenTeam.name, year: new Date().getFullYear() + '-' }],
             league: leagueTeams.map(t => ({ name: t.name, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0 })),
             currentMatchday: 0,
             jerseyNumber: Math.floor(Math.random() * 98) + 1,
             schedule: generateSchedule(leagueTeams.map(t => t.name)),
             transferOffers: [],
-            diamonds: 10
+            coins: 10
         };
         
         currentSaveId = gameState.id;
@@ -837,7 +844,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const homeTeam = leagueTeams.find(t => t.name === fixture.home);
         const awayTeam = leagueTeams.find(t => t.name === fixture.away);
 
-        // MÓDOSÍTÁS: Félidő flag hozzáadása
         if (!currentMatchData || currentMatchData.fixture.home !== fixture.home) {
             currentMatchData = { 
                 fixture, 
@@ -869,7 +875,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isPaused) return;
             currentMatchData.time += 2;
             
-            // MÓDOSÍTÁS: Félidő logika
             if (currentMatchData.time >= 45 && !currentMatchData.halfTimeReached) {
                 currentMatchData.halfTimeReached = true;
                 clearInterval(simulationInterval);
@@ -879,9 +884,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 setTimeout(() => {
                     document.getElementById('half-time-banner').classList.add('hidden');
-                    runSimulation(); // Szimuláció folytatása
-                }, 4000); // 4 másodperces szünet
-                return; // Megállítjuk a jelenlegi interval futást
+                    runSimulation();
+                }, 4000);
+                return;
             }
             
             const leagueTeams = getLeagueData(gameState.leagueName).teams;
@@ -1316,7 +1321,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function updateNavButtons(activeScreenId) { allNavButtons.forEach(btn => { btn.classList.toggle('active', btn.dataset.screen === activeScreenId); }); }
     
-    function updateHeaderUI() { document.getElementById('headerPlayerName').textContent = gameState.playerName; document.getElementById('headerPlayerBalance').textContent = (gameState.money || 0).toLocaleString(); }
+    function updateHeaderUI() { 
+        document.getElementById('headerPlayerName').textContent = gameState.playerName; 
+        document.getElementById('headerPlayerMoney').textContent = (gameState.money || 0).toLocaleString();
+        document.getElementById('headerPlayerCoins').textContent = (gameState.coins || 0).toLocaleString();
+    }
     function updateDashboardUI() {
         document.getElementById('hubPlayerName').textContent = gameState.playerName;
         document.getElementById('hubPlayerTeamName').textContent = gameState.team.name;
@@ -1457,3 +1466,4 @@ document.addEventListener('DOMContentLoaded', () => {
     </script>
 </body>
 </html>
+
