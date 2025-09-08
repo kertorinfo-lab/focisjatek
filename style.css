@@ -1,19 +1,18 @@
-/* --- ALAP STÍLUSOK ÉS VÁLTOZÓK --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
-    --primary-color: #3498db;
-    --primary-hover: #2980b9;
-    --secondary-color: #2ecc71;
-    --secondary-hover: #27ae60;
-    --danger-color: #e74c3c;
-    --background-color: #1c1c1c;
-    --surface-color: #2a2a2a;
-    --surface-darker: #222;
-    --text-color: #ecf0f1;
-    --text-muted: #95a5a6;
-    --border-color: #3d3d3d;
-    --font-family: 'Poppins', 'Helvetica Neue', sans-serif;
-    --border-radius: 12px;
-    --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    --primary-color: #007bff;
+    --primary-hover: #0056b3;
+    --background-color: #121212;
+    --surface-color: #1e1e1e;
+    --surface-light: #2a2a2a;
+    --text-primary: #ffffff;
+    --text-muted: #a0a0a0;
+    --border-color: #333333;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --font-family: 'Inter', sans-serif;
 }
 
 * {
@@ -28,81 +27,26 @@ html, body {
     overflow: hidden;
     font-family: var(--font-family);
     background-color: var(--background-color);
-    color: var(--text-color);
-    -webkit-tap-highlight-color: transparent; /* Mobilon ne villanjon fel a gomb */
-}
-
-h1, h2, h3, h4 {
-    font-weight: 600;
+    color: var(--text-primary);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .hidden {
     display: none !important;
 }
 
-/* --- GOMBOK ÉS INPUT MEZŐK --- */
-.button {
-    padding: 12px 24px;
-    border: none;
-    border-radius: var(--border-radius);
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.button.next-btn, .button.submit-btn, .button.continue-btn {
-    background: linear-gradient(45deg, var(--primary-color), #5dade2);
-    color: white;
-    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
-}
-
-.button.next-btn:hover, .button.submit-btn:hover, .button.continue-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(52, 152, 219, 0.4);
-}
-
-.button.prev-btn {
-    background-color: var(--surface-color);
-    color: var(--text-muted);
-    border: 1px solid var(--border-color);
-}
-
-.button.prev-btn:hover {
-    background-color: var(--border-color);
-    color: var(--text-color);
-}
-
-input[type="text"], input[type="number"], select {
-    width: 100%;
-    padding: 12px;
-    background-color: var(--surface-darker);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    color: var(--text-color);
-    font-size: 1rem;
-}
-
-input:focus, select:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
-}
-
-/* --- TÖLTŐKÉPERNYŐ --- */
+/* --- Betöltőképernyő --- */
 .loading-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: #111;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    background-color: var(--background-color);
     z-index: 1000;
     transition: opacity 0.5s ease-out;
 }
@@ -119,18 +63,16 @@ input:focus, select:focus {
     100% { transform: rotate(360deg); }
 }
 .loading-title {
-    font-size: 2.5rem;
-    margin-top: 20px;
+    font-size: 2rem;
+    margin: 1.5rem 0;
     letter-spacing: 2px;
-    text-transform: uppercase;
 }
 .loading-bar-container {
     width: 80%;
     max-width: 400px;
     height: 10px;
-    background-color: var(--surface-color);
+    background-color: var(--surface-light);
     border-radius: 5px;
-    margin-top: 20px;
     overflow: hidden;
 }
 .loading-bar {
@@ -141,53 +83,69 @@ input:focus, select:focus {
     transition: width 0.1s linear;
 }
 
-/* --- FŐMENÜ --- */
+/* --- Főmenü & Mentések --- */
 .main-menu-container {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    height: 100%;
     padding: 2rem;
 }
 .menu-title {
-    font-size: 3rem;
+    font-size: 2.5rem;
     margin-bottom: 2rem;
 }
 .menu-buttons {
     margin-bottom: 2rem;
 }
+.button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.button:hover {
+    background-color: var(--primary-hover);
+}
+.button.prev-btn {
+    background-color: var(--surface-light);
+}
+.button.prev-btn:hover {
+    background-color: var(--border-color);
+}
 .save-slots-container {
     width: 100%;
     max-width: 500px;
-    max-height: 50vh;
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    max-height: 50vh;
+    overflow-y: auto;
 }
 .save-slot {
+    background-color: var(--surface-color);
+    padding: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    transition: border-color 0.2s;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: var(--surface-color);
-    padding: 1rem;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.2s;
-    border-left: 5px solid transparent;
 }
 .save-slot:hover {
-    background-color: var(--border-color);
-    transform: translateX(5px);
-    border-left-color: var(--primary-color);
+    border-color: var(--primary-color);
 }
-.save-slot-info h4 {
-    margin: 0;
-    color: var(--text-color);
+.save-slot h4 {
+    margin-bottom: 0.25rem;
 }
-.save-slot-info p {
-    margin: 0;
+.save-slot p {
     color: var(--text-muted);
     font-size: 0.9rem;
 }
@@ -203,184 +161,167 @@ input:focus, select:focus {
     color: var(--danger-color);
 }
 
-/* --- KARAKTERKÉSZÍTŐ --- */
+/* --- Karakterkészítő --- */
 .character-creator-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    padding: 1rem;
+    height: 100%;
     overflow: hidden;
 }
 .form-carousel {
     display: flex;
-    width: 100%;
     transition: transform 0.5s ease-in-out;
+    width: 100%;
 }
 .form-step {
     flex: 0 0 100%;
-    width: 100%;
+    padding: 2rem;
     max-width: 500px;
     margin: 0 auto;
-    padding: 2rem;
-    background-color: var(--surface-color);
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+    text-align: center;
 }
 .form-step h2 {
-    text-align: center;
+    margin-bottom: 0.5rem;
 }
 .form-description {
-    text-align: center;
     color: var(--text-muted);
-    margin-top: -1rem;
+    margin-bottom: 2rem;
+}
+input[type="text"], input[type="number"], select {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    margin-bottom: 2rem;
 }
 .navigation-buttons {
     display: flex;
     justify-content: space-between;
-    width: 100%;
+    margin-top: 2rem;
 }
-.navigation-buttons .button {
-    flex-grow: 1;
-    margin: 0 0.5rem;
-}
-
-/* Custom Select (Nemzetiség) */
 .custom-select-wrapper {
     position: relative;
     width: 100%;
+    margin-bottom: 2rem;
 }
 .select-button {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px;
-    background-color: var(--surface-darker);
+    background-color: var(--surface-color);
     border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     cursor: pointer;
 }
 .selected-option {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 0.75rem;
 }
 .selected-option img {
     width: 30px;
-    height: 20px;
-    object-fit: cover;
-    border-radius: 3px;
 }
 .select-options {
     position: absolute;
-    top: 105%;
+    top: 110%;
     left: 0;
-    right: 0;
-    background-color: var(--surface-darker);
+    width: 100%;
+    background-color: var(--surface-color);
     border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    z-index: 10;
-    max-height: 200px;
+    border-radius: 8px;
+    max-height: 250px;
     overflow-y: auto;
+    z-index: 10;
 }
-.select-options .option {
+.option {
+    padding: 12px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px;
+    gap: 0.75rem;
     cursor: pointer;
     transition: background-color 0.2s;
 }
-.select-options .option:hover {
-    background-color: var(--border-color);
+.option:hover {
+    background-color: var(--surface-light);
 }
-.select-options .option img {
+.option img {
     width: 30px;
-    height: 20px;
-    object-fit: cover;
-    border-radius: 3px;
 }
-
-/* Liga Választó */
 .league-select-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 10px;
+    gap: 1rem;
 }
 .league-select-btn {
-    padding: 1rem 0.5rem;
-    background-color: var(--surface-darker);
+    padding: 1rem;
+    background-color: var(--surface-color);
     border: 1px solid var(--border-color);
-    color: var(--text-color);
-    border-radius: var(--border-radius);
+    color: var(--text-primary);
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
-    font-size: 0.9rem;
 }
 .league-select-btn.active, .league-select-btn:hover {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
-    color: white;
-    transform: translateY(-2px);
 }
-
-/* Szerződés Ajánlatok */
 .contract-offers-container {
     display: flex;
-    gap: 1rem;
+    gap: 1.5rem;
     justify-content: center;
+    margin-top: 2rem;
 }
 .contract-offer-card {
-    background-color: var(--surface-darker);
+    background-color: var(--surface-color);
     padding: 1.5rem;
-    border-radius: var(--border-radius);
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
+    border-radius: 12px;
     border: 1px solid var(--border-color);
+    text-align: center;
+    width: 200px;
 }
 .contract-offer-card img {
     width: 60px;
     height: 60px;
-    object-fit: contain;
+    margin-bottom: 1rem;
 }
 .contract-offer-card h3 {
-    margin: 0;
+    margin-bottom: 0.5rem;
+}
+.contract-offer-card p {
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
 }
 .contract-offer-card .button {
     width: 100%;
 }
 
-/* --- ÁLTALÁNOS FELÜLETEK (OVERLAYS, CARDS) --- */
+/* --- Overlay & Modals --- */
 .overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 500;
     padding: 1rem;
+    z-index: 500;
 }
 .card {
     background-color: var(--surface-color);
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
+    padding: 1.5rem;
+    border-radius: 12px;
     width: 100%;
-    max-width: 500px;
+    max-width: 450px;
     text-align: center;
 }
-
-/* Meccs Eredmény Overlay */
 .match-result-header {
     display: flex;
     justify-content: space-around;
@@ -395,65 +336,95 @@ input:focus, select:focus {
     width: 100px;
 }
 .match-result-team img {
-    width: 60px;
-    height: 60px;
-    object-fit: contain;
+    width: 50px;
+    height: 50px;
 }
 .match-result-score {
     font-size: 2.5rem;
-    font-weight: bold;
+    font-weight: 700;
 }
 .match-summary {
     text-align: left;
     margin-bottom: 1.5rem;
-    background: var(--surface-darker);
+    background: var(--surface-light);
     padding: 1rem;
-    border-radius: var(--border-radius);
+    border-radius: 8px;
 }
 .match-summary h4 {
-    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+    color: var(--text-muted);
 }
 .match-summary p {
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
 }
 
-/* --- FŐ FELÜLET (HUB) --- */
+/* Player Swap Modal */
+.swap-roster-list {
+    max-height: 50vh;
+    overflow-y: auto;
+    margin-top: 1rem;
+    text-align: left;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+.swap-player-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.swap-player-row:last-child {
+    border-bottom: none;
+}
+.swap-player-row.is-user {
+    opacity: 0.6;
+}
+.swap-btn {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+}
+
+/* --- Main Hub --- */
 .main-hub {
     display: flex;
     height: 100vh;
-    width: 100vw;
 }
 .sidebar {
+    width: 60px;
     background-color: var(--surface-color);
-    padding: 1rem 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.3);
-    z-index: 10;
+    padding-top: 1rem;
+    border-right: 1px solid var(--border-color);
 }
 .nav-btn {
     background: none;
     border: none;
     color: var(--text-muted);
     font-size: 1.5rem;
-    padding: 1rem;
-    width: 60px;
-    border-radius: var(--border-radius);
+    padding: 1rem 0;
     cursor: pointer;
-    transition: all 0.2s;
     position: relative;
+    width: 100%;
+    transition: color 0.2s, background-color 0.2s;
 }
 .nav-btn.active, .nav-btn:hover {
-    background-color: var(--primary-color);
-    color: white;
+    color: var(--primary-color);
 }
-.nav-btn .fa-users { transition: transform 0.3s ease; }
-.nav-btn:hover .fa-users { transform: rotate(10deg) scale(1.1); }
-
-/* Tooltip a sidebaron */
-.nav-btn[data-tooltip]::after {
+.nav-btn.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 60%;
+    background-color: var(--primary-color);
+    border-radius: 0 4px 4px 0;
+}
+.nav-btn[data-tooltip]:hover::after {
     content: attr(data-tooltip);
     position: absolute;
     left: 110%;
@@ -461,43 +432,37 @@ input:focus, select:focus {
     transform: translateY(-50%);
     background-color: #333;
     color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 0.9rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
     white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.2s, visibility 0.2s;
-    pointer-events: none;
-}
-.nav-btn[data-tooltip]:hover::after {
-    opacity: 1;
-    visibility: visible;
 }
 .hub-content-wrapper {
-    flex-grow: 1;
+    flex: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 .top-bar {
-    background-color: var(--surface-color);
-    padding: 0.75rem 1.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    z-index: 5;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--surface-color);
+    border-bottom: 1px solid var(--border-color);
 }
 .profile-btn {
     background: none;
     border: none;
-    color: var(--text-color);
-    font-size: 1rem;
+    color: var(--text-primary);
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    font-size: 1rem;
     cursor: pointer;
+}
+.profile-btn i {
+    font-size: 1.25rem;
 }
 .currency-display {
     display: flex;
@@ -508,252 +473,110 @@ input:focus, select:focus {
     align-items: center;
     gap: 0.5rem;
 }
+.currency-item i {
+    font-size: 1.2rem;
+}
 .main-content {
-    flex-grow: 1;
-    overflow-y: auto;
+    flex: 1;
     padding: 1.5rem;
+    overflow-y: auto;
+}
+.screen {
+    animation: fadeIn 0.3s ease-in-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* --- DASHBOARD --- */
+/* --- Dashboard --- */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
 }
 .dashboard-card {
     background-color: var(--surface-color);
     padding: 1.5rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
+    border-radius: 12px;
 }
-.card-header {
+.dashboard-card .card-header {
     display: flex;
     align-items: center;
     gap: 1rem;
     margin-bottom: 1rem;
 }
-.card-header i {
+.dashboard-card .card-header i {
     font-size: 1.5rem;
     color: var(--primary-color);
 }
-.card-header h3, .card-header h4 {
-    margin: 0;
-}
-.player-profile-card {
+.player-profile-card .card-header {
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.player-profile-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
 }
 .team-logo {
     width: 50px;
     height: 50px;
-    object-fit: contain;
-}
-.player-info p {
-    color: var(--text-muted);
-    margin: 0;
 }
 .dashboard-card p {
     margin-bottom: 0.5rem;
-}
-
-/* --- CSAPAT (SQUAD) --- */
-.squad-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-.squad-container {
-    display: flex;
-    gap: 1.5rem;
-}
-.pitch {
-    flex-grow: 1;
-    background: linear-gradient(to bottom, #27ae60, #2ecc71);
-    border-radius: var(--border-radius);
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    position: relative;
-    min-height: 500px;
-}
-.pitch-lines {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image:
-        url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100%25' height='100%25' fill='none' stroke='%23FFFFFFAA' stroke-width='2' stroke-dasharray='6%2C 12' stroke-dashoffset='0' stroke-linecap='square'/%3E%3C/svg%3E");
-    opacity: 0.2;
-}
-.formation {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    width: 100%;
-}
-.squad-bench {
-    width: 250px;
-    flex-shrink: 0;
-    background-color: var(--surface-color);
-    padding: 1rem;
-    border-radius: var(--border-radius);
-}
-.bench-players {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.player-slot {
-    width: 80px;
-    height: 100px;
-    border: 2px dashed rgba(255, 255, 255, 0.2);
-    border-radius: var(--border-radius);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.2s;
-}
-.player-slot.drop-hover {
-    background-color: rgba(52, 152, 219, 0.3);
-    border-style: solid;
-}
-.bench-players .player-slot {
-    width: 100%;
-    height: auto;
-    min-height: 80px;
-}
-.squad-player-card {
-    width: 100%;
-    height: 100%;
-    background-color: var(--surface-darker);
-    border-radius: 8px;
-    color: white;
-    text-align: center;
-    padding: 8px;
-    font-size: 0.8rem;
-    cursor: grab;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
-    position: relative;
-}
-.squad-player-card.dragging {
-    opacity: 0.5;
-}
-.squad-player-card .rating {
-    position: absolute;
-    top: 5px;
-    left: 5px;
-    font-weight: bold;
-    background: #333;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 0.85rem;
-}
-.squad-player-card .position {
-    position: absolute;
-    top: 5px;
-    right: 5px;
     color: var(--text-muted);
 }
-.squad-player-card .name {
-    font-weight: 600;
-    margin-top: auto;
-}
-.user-player-card {
-    border: 2px solid var(--primary-color);
-    box-shadow: 0 0 10px var(--primary-color);
-}
-.bench-players .squad-player-card {
-    flex-direction: row;
-    justify-content: flex-start;
-    gap: 10px;
-    text-align: left;
-}
-.bench-players .squad-player-card .rating, .bench-players .squad-player-card .position {
-    position: static;
-}
-.bench-players .squad-player-card .name {
-    margin-top: 0;
-}
-.formation-selector .button {
-    padding: 8px 16px;
-    font-size: 0.9rem;
-}
-.formation-selector .button.active {
-    background: var(--secondary-color);
+.dashboard-card span {
+    color: var(--text-primary);
+    font-weight: 500;
 }
 
-/* --- BAJNOKSÁG (LEAGUE) --- */
+/* --- League Screen --- */
 .league-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    gap: 1.5rem;
     margin-bottom: 1.5rem;
-    position: relative;
 }
 .nav-arrow {
+    cursor: pointer;
     font-size: 1.5rem;
     color: var(--text-muted);
-    cursor: pointer;
-    transition: color 0.2s;
-    position: absolute;
 }
-.nav-arrow:hover { color: var(--text-color); }
-#leagueNavPrev { left: 0; }
-#leagueNavNext { right: 0; }
 .stats-tabs {
     display: flex;
-    justify-content: center;
-    margin-bottom: 1.5rem;
-    background-color: var(--surface-darker);
-    border-radius: var(--border-radius);
-    padding: 5px;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
 }
 .stat-tab {
-    flex: 1;
-    padding: 10px;
-    border: none;
     background: none;
+    border: none;
     color: var(--text-muted);
+    padding-bottom: 0.75rem;
     cursor: pointer;
+    position: relative;
     font-size: 1rem;
-    font-weight: 600;
-    border-radius: 8px;
-    transition: all 0.2s;
 }
 .stat-tab.active {
+    color: var(--primary-color);
+}
+.stat-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
     background-color: var(--primary-color);
-    color: white;
-    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
 }
 .league-table {
     width: 100%;
     border-collapse: collapse;
 }
 .league-table th, .league-table td {
-    padding: 8px;
+    padding: 0.75rem 0.5rem; /* Kisebb padding */
     text-align: left;
-    font-size: 0.9rem;
+    font-size: 0.9rem; /* Kisebb betűméret */
 }
-.league-table thead {
-    background-color: var(--surface-darker);
+.league-table th {
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color);
 }
 .league-table tbody tr {
     border-bottom: 1px solid var(--border-color);
@@ -761,53 +584,99 @@ input:focus, select:focus {
 .league-table tbody tr:last-child {
     border-bottom: none;
 }
-.league-table tbody tr:hover {
-    background-color: var(--surface-darker);
+.league-table .player-team {
+    background-color: rgba(0, 123, 255, 0.1);
 }
 .league-table .team-cell {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0.75rem;
 }
-.league-table .team-cell img {
-    width: 20px;
-    height: 20px;
-    object-fit: contain;
-}
-.league-table .player-team {
-    background-color: rgba(52, 152, 219, 0.1);
-    font-weight: bold;
-    border-left: 3px solid var(--primary-color);
+.team-cell img {
+    width: 24px;
+    height: 24px;
 }
 
-/* --- PROFIL --- */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+/* --- Squad Screen --- */
+.squad-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.squad-container {
+    display: flex;
     gap: 1rem;
 }
-.stat-card {
-    background-color: var(--surface-darker);
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
+.pitch {
+    flex: 1;
+    background: linear-gradient(to bottom, #2a7e2a, #236923);
+    border: 2px solid #fff;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column-reverse; /* Hátulról előre */
+    justify-content: space-around;
+    padding: 1rem;
+    position: relative;
+}
+.formation {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+}
+.player-slot {
+    width: 70px;
+    height: 90px;
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+.player-slot.drop-hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+.squad-bench {
+    width: 250px;
+}
+.bench-players {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+.squad-player-card {
+    width: 100%;
+    height: 100%;
+    background-color: var(--surface-light);
+    border-radius: 6px;
+    color: white;
     text-align: center;
+    padding: 0.5rem;
+    cursor: grab;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    border: 1px solid var(--border-color);
 }
-.stat-value {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: var(--primary-color);
+.squad-player-card.dragging {
+    opacity: 0.5;
 }
-.stat-label {
-    color: var(--text-muted);
-    font-size: 1rem;
+.user-player-card {
+    border: 2px solid var(--warning-color);
+}
+.squad-player-card .rating {
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+.squad-player-card .name {
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* --- IGAZOLÁSOK (TRANSFER) --- */
-.transfer-card {
-    background-color: var(--surface-color);
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
-}
+/* --- Transfer Screen --- */
 .transfer-filters {
     display: flex;
     gap: 1rem;
@@ -815,138 +684,180 @@ input:focus, select:focus {
 }
 .transfer-market-results {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1rem;
 }
 .transfer-player-card {
     background-color: var(--surface-color);
-    border-radius: var(--border-radius);
+    border-radius: 8px;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
     border: 1px solid var(--border-color);
 }
 .player-card-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
     padding: 1rem;
-    background: var(--surface-darker);
+    display: flex;
+    gap: 1rem;
+    align-items: center;
 }
 .player-nat-flag {
     width: 40px;
-    height: 26px;
+    height: 40px;
+    border-radius: 50%;
     object-fit: cover;
-    border-radius: 4px;
-}
-.player-card-name strong {
-    font-size: 1.1rem;
 }
 .player-card-team {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: var(--text-muted);
+    margin-top: 0.25rem;
 }
 .player-card-team img {
-    width: 20px;
-    height: 20px;
-    object-fit: contain;
+    width: 16px;
+    height: 16px;
 }
 .player-card-body {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 1rem;
-}
-.player-card-body span {
-    font-weight: 600;
-}
-.stat-rating { color: #f1c40f; }
-.stat-value { color: #2ecc71; }
-.player-card-footer {
-    padding: 1rem;
-    margin-top: auto;
-}
-.player-card-footer .button {
-    width: 100%;
-}
-.button.offer-btn {
-    background: var(--secondary-color);
-}
-
-/* Játékoscsere és ajánlat modál */
-#offerModalCard .navigation-buttons, #playerSwapModalCard .navigation-buttons {
-    margin-top: 1.5rem;
-}
-.offer-player-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    background: var(--surface-darker);
-    border-radius: var(--border-radius);
-    margin: 1rem 0;
-}
-.offer-player-info img {
-    width: 50px;
-    height: 50px;
-    object-fit: contain;
-}
-.error-message {
-    color: var(--danger-color);
-    margin-top: 0.5rem;
-}
-.swap-roster-list {
-    max-height: 40vh;
-    overflow-y: auto;
-    padding-right: 10px;
-}
-.swap-player-row {
+    padding: 0 1rem 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
-    border-radius: 8px;
-    transition: background-color 0.2s;
+    font-size: 0.9rem;
+    color: var(--text-muted);
 }
-.swap-player-row:hover { background-color: var(--surface-darker); }
-.swap-player-row.is-user { opacity: 0.6; }
-.swap-player-row .button { padding: 5px 10px; font-size: 0.8rem; }
-.swap-player-row .button:disabled { background-color: #555; cursor: not-allowed; }
+.stat-rating {
+    font-weight: 600;
+    color: var(--warning-color);
+}
+.stat-value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.player-card-footer {
+    background-color: var(--surface-light);
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: flex-end;
+}
 
-/* --- ALSÓ NAVIGÁCIÓS SÁV MOBILRA --- */
-.bottom-bar {
-    display: none;
+/* --- Match Simulator --- */
+#matchSimulatorOverlay {
+    background: url('https://i.imgur.com/8i2g2GA.jpg') no-repeat center center/cover;
+}
+.simulator-container {
+    width: 100%;
+    max-width: 600px;
+    height: 80vh;
+    background-color: rgba(18, 18, 18, 0.9);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+.sim-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
     background-color: var(--surface-color);
-    padding: 0.5rem;
-    justify-content: space-around;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
 }
-.bottom-bar .nav-btn {
-    flex-grow: 1;
+.sim-team {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+.sim-score-time {
+    text-align: center;
+}
+#simScore {
+    font-size: 2rem;
+    font-weight: 700;
+}
+.commentary-timeline {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column-reverse; /* Új események fent */
+}
+.commentary-event {
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+    animation: fadeIn 0.5s;
+}
+.commentary-event .time {
+    color: var(--text-muted);
+}
+.sim-pause-btn {
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    background-color: rgba(0,0,0,0.5);
+    color: white;
+    border: 1px solid white;
+}
+.pitch-enter-banner, .half-time-banner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1.5rem;
 }
 
-/* --- RESZPONZIVITÁS --- */
+/* --- Mobile Bottom Bar --- */
+.bottom-bar {
+    display: none; /* Alapból rejtett */
+}
+
+/* --- Responsive --- */
 @media (max-width: 768px) {
-    .sidebar {
+    .sidebar, .hide-on-mobile {
         display: none;
     }
-    .bottom-bar {
-        display: flex;
-    }
     .main-hub {
-        flex-direction: column-reverse; /* Alulra kerül a nav bar */
+        flex-direction: column;
     }
     .main-content {
         padding: 1rem;
+        padding-bottom: 70px; /* Hely a bottom barnak */
     }
-    .top-bar {
-        padding: 0.75rem 1rem;
+    .bottom-bar {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: var(--surface-color);
+        justify-content: space-around;
+        border-top: 1px solid var(--border-color);
+        z-index: 100;
     }
-    .dashboard-grid {
-        grid-template-columns: 1fr;
+    .bottom-bar .nav-btn {
+        padding: 0.75rem 0;
+    }
+    .bottom-bar .nav-btn.active::before {
+        display: none;
+    }
+    .bottom-bar .nav-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 6px;
+        height: 6px;
+        background-color: var(--primary-color);
+        border-radius: 50%;
     }
     .squad-container {
         flex-direction: column;
@@ -955,14 +866,7 @@ input:focus, select:focus {
         width: 100%;
     }
     .bench-players {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    }
-    .hide-on-mobile {
-        display: none;
-    }
-    .contract-offers-container {
-        flex-direction: column;
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
     }
 }
 
