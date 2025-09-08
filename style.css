@@ -53,6 +53,7 @@ background-color: #555;
 cursor: not-allowed;
 transform: none;
 }
+.error-message { color: var(--rel-color); font-size: 0.9em; margin-top: 10px; }
 
 /* --- TÖLTŐKÉPERNYŐ --- */
 .loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: #111; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease-out; }
@@ -151,7 +152,7 @@ gap: 15px;
 .form-step { flex: 0 0 100%; padding: 30px 40px; box-sizing: border-box; text-align: center;}
 .form-step h2 { margin-bottom: 10px; }
 .form-description { color: var(--text-muted); margin-top: 0; }
-input[type="text"], .select-button { width: 100%; padding: 12px 15px; background-color: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 1em; box-sizing: border-box; }
+input[type="text"], input[type="number"], .select-button { width: 100%; padding: 12px 15px; background-color: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 1em; box-sizing: border-box; }
 .navigation-buttons { display: flex; justify-content: space-between; margin-top: 20px; }
 
 .custom-select-wrapper {
@@ -290,7 +291,8 @@ font-weight: 600;
 
 /* --- OVERLAY-EK --- */
 .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(18, 18, 18, 0.8); backdrop-filter: blur(10px); display: flex; justify-content: center; align-items: center; z-index: 10000; }
-#matchResultOverlay .card { background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); border-radius: 20px; padding: 30px 40px; width: 90%; max-width: 600px; text-align: center; border: 1px solid var(--border-color); }
+#matchResultOverlay .card, #offerModalOverlay .card { background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); border-radius: 20px; padding: 30px 40px; width: 90%; max-width: 600px; text-align: center; border: 1px solid var(--border-color); }
+#offerModalOverlay .card { max-width: 400px; }
 .match-result-header { display: flex; justify-content: space-around; align-items: center; margin-bottom: 20px; }
 .match-result-team { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .match-result-team img { width: 80px; }
@@ -348,130 +350,23 @@ background-color: #444;
 .pitch-enter-banner { position: absolute; bottom: 20%; left: 50%; transform: translateX(-50%); background-color: var(--primary-color); color: white; padding: 15px 30px; border-radius: 10px; font-size: 1.2rem; font-weight: bold; z-index: 10; }
 .sim-pause-btn { position: absolute; bottom: 20px; right: 20px; background-color: rgba(0,0,0,0.5); border: none; color: white; width: 60px; height: 60px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; }
 
-/* === MINIJÁTÉK (FRISSÍTETT GRAFIKA) === */
-#matchGameOverlay {
-flex-direction: column;
-justify-content: flex-start;
-padding: 0;
-background-color: #1a511a;
-}
-#gameCanvas {
-background-color: transparent;
-border: none;
-width: 100%;
-height: 100%;
-}
-.game-scoreboard-wrapper {
-position: absolute;
-top: 20px;
-left: 50%;
-transform: translateX(-50%);
-width: 90%;
-max-width: 300px;
-z-index: 10;
-}
-.game-scoreboard {
-display: flex;
-justify-content: space-between;
-align-items: center;
-background-color: rgba(40, 40, 40, 0.85);
-border-radius: 50px;
-padding: 6px 15px;
-color: white;
-backdrop-filter: blur(10px);
-border: 1px solid rgba(255, 255, 255, 0.1);
-box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-position: relative;
-}
-.game-scoreboard .team-info {
-display: flex;
-align-items: center;
-gap: 8px;
-font-weight: 600;
-font-size: 1.1em;
-}
-.game-scoreboard .score-info {
-display: flex;
-flex-direction: column;
-align-items: center;
-position: absolute;
-left: 50%;
-top: 50%;
-transform: translate(-50%, -50%);
-}
-#gameScore {
-font-size: 1.5em;
-font-weight: 700;
-padding: 0 15px;
-line-height: 1;
-}
-.score-timeline {
-width: 80px;
-height: 5px;
-background-color: rgba(255, 255, 255, 0.2);
-border-radius: 5px;
-display: flex;
-overflow: hidden;
-margin-top: 4px;
-}
+/* === MINIJÁTÉK === */
+#matchGameOverlay { flex-direction: column; justify-content: flex-start; padding: 0; background-color: #1a511a; }
+#gameCanvas { background-color: transparent; border: none; width: 100%; height: 100%; }
+.game-scoreboard-wrapper { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 300px; z-index: 10; }
+.game-scoreboard { display: flex; justify-content: space-between; align-items: center; background-color: rgba(40, 40, 40, 0.85); border-radius: 50px; padding: 6px 15px; color: white; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 5px 20px rgba(0,0,0,0.4); position: relative; }
+.game-scoreboard .team-info { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 1.1em; }
+.game-scoreboard .score-info { display: flex; flex-direction: column; align-items: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+#gameScore { font-size: 1.5em; font-weight: 700; padding: 0 15px; line-height: 1; }
+.score-timeline { width: 80px; height: 5px; background-color: rgba(255, 255, 255, 0.2); border-radius: 5px; display: flex; overflow: hidden; margin-top: 4px; }
 #homeProgress { background-color: #3498db; transition: flex 0.5s; }
 #awayProgress { background-color: #e74c3c; transition: flex 0.5s; }
-#gameTime {
-font-size: 0.85em;
-color: #ccc;
-font-weight: 600;
-}
-
-.mobile-controls {
-position: absolute;
-bottom: 30px;
-width: 100%;
-max-width: 500px;
-left: 50%;
-transform: translateX(-50%);
-display: flex;
-justify-content: space-between;
-align-items: flex-end;
-padding: 0 20px;
-box-sizing: border-box;
-pointer-events: none;
-}
-.joystick-zone {
-width: 130px; height: 130px;
-background-color: rgba(0,0,0,0.3);
-border: 2px solid rgba(255,255,255,0.2);
-border-radius: 50%;
-position: relative;
-pointer-events: auto;
-}
-.joystick-handle {
-width: 65px; height: 65px;
-background-color: rgba(255,255,255,0.7);
-border-radius: 50%;
-position: absolute;
-top: 32.5px; left: 32.5px;
-transition: transform 0.1s;
-}
-.action-buttons {
-pointer-events: auto;
-display: flex;
-gap: 15px;
-align-items: center;
-}
-.action-btn {
-width: 65px; height: 65px;
-border-radius: 50%;
-border: 2px solid rgba(255,255,255,0.2);
-color: white;
-font-weight: bold;
-display: flex;
-flex-direction: column;
-justify-content: center;
-align-items: center;
-background: rgba(0,0,0,0.3);
-backdrop-filter: blur(5px);
-padding-top: 5px;
-}
+#gameTime { font-size: 0.85em; color: #ccc; font-weight: 600; }
+.mobile-controls { position: absolute; bottom: 30px; width: 100%; max-width: 500px; left: 50%; transform: translateX(-50%); display: flex; justify-content: space-between; align-items: flex-end; padding: 0 20px; box-sizing: border-box; pointer-events: none; }
+.joystick-zone { width: 130px; height: 130px; background-color: rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.2); border-radius: 50%; position: relative; pointer-events: auto; }
+.joystick-handle { width: 65px; height: 65px; background-color: rgba(255,255,255,0.7); border-radius: 50%; position: absolute; top: 32.5px; left: 32.5px; transition: transform 0.1s; }
+.action-buttons { pointer-events: auto; display: flex; gap: 15px; align-items: center; }
+.action-btn { width: 65px; height: 65px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); color: white; font-weight: bold; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.3); backdrop-filter: blur(5px); padding-top: 5px; }
 .action-btn i { font-size: 1.8em; margin-bottom: 2px; }
 .action-btn span { font-size: 0.8em; font-weight: 600; }
 .shoot-btn { width: 80px; height: 80px; }
@@ -530,6 +425,35 @@ padding-top: 5px;
 .stat-card .stat-value { font-size: 2.5em; font-weight: 900; color: var(--primary-color); }
 .stat-card .stat-label { font-size: 1em; color: var(--text-muted); margin-top: 5px; }
 
+/* IGazolási Piac */
+.transfer-filters { display: flex; gap: 15px; margin-bottom: 20px; }
+.transfer-filters input, .transfer-filters select { flex-grow: 1; background-color: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 1em; padding: 12px 15px; }
+.transfer-market-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px; }
+.transfer-player-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between; }
+.player-card-header { display: flex; align-items: center; gap: 15px; }
+.player-nat-flag { width: 30px; height: 20px; object-fit: cover; border-radius: 3px; }
+.player-card-name strong { font-size: 1.1em; }
+.player-card-name span { color: var(--text-muted); }
+.player-card-team { display: flex; align-items: center; gap: 8px; font-size: 0.9em; color: var(--text-muted); margin-top: 4px; }
+.player-card-team img { width: 20px; height: 20px; object-fit: contain; }
+.player-card-body { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; }
+.player-card-body span { font-weight: 600; }
+.stat-rating { color: #f1c40f; }
+.stat-rating i { margin-right: 5px; }
+.stat-value { font-size: 1.1em; color: var(--primary-color); }
+.player-card-footer { display: flex; }
+.offer-btn { flex-grow: 1; background-color: var(--primary-color); padding: 10px; }
+
+/* Ajánlati ablak */
+#offerModalCard h3 { margin-top: 0; }
+.offer-player-info { display: flex; align-items: center; gap: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+.offer-player-info img { width: 50px; height: 50px; }
+.offer-player-info div { text-align: left; }
+.offer-player-info strong { font-size: 1.2em; }
+.offer-player-info p { margin: 5px 0 0; color: var(--text-muted); }
+.offer-input-group { text-align: left; margin-bottom: 15px; }
+.offer-input-group label { display: block; margin-bottom: 8px; color: var(--text-muted); }
+
 .bottom-bar { display: none; }
 
 /* === MOBIL NÉZET === */
@@ -544,9 +468,10 @@ body { height: -webkit-fill-available; }
 .top-bar { padding: 10px 15px; }
 .hide-on-mobile { display: none; }
 .screen { padding: 15px; }
-.dashboard-grid { grid-template-columns: 1fr; }
+.dashboard-grid, .transfer-market-results { grid-template-columns: 1fr; }
 .character-creator-container { width: 100%; height: 100%; border-radius: 0; }
 .contract-offers-container { grid-template-columns: 1fr; }
+.transfer-filters { flex-direction: column; }
 }
 
 @media (max-width: 480px) {
