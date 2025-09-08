@@ -1,4 +1,4 @@
-import { generateSchedule, generateRosterForTeam } from './data.js';
+import { generateSchedule, generateRosterForTeam, getLeagueData } from './data.js';
 import { showMainHub } from './ui.js';
 
 // --- JÁTÉKÁLLAPOT KEZELÉSE ---
@@ -25,7 +25,6 @@ export function saveCurrentGame() {
     }
 }
 
-// ÚJ, HIÁNYZÓ FÜGGVÉNY
 export function getAllSaves() {
     return allSaves;
 }
