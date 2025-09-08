@@ -15,7 +15,8 @@ export function getRandomElement(arr) {
 }
 
 function generatePlayerName(nationalityCode) {
-    const nameData = NAMES[nationalityCode] || NAMES['en'];
+    // JAVÍTVA: window.NAMES használata
+    const nameData = window.NAMES[nationalityCode] || window.NAMES['en'];
     const firstName = getRandomElement(nameData.firstNames);
     const lastName = getRandomElement(nameData.lastNames);
     return `${firstName} ${lastName}`;
@@ -30,10 +31,11 @@ export function formatValue(value) {
 export function generateAllPlayers() {
     allPlayers = [];
     const positions = ['K', 'V', 'V', 'V', 'V', 'KP', 'KP', 'KP', 'CS', 'CS', 'CS'];
-    const natCodes = Object.keys(NATIONALITIES);
-    for (const country in LEAGUES) {
-        for (const leagueName in LEAGUES[country]) {
-            LEAGUES[country][leagueName].teams.forEach(team => {
+    // JAVÍTVA: window.NATIONALITIES és window.LEAGUES használata
+    const natCodes = Object.keys(window.NATIONALITIES);
+    for (const country in window.LEAGUES) {
+        for (const leagueName in window.LEAGUES[country]) {
+            window.LEAGUES[country][leagueName].teams.forEach(team => {
                 for (let i = 0; i < 22; i++) {
                     const baseStrength = team.strength;
                     const rating = Math.max(40, Math.min(99, Math.round(baseStrength - 15 + Math.random() * 25)));
@@ -54,20 +56,23 @@ export function generateAllPlayers() {
 export function getAllPlayers() { return allPlayers; }
 
 export function getLeagueData(leagueName) {
-    for (const country in LEAGUES) {
-        if (LEAGUES[country][leagueName]) return { country, ...LEAGUES[country][leagueName] };
+    // JAVÍTVA: window.LEAGUES használata
+    for (const country in window.LEAGUES) {
+        if (window.LEAGUES[country][leagueName]) return { country, ...window.LEAGUES[country][leagueName] };
     }
     return null;
 }
 
 export function getCountryLeagues(countryName) {
-    return LEAGUES[countryName] ? Object.keys(LEAGUES[countryName]) : [];
+    // JAVÍTVA: window.LEAGUES használata
+    return window.LEAGUES[countryName] ? Object.keys(window.LEAGUES[countryName]) : [];
 }
 
 export function getTeamData(teamName) {
-    for (const country in LEAGUES) {
-        for (const leagueName in LEAGUES[country]) {
-            const team = LEAGUES[country][leagueName].teams.find(t => t.name === teamName);
+    // JAVÍTVA: window.LEAGUES használata
+    for (const country in window.LEAGUES) {
+        for (const leagueName in window.LEAGUES[country]) {
+            const team = window.LEAGUES[country][leagueName].teams.find(t => t.name === teamName);
             if (team) return team;
         }
     }
@@ -99,10 +104,11 @@ export function generateSchedule(teamNames) {
     return [...schedule, ...secondHalf];
 }
 
-export function simulateOtherMatch(homeName, awayName) {
-    const leagueTeams = getLeagueData(gameState.leagueName).teams;
-    const homeTeam = leagueTeams.find(t => t.name === homeName);
-    const awayTeam = leagueTeams.find(t => t.name === awayName);
+export function simulateOtherMatch(homeName, awayName, leagueName) {
+    const leagueData = getLeagueData(leagueName);
+    if (!leagueData) return { homeName, awayName, homeScore: 0, awayScore: 0 };
+    const homeTeam = leagueData.teams.find(t => t.name === homeName);
+    const awayTeam = leagueData.teams.find(t => t.name === awayName);
     if (!homeTeam || !awayTeam) {
         return { homeName, awayName, homeScore: 0, awayScore: 0 };
     }
