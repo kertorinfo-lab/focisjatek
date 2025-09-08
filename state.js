@@ -2,6 +2,7 @@ import { generateSchedule, generateRosterForTeam, getLeagueData } from './data.j
 import { showMainHub } from './ui.js';
 
 // --- JÁTÉKÁLLAPOT KEZELÉSE ---
+// Ez a modul felel a játékállás mentéséért, betöltéséért és kezeléséért.
 
 export let gameState = {};
 let allSaves = [];
