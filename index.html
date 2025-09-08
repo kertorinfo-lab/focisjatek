@@ -25,8 +25,7 @@
             <button class="button next-btn" id="newGameBtn">Új Karrier</button>
         </div>
         <div id="saveSlotsContainer" class="save-slots-container">
-            <!-- Mentési helyek dinamikusan generálva -->
-        </div>
+            </div>
     </div>
 
     <div class="character-creator-container hidden" id="characterCreator">
@@ -45,8 +44,7 @@
                         <div class="selected-option" data-value="hu"><img src="https://flagcdn.com/w40/hu.png" alt="Magyar zászló"><span>Magyar</span></div><span>&#9660;</span>
                     </div>
                     <div class="select-options hidden" id="nationalityOptions">
-                         <!-- Options are generated from nationalities.js -->
-                    </div>
+                        </div>
                 </div>
                 <div class="navigation-buttons"><button class="button prev-btn">&larr; Vissza</button><button class="button next-btn">Tovább &rarr;</button></div>
             </div>
@@ -54,16 +52,14 @@
                 <h2>Válaszd ki a bajnokságot</h2>
                 <p class="form-description">Válassz egy bajnokságot, ahol elindítod a karriered.</p>
                 <div class="league-select-grid" id="leagueSelectGrid">
-                    <!-- Dinamikusan generálva JS-ből -->
-                </div>
+                    </div>
                 <div class="navigation-buttons"><button class="button prev-btn">&larr; Vissza</button><button class="button next-btn">Tovább &rarr;</button></div>
             </div>
             <div class="form-step">
                 <h2>Aláírnád a szerződést?</h2>
                 <p style="text-align: center; color: var(--text-muted);">Válassz a két felajánlott csapat közül, és indítsd el a karriered!</p>
                 <div class="contract-offers-container" id="contractOffersContainer">
-                    <!-- Ajánlatok generálása JS-ből -->
-                </div>
+                    </div>
                 <div class="navigation-buttons" style="justify-content: flex-start;"><button class="button prev-btn">&larr; Vissza</button></div>
             </div>
         </div>
@@ -94,8 +90,7 @@
 
     <div class="overlay hidden" id="offerModalOverlay">
         <div class="card" id="offerModalCard">
-            <!-- Tartalom dinamikusan generálva JS-ből -->
-        </div>
+            </div>
     </div>
     
     <div id="matchSimulatorOverlay" class="overlay hidden">
@@ -275,8 +270,7 @@
                         </select>
                     </div>
                     <div class="transfer-market-results" id="transferMarketResults">
-                        <!-- Player cards will be generated here -->
-                    </div>
+                        </div>
                 </div>
             </main>
         </div>
@@ -290,10 +284,24 @@
     
     <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // ... (korábbi kód)
     let allPlayers = []; // Új globális tömb az összes játékosnak
 
     // --- SEGÉDFÜGGVÉNYEK ---
+
+    // --- HIBAJAVÍTÁS: HIÁNYZÓ FÜGGVÉNYEK ---
+    // Ezek a függvények hiányoztak, ezért nem tudott lefutni a játékos generálás.
+    function getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function getRandomElement(arr) {
+        if (!arr || arr.length === 0) return null;
+        return arr[Math.floor(Math.random() * arr.length)];
+    }
+    // --- HIBAJAVÍTÁS VÉGE ---
+
     function formatValue(value) {
         if (value >= 1000000) {
             return `€${(value / 1000000).toFixed(1)}M`;
@@ -305,21 +313,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function generateAllPlayers() {
         allPlayers = [];
-        const positions = ['K', 'V', 'V', 'V', 'KP', 'KP', 'KP', 'CS', 'CS']; // Realisztikusabb eloszlás
+        const positions = ['K', 'V', 'V', 'V', 'V', 'KP', 'KP', 'KP', 'CS', 'CS', 'CS']; // Realisztikusabb eloszlás
         const natCodes = Object.keys(NATIONALITIES);
 
         for (const country in LEAGUES) {
             for (const leagueName in LEAGUES[country]) {
                 LEAGUES[country][leagueName].teams.forEach(team => {
                     // Generáljunk egy keretet minden csapatnak
-                    for (let i = 0; i < 20; i++) {
+                    for (let i = 0; i < 22; i++) { // Reálisabb keretméret
                         const baseStrength = team.strength;
                         const playerStrength = Math.max(40, Math.min(99, Math.round(baseStrength - 15 + Math.random() * 25)));
                         const age = getRandomInt(17, 36);
-                        const value = Math.round(Math.pow(playerStrength / 10, 3) * (40 - age) * 1000);
+                        const value = Math.round(Math.pow(playerStrength / 10, 3) * Math.max(1, (40 - age)) * 1000);
 
                         allPlayers.push({
-                            name: `Példa Játékos ${i + 1}`, // Később ezt lehetne cserélni valós nevekre
+                            name: `Példa Játékos ${allPlayers.length + 1}`, // Később ezt lehetne cserélni valós nevekre
                             position: getRandomElement(positions),
                             age: age,
                             rating: playerStrength,
@@ -342,10 +350,17 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = '';
         
         const filteredPlayers = allPlayers.filter(p => {
+            if (!p || !p.name) return false;
             const nameMatch = p.name.toLowerCase().includes(nameFilter);
             const posMatch = posFilter ? p.position === posFilter : true;
-            return nameMatch && posMatch;
+            const isNotUserPlayer = !gameState.playerName || p.name !== gameState.playerName; // Ne jelenítsük meg a saját játékosunkat
+            return nameMatch && posMatch && isNotUserPlayer;
         });
+
+        if (filteredPlayers.length === 0) {
+            container.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 20px;">Nincs a keresésnek megfelelő játékos.</p>`;
+            return;
+        }
 
         // Csak az első 50 találatot jelenítjük meg a teljesítmény miatt
         filteredPlayers.slice(0, 50).forEach(player => {
@@ -421,6 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert(`Az ajánlatodat elfogadták! ${formatValue(amount)} levonva.`);
                 gameState.money -= amount;
                 updateHeaderUI();
+                // Itt majd a játékost át kellene helyezni a csapatba, ez egy későbbi fejlesztés
             } else {
                 alert(`Az ajánlatodat elutasították. Túl alacsony.`);
             }
@@ -436,11 +452,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function main() {
         allSaves = loadAllSaves();
         displaySaveSlots();
-        generateAllPlayers(); // Játékosok generálása indításkor
-
-        // ... a betöltő képernyő logikája ...
+        
         let progress = 0;
         const loadingBar = document.getElementById('loadingBar');
+        const loadingScreen = document.getElementById('loadingScreen');
+        
+        // Játékosok generálása a háttérben
+        setTimeout(() => {
+            generateAllPlayers();
+        }, 100);
+
         const loadingInterval = setInterval(() => {
             progress += 5;
             loadingBar.style.width = `${progress}%`;
@@ -455,26 +476,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 50);
     }
     
-    // Event Listenerek
-    document.getElementById('playerNameSearch').addEventListener('input', populateTransferMarket);
-    document.getElementById('positionFilter').addEventListener('change', populateTransferMarket);
-
-    // ... (a többi event listener és a kód többi része változatlan)
-    // A kódot a rövidség kedvéért itt nem ismétlem, de a meglévő script tag-be kell illeszteni.
-    // A `main()` és az `updateUI()` függvényeket kell kiegészíteni a megfelelő hívásokkal.
-    
     // A meglévő `updateUI()` függvény kiegészítése
     function updateUI() {
+        if (!gameState || Object.keys(gameState).length === 0) return;
         updateHeaderUI();
         updateDashboardUI();
         updateLeagueTable();
         updateProfileUI();
         updateTransferUI(); // A saját ajánlatokhoz
-        populateTransferMarket(); // Az új globális piachoz
+        // A globális piacot csak akkor töltjük újra, ha az a képernyő aktív
+        if (!document.getElementById('globalTransferScreen').classList.contains('hidden')) {
+            populateTransferMarket();
+        }
     }
 
-    // A meglévő `showScreen` függvény kiegészítése lehet szükséges,
-    // hogy amikor a globalTransferScreen-re váltunk, frissüljön a lista
+    // A meglévő `showScreen` függvény kiegészítése
     function showScreen(targetScreenId) {
         allScreens.forEach(screen => screen.classList.add('hidden'));
         const targetScreen = document.getElementById(targetScreenId);
@@ -490,18 +506,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Maradék kód (változatlan) ---
-    // Ide jön az összes többi, korábban már meglévő JS függvény
-    // (playNextMatch, startMatchSimulator, a teljes játék logika, stb.)
-    // Ezt a kódrészletet a meglévő <script> tag-be kell bemásolni,
-    // a megfelelő helyekre beillesztve az új függvényeket és változókat.
-    
     const SAVE_KEY = 'footballCrazySaves';
     let gameState = {};
     let allSaves = [];
     let currentSaveId = null;
 
     // --- UI ELEMEK INICIALIZÁLÁSA ---
-    const loadingScreen = document.getElementById('loadingScreen');
     const mainMenu = document.getElementById('mainMenu');
     const characterCreator = document.getElementById('characterCreator');
     const matchSimulatorOverlay = document.getElementById('matchSimulatorOverlay');
@@ -509,6 +519,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const matchResultOverlay = document.getElementById('matchResultOverlay');
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
+    const allScreens = document.querySelectorAll('.screen');
+    const allNavButtons = document.querySelectorAll('.nav-btn');
 
     // --- JÁTÉK ÁLLAPOT VÁLTOZÓK ---
     let gameLoop;
@@ -559,6 +571,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function saveAllSaves() {
         try {
+            const gameIndex = allSaves.findIndex(save => save.id === currentSaveId);
+            if (gameIndex !== -1) {
+                allSaves[gameIndex] = gameState;
+            }
             localStorage.setItem(SAVE_KEY, JSON.stringify(allSaves));
         } catch (e) {
             console.error("Hiba a játék mentésekor: ", e);
@@ -589,11 +605,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 gameState.currentMatchday = 0;
                 gameState.league = currentLeagueTeams.map(t => ({ name: t.name, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0 }));
                 
-                const gameIndex = allSaves.findIndex(save => save.id === currentSaveId);
-                if (gameIndex !== -1) {
-                    allSaves[gameIndex] = gameState;
-                    saveAllSaves();
-                }
+                saveAllSaves();
             }
             showMainHub();
         }
@@ -639,7 +651,9 @@ document.addEventListener('DOMContentLoaded', () => {
             slot.querySelector('.delete-save-btn').addEventListener('click', (e) => {
                 e.stopPropagation();
                 const saveId = parseInt(e.currentTarget.dataset.id, 10);
-                deleteSave(saveId);
+                if (confirm(`Biztosan törölni szeretnéd a "${save.playerName}" nevű mentést?`)) {
+                    deleteSave(saveId);
+                }
             });
         });
     }
@@ -798,7 +812,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- MECCS LOGIKA ---
-    // ... (A meccs logika nem változott, ezért a rövidség kedvéért itt nem ismétlem meg)
     function playNextMatch() {
         if (!gameState.schedule || gameState.currentMatchday >= gameState.schedule.length) {
             endSeason();
@@ -820,7 +833,7 @@ document.addEventListener('DOMContentLoaded', () => {
             saveAllSaves();
             updateUI();
             return;
-         }
+           }
         
         const homeTeam = leagueTeams.find(t => t.name === fixture.home);
         const awayTeam = leagueTeams.find(t => t.name === fixture.away);
@@ -904,6 +917,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                         <div class="event-text"><span class="time">${String(event.time).padStart(2, '0')}'</span> <span class="comment">${event.comment}</span></div>`;
             timeline.appendChild(eventDiv);
         });
+        timeline.scrollTop = 0; // Mindig a legfrissebb esemény legyen felül
     }
 
     function addMatchEvent(comment, icon) {
@@ -912,7 +926,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function getRandomCommentary() {
-        const comments = ["A középpályán folyik a játék.", "Szép passz a szélen.", "Bedobás következik."];
+        const comments = ["A középpályán folyik a játék.", "Szép passz a szélen.", "Bedobás következik.", "Az ellenfél birtokolja a labdát.", "Szabadrúgás a félpályánál."];
         return comments[Math.floor(Math.random() * comments.length)];
     }
 
@@ -1094,13 +1108,7 @@ document.addEventListener('DOMContentLoaded', () => {
             gameState.currentMatchday++;
             checkTransferOffers();
             
-            const gameIndex = allSaves.findIndex(save => save.id === currentSaveId);
-            if (gameIndex !== -1) {
-                allSaves[gameIndex] = gameState;
-                saveAllSaves();
-            } else {
-                console.error("Nem található a jelenlegi mentés az automatikus mentéshez.");
-            }
+            saveAllSaves();
 
             showMatchResult(finalResult);
             currentMatchData = null;
@@ -1136,6 +1144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (playerTeamWon) bonus += 20000;
         if (result.homeScore === result.awayScore) bonus += 5000;
         bonus += result.playerGoals * 10000;
+        bonus += result.playerAssists * 5000;
         gameState.money += (gameState.salary || 0) + bonus;
         gameState.goals += result.playerGoals;
         gameState.assists += result.playerAssists;
@@ -1153,7 +1162,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!homeTeam || !awayTeam) {
             return { homeName, awayName, homeScore: 0, awayScore: 0, playerGoals: 0 };
         }
-        const homeScore = Math.floor(Math.random() * (homeTeam.strength / 28));
+        const homeAdvantage = 0.15; // Hazai pálya előnye
+        const homeScore = Math.floor(Math.random() * (homeTeam.strength / 28 + homeAdvantage));
         const awayScore = Math.floor(Math.random() * (awayTeam.strength / 28));
         return { homeName, awayName, homeScore, awayScore, playerGoals: 0 };
     }
@@ -1161,15 +1171,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function endSeason() {
         alert("A szezon véget ért!");
         const leagueTeams = getLeagueData(gameState.leagueName).teams;
+        gameState.age++;
         gameState.schedule = generateSchedule(leagueTeams.map(t => t.name));
         gameState.currentMatchday = 0;
         gameState.league.forEach(team => { Object.assign(team, { played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0 }); });
         
-        const gameIndex = allSaves.findIndex(save => save.id === currentSaveId);
-        if(gameIndex !== -1) {
-            allSaves[gameIndex] = gameState;
-            saveAllSaves();
-        }
+        saveAllSaves();
 
         showMainHub();
     }
@@ -1244,9 +1251,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 gameState.goals = 0;
                 gameState.assists = 0;
                 gameState.matchesPlayed = 0;
+                saveAllSaves();
                 showMainHub();
             } else if (action === 'reject') {
                 gameState.transferOffers.splice(index, 1);
+                saveAllSaves();
                 updateTransferUI();
             }
         });
@@ -1283,9 +1292,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUI();
     }
     
-    const allScreens = document.querySelectorAll('.screen');
-    const allNavButtons = document.querySelectorAll('.nav-btn');
-
     function updateNavButtons(activeScreenId) { allNavButtons.forEach(btn => { btn.classList.toggle('active', btn.dataset.screen === activeScreenId); }); }
     
     function updateHeaderUI() { document.getElementById('headerPlayerName').textContent = gameState.playerName; document.getElementById('headerPlayerBalance').textContent = (gameState.money || 0).toLocaleString(); }
@@ -1332,11 +1338,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if(team.name === gameState.team.name) row.classList.add('player-team'); 
 
             let posClass = '';
-            if (displayedLeagueName === 'Premier League') {
-                if (index < 4) posClass = 'pos-cl'; // Bajnokok Ligája
-                else if (index === 4) posClass = 'pos-el'; // Európa-liga
-                else if (index >= leagueClone.length - 3) posClass = 'pos-rel'; // Kiesés
-            }
+            // Itt lehetne bővíteni más ligákra is a színezést
+            if (index < 4) posClass = 'pos-cl'; // Bajnokok Ligája
+            else if (index === 4) posClass = 'pos-el'; // Európa-liga
+            else if (index >= leagueClone.length - 3) posClass = 'pos-rel'; // Kiesés
 
             row.innerHTML = `
                 <td><span class="position-indicator ${posClass}"></span>${index + 1}</td>
@@ -1393,6 +1398,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('matchResultContinueBtn')?.addEventListener('click', showMainHub);
     document.getElementById('sim-pause-btn')?.addEventListener('click', togglePause);
     document.getElementById('newGameBtn')?.addEventListener('click', initializeCharacterCreator);
+    document.getElementById('playerNameSearch').addEventListener('input', populateTransferMarket);
+    document.getElementById('positionFilter').addEventListener('change', populateTransferMarket);
     
     document.querySelectorAll('.stat-tab').forEach(tab => {
         tab.addEventListener('click', () => {
@@ -1423,9 +1430,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.addEventListener('resize', resizeCanvas);
+    
     main();
 });
     </script>
 </body>
 </html>
-
