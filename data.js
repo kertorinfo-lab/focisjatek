@@ -1,4 +1,8 @@
-import { gameState } from './state.js';
+// --- DATA HANDLING MODULE ---
+// Ez a modul felelős a játék adatainak kezeléséért, generálásáért és lekérdezéséért.
+
+// A gameState importot eltávolítottuk a körkörös függőség megszüntetése érdekében.
+// Ahol szükséges, a gameState-et paraméterként adjuk át a függvényeknek.
 
 let allPlayers = [];
 
@@ -70,7 +74,8 @@ export function generateAllPlayers() {
     }
 }
 
-export function generateRosterForTeam(teamName) {
+// JAVÍTVA: A gameState-et most már paraméterként kapja meg
+export function generateRosterForTeam(teamName, gameState) {
     const teamPlayers = allPlayers.filter(p => p.teamName === teamName);
 
     const positions = {
@@ -120,7 +125,7 @@ export function generateRosterForTeam(teamName) {
 }
 
 
-export function getFilteredPlayers(nameFilter, posFilter) {
+export function getFilteredPlayers(nameFilter, posFilter, gameState) {
     return allPlayers.filter(p => {
         if (!p || !p.name) return false;
         const nameMatch = p.name.toLowerCase().includes(nameFilter);
