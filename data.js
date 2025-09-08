@@ -80,7 +80,7 @@ export function generateRosterForTeam(teamName) {
         'CS': []
     };
     teamPlayers.forEach(p => {
-        if (positions[p.position]) {
+        if (p && positions[p.position]) {
             positions[p.position].push(p);
         }
     });
