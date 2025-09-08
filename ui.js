@@ -98,7 +98,7 @@ function initializeCharacterCreator() {
     document.querySelectorAll('#characterCreator .prev-btn').forEach(btn => btn.onclick = () => { if (currentStep > 0) { currentStep--; updateCarousel(); } });
 
     const nationalityOptions = document.getElementById('nationalityOptions'); nationalityOptions.innerHTML = '';
-    Object.entries(NATIONALITIES).forEach(([code, nation]) => {
+    Object.entries(window.NATIONALITIES).forEach(([code, nation]) => {
         const optionDiv = document.createElement('div'); optionDiv.className = 'option'; optionDiv.dataset.value = code;
         optionDiv.innerHTML = `<img src="${nation.flag}" alt="${nation.name} zászló"><span>${nation.name}</span>`;
         optionDiv.onclick = () => {
@@ -112,7 +112,7 @@ function initializeCharacterCreator() {
     document.addEventListener('click', () => nationalityOptions.classList.add('hidden'));
 
     const leagueSelectGrid = document.getElementById('leagueSelectGrid'); leagueSelectGrid.innerHTML = '';
-    Object.values(LEAGUES).forEach(country => Object.keys(country).forEach(leagueName => {
+    Object.values(window.LEAGUES).forEach(country => Object.keys(country).forEach(leagueName => {
         if (country[leagueName].tier === 1) {
             const btn = document.createElement('button'); btn.className = 'league-select-btn'; btn.textContent = leagueName;
             btn.onclick = () => { document.querySelectorAll('.league-select-btn.active').forEach(b => b.classList.remove('active')); btn.classList.add('active'); selectedLeagueName = leagueName; };
@@ -122,18 +122,27 @@ function initializeCharacterCreator() {
 }
 
 function generateContractOffers() {
-    const offersContainer = document.getElementById('contractOffersContainer'), leagueData = getLeagueData(selectedLeagueName);
-    offersContainer.innerHTML = ''; if (!leagueData) return;
-    const smallTeams = leagueData.teams.filter(t => t.strength <= 75), offers = [];
+    const offersContainer = document.getElementById('contractOffersContainer');
+    const leagueData = getLeagueData(selectedLeagueName);
+    offersContainer.innerHTML = ''; 
+    if (!leagueData) return;
+
+    const smallTeams = leagueData.teams.filter(t => t.strength <= 75);
+    const offers = [];
     const chosenTeams = new Set();
     while (offers.length < 2 && chosenTeams.size < leagueData.teams.length) {
         const team = getRandomElement(smallTeams.length >= 2 ? smallTeams : leagueData.teams);
-        if (team && !chosenTeams.has(team.name)) { chosenTeams.add(team.name); offers.push(team); }
+        if (team && !chosenTeams.has(team.name)) { 
+            chosenTeams.add(team.name); 
+            offers.push(team); 
+        }
     }
+
     offers.forEach(team => {
-        const card = document.createElement('div'); card.className = 'contract-offer-card';
-        card.innerHTML = `<img src="${team.logo}" alt="${team.name} logó"><h3>${team.name}</h3><p><strong>Fizetés:</strong> €15.000 /hét</p><button class="button submit-btn">Szerződés aláírása</button>`;
-        card.querySelector('button').onclick = () => startNewGame(team);
+        const card = document.createElement('div'); 
+        card.className = 'contract-offer-card';
+        // JAVÍTVA: data-team attribútum hozzáadva a gombhoz
+        card.innerHTML = `<img src="${team.logo}" alt="${team.name} logó"><h3>${team.name}</h3><p><strong>Fizetés:</strong> €15.000 /hét</p><button class="button submit-btn accept-offer-btn" data-team='${JSON.stringify(team)}'>Szerződés aláírása</button>`;
         offersContainer.appendChild(card);
     });
 }
@@ -154,8 +163,10 @@ function startNewGame(chosenTeam) {
     const fwds = newGameState.team.players.filter(p => p.position === 'CS');
     const idx = newGameState.team.players.findIndex(p => p.id === (fwds.length > 0 ? fwds[0]?.id : -1));
     if (idx !== -1) newGameState.team.players[idx] = userPlayer; else newGameState.team.players.push(userPlayer);
-    setGameState(newGameState); saveCurrentGame();
-    characterCreator.classList.add('hidden'); showMainHub();
+    setGameState(newGameState); 
+    saveCurrentGame();
+    characterCreator.classList.add('hidden'); 
+    showMainHub();
 }
 
 // --- UI FRISSÍTŐ FÜGGVÉNYEK ---
@@ -225,22 +236,36 @@ function updateProfileUI() {
     document.getElementById('profileTrophies').textContent = (gameState.trophies || []).length;
 }
 
-function updateTransferUI() { /* ... */ }
-function populateTransferMarket() { /* ... */ }
+function updateTransferUI() { /* TODO */ }
+function populateTransferMarket() { /* TODO */ }
 
 export function initEventListeners() {
     document.getElementById('newGameBtn')?.addEventListener('click', initializeCharacterCreator);
+    
     document.getElementById('saveSlotsContainer').addEventListener('click', (e) => {
         const slot = e.target.closest('.save-slot');
         if (!slot) return;
         const saveId = parseInt(slot.dataset.id, 10);
-        if (e.target.closest('.delete-save-btn')) handleDeleteSave(saveId); else handleLoadGame(saveId);
+        if (e.target.closest('.delete-save-btn')) {
+            handleDeleteSave(saveId);
+        } else {
+            handleLoadGame(saveId);
+        }
     });
+
+    // JAVÍTVA: Eseményfigyelő a szerződési ajánlatokra
+    document.getElementById('contractOffersContainer').addEventListener('click', (e) => {
+        const button = e.target.closest('.accept-offer-btn');
+        if (button) {
+            const team = JSON.parse(button.dataset.team);
+            startNewGame(team);
+        }
+    });
+
     allNavButtons.forEach(button => button.addEventListener('click', () => showScreen(button.dataset.screen)));
     document.getElementById('profileBtn')?.addEventListener('click', () => showScreen('profileScreen'));
     document.getElementById('dashboardProfileCard')?.addEventListener('click', () => showScreen('squadScreen'));
     document.getElementById('playMatchBtn')?.addEventListener('click', playNextMatch);
     document.getElementById('matchResultContinueBtn')?.addEventListener('click', showMainHub);
-    // ...többi eseményfigyelő
 }
 
