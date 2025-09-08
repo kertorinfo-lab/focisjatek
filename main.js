@@ -29,7 +29,8 @@ function main() {
     }, 50);
 }
 
-// JAVÍTVA: A `main` függvényt csak akkor hívjuk meg, ha a DOM teljesen betöltődött.
-// Ez biztosítja, hogy a leagues.js, names.js stb. fájlok már betöltődtek és elérhetőek.
-document.addEventListener('DOMContentLoaded', main);
+// JAVÍTVA: A 'load' eseményre cseréltük a figyelőt.
+// Ez biztosítja, hogy minden (leagues.js, names.js stb.) betöltődjön,
+// mielőtt a fő programlogika elindulna.
+window.addEventListener('load', main);
 
