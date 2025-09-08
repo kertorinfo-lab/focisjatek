@@ -70,6 +70,59 @@ export function generateAllPlayers() {
     }
 }
 
+// HIÁNYZÓ FÜGGVÉNY HOZZÁADVA
+export function generateRosterForTeam(teamName) {
+    const teamPlayers = allPlayers.filter(p => p.teamName === teamName);
+
+    const positions = {
+        'K': [],
+        'V': [],
+        'KP': [],
+        'CS': []
+    };
+    teamPlayers.forEach(p => {
+        if (positions[p.position]) {
+            positions[p.position].push(p);
+        }
+    });
+
+    const roster = [
+        ...positions['K'].slice(0, 2),
+        ...positions['V'].slice(0, 5),
+        ...positions['KP'].slice(0, 5),
+        ...positions['CS'].slice(0, 4)
+    ];
+
+    gameState.team.players = roster;
+
+    // A felhasználó játékosának hozzáadása a kerethez
+    const userPlayer = {
+        id: 'user_player',
+        name: gameState.playerName,
+        position: 'CS', // Alapértelmezett pozíció
+        age: gameState.age,
+        rating: gameState.rating,
+        teamName: gameState.team.name,
+        isUser: true
+    };
+
+    // Lecserélünk egy csatárt, ha van, ha nincs, egy középpályást
+    const fwds = gameState.team.players.filter(p => p.position === 'CS');
+    if (fwds.length > 0) {
+        const playerToReplaceIndex = gameState.team.players.findIndex(p => p.id === fwds[0].id);
+        gameState.team.players[playerToReplaceIndex] = userPlayer;
+    } else {
+        const mids = gameState.team.players.filter(p => p.position === 'KP');
+        if (mids.length > 0) {
+            const playerToReplaceIndex = gameState.team.players.findIndex(p => p.id === mids[0].id);
+            gameState.team.players[playerToReplaceIndex] = userPlayer;
+        } else {
+            gameState.team.players.push(userPlayer);
+        }
+    }
+}
+
+
 export function getFilteredPlayers(nameFilter, posFilter) {
     return allPlayers.filter(p => {
         if (!p || !p.name) return false;
@@ -109,7 +162,7 @@ export function generateSchedule(teamNames) {
     let teams = [...teamNames];
     if (teams.length % 2 !== 0) {
         teams.push(null);
-    } // Ha páratlan a csapatok száma, hozzáadunk egy "pihenőhetet"
+    }
     const schedule = [];
     const numRounds = teams.length - 1;
     const numMatchesPerRound = teams.length / 2;
@@ -127,7 +180,6 @@ export function generateSchedule(teamNames) {
             }
         }
         schedule.push(roundMatches);
-        // Csapatok forgatása a sorsoláshoz
         teams.splice(1, 0, teams.pop());
     }
 
@@ -145,7 +197,12 @@ export function generateSchedule(teamNames) {
 
 export function simulateOtherMatch(homeName, awayName, leagueName) {
     const leagueData = getLeagueData(leagueName);
-    if (!leagueData) return { homeName, awayName, homeScore: 0, awayScore: 0 };
+    if (!leagueData) return {
+        homeName,
+        awayName,
+        homeScore: 0,
+        awayScore: 0
+    };
 
     const homeTeam = leagueData.teams.find(t => t.name === homeName);
     const awayTeam = leagueData.teams.find(t => t.name === awayName);
