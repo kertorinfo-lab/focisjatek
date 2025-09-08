@@ -114,8 +114,11 @@ function initializeCharacterCreator() {
     const leagueSelectGrid = document.getElementById('leagueSelectGrid'); leagueSelectGrid.innerHTML = '';
     Object.values(window.LEAGUES).forEach(country => Object.keys(country).forEach(leagueName => {
         if (country[leagueName].tier === 1) {
-            const btn = document.createElement('button'); btn.className = 'league-select-btn'; btn.textContent = leagueName;
-            btn.onclick = () => { document.querySelectorAll('.league-select-btn.active').forEach(b => b.classList.remove('active')); btn.classList.add('active'); selectedLeagueName = leagueName; };
+            const btn = document.createElement('button');
+            btn.className = 'league-select-btn';
+            btn.textContent = leagueName;
+            // JAVÍTVA: Az onclick eseménykezelőt eltávolítottuk, helyette data attribútumot használunk
+            btn.dataset.league = leagueName;
             leagueSelectGrid.appendChild(btn);
         }
     }));
@@ -141,7 +144,6 @@ function generateContractOffers() {
     offers.forEach(team => {
         const card = document.createElement('div'); 
         card.className = 'contract-offer-card';
-        // JAVÍTVA: data-team attribútum hozzáadva a gombhoz
         card.innerHTML = `<img src="${team.logo}" alt="${team.name} logó"><h3>${team.name}</h3><p><strong>Fizetés:</strong> €15.000 /hét</p><button class="button submit-btn accept-offer-btn" data-team='${JSON.stringify(team)}'>Szerződés aláírása</button>`;
         offersContainer.appendChild(card);
     });
@@ -253,7 +255,16 @@ export function initEventListeners() {
         }
     });
 
-    // JAVÍTVA: Eseményfigyelő a szerződési ajánlatokra
+    // JAVÍTVA: Eseményfigyelő a bajnokságválasztó gombokra
+    document.getElementById('leagueSelectGrid').addEventListener('click', (e) => {
+        const button = e.target.closest('.league-select-btn');
+        if (button) {
+            document.querySelectorAll('#leagueSelectGrid .league-select-btn.active').forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+            selectedLeagueName = button.dataset.league;
+        }
+    });
+
     document.getElementById('contractOffersContainer').addEventListener('click', (e) => {
         const button = e.target.closest('.accept-offer-btn');
         if (button) {
