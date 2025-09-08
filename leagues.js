@@ -57,7 +57,7 @@ const LEAGUES = {
                 { name: "TSG Hoffenheim", strength: 76, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/lPDRR04KllkMg6PfnxPo5g_96x96.png" },
                 { name: "1. FC Köln", strength: 75, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/L661T-9L5P0-xGj3E8k4RQ_96x96.png" },
                 { name: "VfB Stuttgart", strength: 74, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/5acI5-KY2sE-aV9fOQJzxg_96x96.png" },
-                { name: "FC Augsburg", strength: 72, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/QOUce0WQBYqreK3CVvuoYg_96x96.png" },
+                { name: "FC Augsburg", strength: 72, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/LV8u7sR4d-8Gv3_t0yC5jA_96x96.png" },
                 { name: "VfL Bochum", strength: 71, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/W3J2-4A51k2iS2LND4eWng_96x96.png" },
             ]
         }
@@ -71,15 +71,15 @@ const LEAGUES = {
                 { name: "Juventus", strength: 83, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/Lv6xmBlUIa3wvl2C-8o5xQ_96x96.png" },
                 { name: "Napoli", strength: 85, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/Q1N5kn2d49y24va7fBedJQ_96x96.png" },
                 { name: "AS Roma", strength: 82, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/Q-A3cy6-Kk2v2l2k2s8w_Q_96x96.png" },
-                { name: "Lazio", strength: 81, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/T2L0d-v-L-1v0e1v1v1v1Q_96x96.png" },
+                { name: "Lazio", strength: 81, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/kk-8v1z2eC4Z9vX9_J5A7A_96x96.png" },
                 { name: "Atalanta", strength: 80, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/01PIu3_N0gO3Jz-5n1i-iQ_96x96.png" },
                 { name: "Fiorentina", strength: 79, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/idofV82-4Br3w4v6x2BODg_96x96.png" },
                 { name: "Torino", strength: 77, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/JTE85v2nSS2P-oPEn0uSjA_96x96.png" },
                 { name: "Bologna", strength: 76, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/1P55QQHSPdCRb-2oI2P21A_96x96.png" },
                 { name: "Udinese", strength: 75, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/36AlWJ1_3-_aKDBxGk0vAw_96x96.png" },
                 { name: "Monza", strength: 74, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/20P6tnI5ybcR5eYj2NcKbw_96x96.png" },
-                { name: "Sassuolo", strength: 73, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/v-1v1v1v1v1v1v1v1v1Q_96x96.png" },
-                { name: "Hellas Verona", strength: 72, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/01PIu3_N0gO3Jz-5n1i-iQ_96x96.png" },
+                { name: "Sassuolo", strength: 73, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/GdLw3-29fL_GqIt34D5pDA_96x96.png" },
+                { name: "Hellas Verona", strength: 72, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/nLjnH-pW1Y26kC3iG0v3Aw_96x96.png" },
             ]
         }
     },
@@ -88,17 +88,17 @@ const LEAGUES = {
             tier: 1,
             teams: [
                 { name: "Ferencvárosi TC", strength: 74, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/5s1AARla2Y2K6e3iG0v3Aw_96x96.png" },
-                { name: "Puskás Akadémia FC", strength: 68, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/Lq6xKq-yYVw-v-1v1v1v1Q_96x96.png" },
-                { name: "Fehérvár FC", strength: 69, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/S-0uQ78-v-1v1v1v1v1Q_96x96.png" },
-                { name: "Debreceni VSC", strength: 67, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/3-8-v-1v1v1v1v1v1v1Q_96x96.png" },
-                { name: "Paksi FC", strength: 66, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/0-5-v-1v1v1v1v1v1v1Q_96x96.png" },
-                { name: "Zalaegerszegi TE", strength: 65, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/1-9-v-1v1v1v1v1v1v1Q_96x96.png" },
-                { name: "Újpest FC", strength: 67, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/0-9-v-1v1v1v1v1v1v1Q_96x96.png" },
-                { name: "Diósgyőri VTK", strength: 64, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/0-8-v-1v1v1v1v1v1v1Q_96x96.png" },
-                { name: "MTK Budapest", strength: 65, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/0-7-v-1v1v1v1v1v1v1Q_96x96.png" },
-                { name: "Kecskeméti TE", strength: 66, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/0-6-v-1v1v1v1v1v1v1Q_96x96.png" },
-                { name: "Kisvárda FC", strength: 63, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/0-4-v-1v1v1v1v1v1v1Q_96x96.png" },
-                { name: "Mezőkövesd Zsóry", strength: 62, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/0-3-v-1v1v1v1v1v1v1Q_96x96.png" },
+                { name: "Puskás Akadémia FC", strength: 68, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/e5gt3w3gjP5z283mDnlqBA_96x96.png" },
+                { name: "Fehérvár FC", strength: 69, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/YQYVyvJ0ce1pvea_3053NQ_96x96.png" },
+                { name: "Debreceni VSC", strength: 67, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/eoWv9-zI4y3qL1S2T-s9xA_96x96.png" },
+                { name: "Paksi FC", strength: 66, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/3v-d1p20aCI471KMvwF8_g_96x96.png" },
+                { name: "Zalaegerszegi TE", strength: 65, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/415QjS8s32gQYx52s8MmYg_96x96.png" },
+                { name: "Újpest FC", strength: 67, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/0AbmMPNxI68S3YJajae34A_96x96.png" },
+                { name: "Diósgyőri VTK", strength: 64, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/jMvI1fD5W3S-H-t-K-q_Jw_96x96.png" },
+                { name: "MTK Budapest", strength: 65, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/5v2z-m7q_11XlRA0kCt2hA_96x96.png" },
+                { name: "Kecskeméti TE", strength: 66, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/yZlSgD0s1fJuhp2rqy-3-g_96x96.png" },
+                { name: "Kisvárda FC", strength: 63, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/cAvPvsJdYqGZkE45C49Tmw_96x96.png" },
+                { name: "Mezőkövesd Zsóry", strength: 62, logo: "https://ssl.gstatic.com/onebox/media/sports/logos/XmXb50PvhNsF2SBU07e-KA_96x96.png" },
             ]
         }
     }
