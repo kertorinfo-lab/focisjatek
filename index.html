@@ -921,11 +921,175 @@
         showMainHub();
     }
     
-    // --- MECCS LOGIKA (A tömörségért rövidítve, a lényeg a UI és csapatkezelésben) ---
-    function playNextMatch() { alert("A meccs funkció fejlesztés alatt áll!"); }
-    function startMatchSimulator() { /* ... */ }
-    function runSimulation(homeTeam, awayTeam) { /* ... */ }
-    function endMatchGame() { /* ... */ }
+    // --- MECCS LOGIKA ---
+    function playNextMatch() {
+        const matchData = getNextMatch();
+        if (!matchData) {
+            alert("A szezon véget ért!");
+            return;
+        }
+        currentMatchData = matchData;
+
+        const opponentTeamData = getTeamData(matchData.opponent);
+        currentOpponentStrength = opponentTeamData ? opponentTeamData.strength : 70;
+
+        startMatchSimulator(matchData.home, matchData.away);
+    }
+
+    function startMatchSimulator(homeTeamName, awayTeamName) {
+        document.getElementById('mainHub').classList.add('hidden');
+        matchSimulatorOverlay.classList.remove('hidden');
+
+        document.getElementById('simHomeName').textContent = homeTeamName;
+        document.getElementById('simAwayName').textContent = awayTeamName;
+        document.getElementById('simScore').textContent = '0 - 0';
+        document.getElementById('simTime').textContent = `00:00`;
+        document.getElementById('commentary-timeline').innerHTML = '';
+
+        runSimulation(homeTeamName, awayTeamName);
+    }
+
+    function runSimulation(homeTeam, awayTeam) {
+        let homeScore = 0;
+        let awayScore = 0;
+        let gameTime = 0;
+        const commentary = document.getElementById('commentary-timeline');
+        isPaused = false;
+        
+        const homeStrength = (homeTeam === gameState.team.name) ? calculateTeamStrength() : getTeamData(homeTeam).strength;
+        const awayStrength = (awayTeam === gameState.team.name) ? calculateTeamStrength() : getTeamData(awayTeam).strength;
+
+        const addCommentary = (time, text, icon = 'fa-futbol') => {
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'commentary-event';
+            eventDiv.innerHTML = `<span class="time">${time}'</span> <i class="fas ${icon}"></i> <span class="text">${text}</span>`;
+            commentary.appendChild(eventDiv);
+            commentary.scrollTop = commentary.scrollHeight;
+        };
+
+        addCommentary('0', 'A mérkőzés elkezdődött!', 'fa-flag');
+
+        simulationInterval = setInterval(() => {
+            if (isPaused) return;
+
+            gameTime++;
+            document.getElementById('simTime').textContent = `${String(Math.floor(gameTime / 60)).padStart(2, '0')}:${String(gameTime % 60).padStart(2, '0')}`;
+
+            // Esemény szimuláció
+            const randomEvent = Math.random() * 1000;
+            const strengthDiff = homeStrength - awayStrength;
+            const homeChanceModifier = 50 + strengthDiff; // Base 50% chance, modified by strength
+
+            if (randomEvent < 15) { // Gól esélye
+                if (Math.random() * 100 < homeChanceModifier) {
+                    homeScore++;
+                    addCommentary(gameTime, `GÓL! ${homeTeam} megszerezte a vezetést!`);
+                } else {
+                    awayScore++;
+                    addCommentary(gameTime, `GÓL! ${awayTeam} kiegyenlített vagy vezet!`);
+                }
+                document.getElementById('simScore').textContent = `${homeScore} - ${awayScore}`;
+            } else if (randomEvent < 40) {
+                 const attackingTeam = Math.random() * 100 < homeChanceModifier ? homeTeam : awayTeam;
+                 addCommentary(gameTime, `${attackingTeam} támad, de a védelem tisztáz.`, 'fa-shield-alt');
+            }
+
+
+            if (gameTime === 45) {
+                isPaused = true;
+                document.getElementById('half-time-banner').classList.remove('hidden');
+                 addCommentary('45', 'Félidő.', 'fa-coffee');
+                setTimeout(() => {
+                    isPaused = false;
+                     document.getElementById('half-time-banner').classList.add('hidden');
+                }, 4000);
+            }
+
+            if (gameTime >= 90) {
+                clearInterval(simulationInterval);
+                addCommentary('90', 'Vége a mérkőzésnek!', 'fa-flag-checkered');
+                setTimeout(() => {
+                    endMatchGame(homeTeam, awayTeam, homeScore, awayScore);
+                }, 2000);
+            }
+
+        }, 100); // Gyorsabb szimuláció
+    }
+
+    function endMatchGame(homeTeam, awayTeam, homeScore, awayScore) {
+        matchSimulatorOverlay.classList.add('hidden');
+        matchResultOverlay.classList.remove('hidden');
+
+        document.getElementById('resultHomeLogo').src = getTeamData(homeTeam).logo;
+        document.getElementById('resultHomeName').textContent = homeTeam;
+        document.getElementById('resultAwayLogo').src = getTeamData(awayTeam).logo;
+        document.getElementById('resultAwayName').textContent = awayTeam;
+        document.getElementById('resultScore').textContent = `${homeScore} - ${awayScore}`;
+
+        // Jutalmak és statisztikák (egyszerűsített)
+        const playerTeam = gameState.team.name;
+        let playerGoals = 0;
+        let playerAssists = 0;
+        let bonus = 0;
+        
+        const isHomeTeam = playerTeam === homeTeam;
+        const playerScore = isHomeTeam ? homeScore : awayScore;
+        const opponentScore = isHomeTeam ? awayScore : homeScore;
+
+        if (playerScore > 0) {
+             playerGoals = getRandomInt(0, Math.min(2, playerScore)); // Max 2 gólt szerezhet a játékos
+             playerAssists = getRandomInt(0, Math.min(2, playerScore - playerGoals));
+        }
+
+        if (playerScore > opponentScore) { // Győzelem
+            bonus = gameState.salary * 0.5;
+        } else if (playerScore === opponentScore) { // Döntetlen
+            bonus = gameState.salary * 0.2;
+        }
+        
+        gameState.money += gameState.salary + bonus;
+        gameState.goals += playerGoals;
+        gameState.assists += playerAssists;
+        gameState.matchesPlayed++;
+        
+        document.getElementById('resultPlayerPerformance').textContent = `Gólok: ${playerGoals}, Gólpasszok: ${playerAssists}`;
+        document.getElementById('resultEarnings').textContent = `Fizetés: €${gameState.salary.toLocaleString()}, Bónusz: €${bonus.toLocaleString()}`;
+
+        // Liga frissítése
+        updateLeagueAfterMatch(homeTeam, awayTeam, homeScore, awayScore);
+
+        gameState.currentMatchday++;
+        saveAllSaves();
+    }
+    
+    function updateLeagueAfterMatch(homeTeam, awayTeam, homeScore, awayScore) {
+        const home = gameState.league.find(t => t.name === homeTeam);
+        const away = gameState.league.find(t => t.name === awayTeam);
+
+        home.played++;
+        away.played++;
+        home.gf += homeScore;
+        home.ga += awayScore;
+        away.gf += awayScore;
+        away.ga += homeScore;
+        home.gd = home.gf - home.ga;
+        away.gd = away.gf - away.ga;
+
+        if (homeScore > awayScore) {
+            home.wins++;
+            home.points += 3;
+            away.losses++;
+        } else if (awayScore > homeScore) {
+            away.wins++;
+            away.points += 3;
+            home.losses++;
+        } else {
+            home.draws++;
+            away.draws++;
+            home.points++;
+            away.points++;
+        }
+    }
     
     // --- CSAPATKEZELÉS ---
     let draggedPlayerId = null;
