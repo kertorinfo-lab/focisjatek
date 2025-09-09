@@ -1,4 +1,10 @@
-const LEAGUES = {
+/**
+ * leagues.js
+ * Ez a modul tartalmazza a játékban szereplő összes bajnokság és csapat adatait.
+ * Az adatokat a LEAGUES nevű konstansban exportálja.
+ */
+
+export const LEAGUES = {
     "England": {
         "Premier League": {
             tier: 1,
