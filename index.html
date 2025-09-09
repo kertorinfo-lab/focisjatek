@@ -6,12 +6,6 @@
     <title>Football Crazy - A Karrier</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- 
-      FIGYELEM: Az adatfájlok (leagues.js, names.js, nationalities.js) betöltését eltávolítottuk innen.
-      Mostantól a "main.js" modul felelős az összes szükséges JavaScript fájl importálásáért.
-      Ez a modern és hibabiztos megközelítés.
-    -->
 </head>
 <body>
 
@@ -77,8 +71,6 @@
     </div>
     
     <!-- All other overlays and hub content remain the same -->
-    <!-- ... Match Result Overlay, Offer Modal, Player Swap, Simulators ... -->
-
     <div class="overlay hidden" id="matchResultOverlay">
         <div class="card">
             <div class="match-result-header">
@@ -108,7 +100,7 @@
         </div>
         <button id="sim-pause-btn" class="sim-pause-btn"><i class="fas fa-pause"></i></button>
     </div>
-    <div class="overlay hidden" id="matchGameOverlay">
+    <div class="overlay hidden" Új Karrier="matchGameOverlay">
         <div class="game-scoreboard-wrapper"><div id="game-scoreboard" class="game-scoreboard">
             <div class="team-info left"><span id="gameHomeName">HOM</span></div>
             <div class="score-info"><div id="gameScore">0 - 0</div><div class="score-timeline"><span id="homeProgress"></span><span id="awayProgress"></span></div></div>
@@ -202,9 +194,22 @@
             <button class="nav-btn" data-screen="globalTransferScreen"><i class="fas fa-globe-europe"></i></button>
         </nav>
     </div>
+
+    <!-- Confirmation Modal -->
+    <div class="overlay hidden" id="confirmationModalOverlay">
+        <div class="card" style="max-width: 400px; text-align: center;">
+            <h3 id="confirmationModalTitle">Megerősítés</h3>
+            <p id="confirmationModalText" style="margin: 20px 0;">Biztosan végrehajtod a műveletet?</p>
+            <div class="navigation-buttons" style="justify-content: center;">
+                <button class="button cancel-btn" id="cancelBtn">Mégsem</button>
+                <button class="button submit-btn" id="confirmBtn">Igen</button>
+            </div>
+        </div>
+    </div>
     
-    <!-- A játék logikája EGYETLEN ponton, modulként töltődik be -->
+    <!-- A játék logikája modulként töltődik be, ami sokkal tisztább és modernebb megoldás -->
     <script type="module" src="main.js"></script>
 
 </body>
 </html>
+
