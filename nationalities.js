@@ -1,4 +1,11 @@
-const NATIONALITIES = {
+/**
+ * nationalities.js
+ * Ez a modul tartalmazza a játékban választható nemzetiségeket, a hozzájuk tartozó
+ * teljes névvel és zászló URL-lel.
+ * Az adatokat a NATIONALITIES nevű konstansban exportálja.
+ */
+
+export const NATIONALITIES = {
     'hu': { name: 'Magyar', flag: 'https://flagcdn.com/w40/hu.png' },
     'en': { name: 'Angol', flag: 'https://flagcdn.com/w40/gb-eng.png' },
     'es': { name: 'Spanyol', flag: 'https://flagcdn.com/w40/es.png' },
