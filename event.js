@@ -1,19 +1,16 @@
 /**
  * events.js
- * Ez az új, központi eseménykezelő modul.
- * Felelős a felhasználói interakciók (pl. gombnyomások) és a játéklogika
- * összekötéséért. Importál a state, ui és data modulokból is,
- * ezzel megszüntetve a körkörös függőségeket.
+ * Ez a központi eseménykezelő modul. Felelős a felhasználói interakciók és
+ * a játéklogika összekötéséért.
  */
 
 import { gameState, getAllSaves, deleteSave, loadSelectedGame, startNewGame } from './state.js';
-import { getLeagueData } from './data.js';
 import { playNextMatch } from './match.js';
 import {
     showScreen, showMainMenu, displaySaveSlots, initializeCharacterCreator,
-    updateCarousel, generateContractOffers, showConfirmationModal, hideConfirmationModal, getConfirmCallback
+    updateCarousel, generateContractOffers, showConfirmationModal, hideConfirmationModal,
+    getConfirmCallback, showMainHub
 } from './ui.js';
-// JAVÍTÁS: Hozzáadtuk a hiányzó NATIONALITIES importot
 import { NATIONALITIES } from './nationalities.js';
 
 let selectedLeagueName = null;
@@ -37,7 +34,11 @@ export function initEventListeners() {
                 hideConfirmationModal();
             });
         } else {
+            // JAVÍTVA: A logika szétválasztva
+            // 1. Betöltjük az állapotot
             loadSelectedGame(saveId);
+            // 2. Frissítjük a UI-t az új állapottal
+            showMainHub(gameState);
         }
     });
 
@@ -85,7 +86,11 @@ export function initEventListeners() {
         } else if (e.target.closest('.accept-offer-btn')) {
             const team = JSON.parse(e.target.dataset.team);
             const playerName = document.getElementById('playerName').value;
+            // JAVÍTVA: A logika szétválasztva
+            // 1. Elindítjuk az új játékot (állapot létrehozása)
             startNewGame(playerName, selectedNationality, selectedLeagueName, team);
+            // 2. Megjelenítjük a fő hubot az új állapottal
+            showMainHub(gameState);
         }
     });
 
@@ -104,13 +109,10 @@ export function initEventListeners() {
         if (option) {
             selectedNationality = option.dataset.value;
             const selectedOptionDisplay = document.querySelector('#nationalitySelect .selected-option');
-
-            // JAVÍTÁS: A rossz `getLeagueData` hívás helyett a helyes `NATIONALITIES` objektumot használjuk.
             const nationData = NATIONALITIES[selectedNationality];
             if (nationData) {
                 selectedOptionDisplay.innerHTML = `<img src="${nationData.flag}" alt="${nationData.name} zászló"><span>${nationData.name}</span>`;
             }
-            
             nationalityOptions.classList.add('hidden');
         }
     });
