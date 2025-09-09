@@ -13,6 +13,8 @@ import {
     showScreen, showMainMenu, displaySaveSlots, initializeCharacterCreator,
     updateCarousel, generateContractOffers, showConfirmationModal, hideConfirmationModal, getConfirmCallback
 } from './ui.js';
+// JAVÍTÁS: Hozzáadtuk a hiányzó NATIONALITIES importot
+import { NATIONALITIES } from './nationalities.js';
 
 let selectedLeagueName = null;
 let selectedNationality = 'hu';
@@ -102,14 +104,15 @@ export function initEventListeners() {
         if (option) {
             selectedNationality = option.dataset.value;
             const selectedOptionDisplay = document.querySelector('#nationalitySelect .selected-option');
-            const nation = getLeagueData(selectedLeagueName); // Note: This seems incorrect, should be NATIONALITIES
-            // Assuming NATIONALITIES is available via an import in the scope that needs it.
-            // Correcting logic here to use a placeholder or require NATIONALITIES to be passed.
-            // For now, let's just update the display based on what we can.
-            const flagImg = option.querySelector('img').src;
-            const nationName = option.querySelector('span').textContent;
-            selectedOptionDisplay.innerHTML = `<img src="${flagImg}" alt=""><span>${nationName}</span>`;
+
+            // JAVÍTÁS: A rossz `getLeagueData` hívás helyett a helyes `NATIONALITIES` objektumot használjuk.
+            const nationData = NATIONALITIES[selectedNationality];
+            if (nationData) {
+                selectedOptionDisplay.innerHTML = `<img src="${nationData.flag}" alt="${nationData.name} zászló"><span>${nationData.name}</span>`;
+            }
+            
             nationalityOptions.classList.add('hidden');
         }
     });
 }
+
