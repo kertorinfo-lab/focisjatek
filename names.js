@@ -1,4 +1,14 @@
-const REAL_PLAYERS = {
+/**
+ * names.js
+ * FIGYELEM: Ezt a fájlt a felhasználó `names.js`-ként azonosította.
+ * A fájl valós játékosok adatait tartalmazza csapatok szerint (`REAL_PLAYERS`), 
+ * nem pedig a véletlenszerű névgeneráláshoz szükséges kereszt- és vezetékneveket.
+ * * A `data.js`-ben lévő `generatePlayerName` függvény egy `NAMES` objektumot vár,
+ * ami nemzetiségenként `firstNames` és `lastNames` tömböket tartalmaz.
+ * A jelenlegi struktúra használatához a `data.js`-t módosítani kell.
+ */
+
+export const REAL_PLAYERS = {
     "Manchester City": [
         { id: 'mci_1', name: 'Erling Haaland', position: 'CS', age: 24, rating: 91, value: 180000000, nationality: 'no' },
         { id: 'mci_2', name: 'Kevin De Bruyne', position: 'KP', age: 33, rating: 90, value: 100000000, nationality: 'be' },
