@@ -7,10 +7,11 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Adatfájlok betöltése -->
-    <script src="leagues.js" defer></script>
-    <script src="nationalities.js" defer></script>
-    <script src="names.js" defer></script>
+    <!-- 
+      FIGYELEM: Az adatfájlok (leagues.js, names.js, nationalities.js) betöltését eltávolítottuk innen.
+      Mostantól a "main.js" modul felelős az összes szükséges JavaScript fájl importálásáért.
+      Ez a modern és hibabiztos megközelítés.
+    -->
 </head>
 <body>
 
@@ -202,9 +203,8 @@
         </nav>
     </div>
     
-    <!-- A játék logikája modulként töltődik be, ami sokkal tisztább és modernebb megoldás -->
+    <!-- A játék logikája EGYETLEN ponton, modulként töltődik be -->
     <script type="module" src="main.js"></script>
 
 </body>
 </html>
-
