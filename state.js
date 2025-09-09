@@ -1,3 +1,9 @@
+import * as DataModule from './data.js';
+console.log("DataModule exports:", DataModule);
+
+
+
+
 // --- JÁTÉKÁLLAPOT KEZELŐ MODUL (state.js) ---
 import { generateSchedule, generateRosterForTeam, getLeagueData } from './data.js';
 
