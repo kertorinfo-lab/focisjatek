@@ -99,8 +99,7 @@ function startMatchSimulator(fixture, gameState) {
         halfTimeReached: false
     };
 
-    // DOM elemek frissítése
-    // ✅ HIBA ELKERÜLÉSE: Biztonsági ellenőrzés a DOM elemekre (simHomeNameEl, simAwayNameEl)
+    // DOM elemek frissítése biztonsági ellenőrzéssel
     if (simHomeNameEl) {
         simHomeNameEl.textContent = homeTeam.name;
     } else {
@@ -122,7 +121,14 @@ function startMatchSimulator(fixture, gameState) {
     document.getElementById('mainHub')?.classList.add('hidden');
     matchSimulatorOverlay?.classList.remove('hidden');
     isPaused = false;
-    simPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+    
+    // ✅ KRITIKUS BIZTONSÁGI ELLENŐRZÉS: simPauseBtn
+    if (simPauseBtn) { 
+        simPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+    } else {
+        // Ha a simPauseBtn hiányzik, a kód itt elkerüli az összeomlást (Type Error)
+        console.warn("Hiányzó DOM elem: simPauseBtn. Kérlek, ellenőrizd az index.html-ben lévő 'sim-pause-btn' ID-t!");
+    }
 
     runSimulation();
 }
