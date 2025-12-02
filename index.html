@@ -9,7 +9,6 @@
 </head>
 <body>
 
-    <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen">
         <svg class="football-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#ffffff" d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM152 352h32v32c0 17.7-14.3 32-32 32s-32-14.3-32-32V320c0-17.7 14.3-32 32-32h64c17.7 0 32 14.3 32 32v64c0 17.7-14.3 32-32 32s-32-14.3-32-32V352H152zM280 288c-17.7 0-32 14.3-32 32v96c0 17.7 14.3 32 32 32h96c17.7 0 32-14.3 32-32V320c0-17.7-14.3-32-32-32H280zm64-224c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32h64c17.7 0 32-14.3 32-32V96c0-17.7-14.3-32-32-32H344zM120 96c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32s32-14.3 32-32V128c0-17.7-14.3-32-32-32zm88 64c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32h64c17.7 0 32-14.3 32-32V192c0-17.7-14.3-32-32-32H208z"/></svg>
         <h1 class="loading-title">Football Crazy</h1>
@@ -18,59 +17,75 @@
         </div>
     </div>
 
-    <!-- Main Menu -->
     <div class="main-menu-container hidden" id="mainMenu">
         <h1 class="menu-title">Football Crazy</h1>
         <div class="menu-buttons">
             <button class="button next-btn" id="newGameBtn">Új Karrier</button>
         </div>
         <div id="saveSlotsContainer" class="save-slots-container">
-            <!-- Save slots are dynamically generated here -->
-        </div>
+            </div>
     </div>
 
-    <!-- Character Creator -->
     <div class="character-creator-container hidden" id="characterCreator">
         <div class="form-carousel" id="formCarousel">
+            
             <div class="form-step">
-                <h2>Add meg a neved</h2>
-                <p class="form-description">Ez a név fog megjelenni a mezeken és a sajtóban.</p>
+                <h2>Indítsd el a karriered!</h2>
+                <p class="form-description">Add meg a neved, nemzetiséged és posztod.</p>
+                
+                <label for="playerName" style="display: block; text-align: left; margin-top: 15px; margin-bottom: 5px;">Játékos neve:</label>
                 <input type="text" id="playerName" placeholder="pl. Minta János" required>
-                <div class="navigation-buttons" style="justify-content: flex-end;"><button class="button next-btn">Tovább &rarr;</button></div>
-            </div>
-            <div class="form-step">
-                <h2>Válaszd ki a nemzetiséged</h2>
-                <p class="form-description">Melyik országot képviseled a nemzetközi porondon?</p>
+
+                <label for="nationalitySelect" style="display: block; text-align: left; margin-top: 15px; margin-bottom: 5px;">Nemzetiség:</label>
                 <div class="custom-select-wrapper">
-                    <div class="select-button" id="nationalitySelect">
+                    <div class="select-button" id="nationalitySelect" data-selected-value="hu">
                         <div class="selected-option" data-value="hu"><img src="https://flagcdn.com/w40/hu.png" alt="Magyar zászló"><span>Magyar</span></div><span>&#9660;</span>
                     </div>
                     <div class="select-options hidden" id="nationalityOptions">
-                        <!-- Options are generated from nationalities.js -->
+                        </div>
+                </div>
+
+                <label for="positionSelect" style="display: block; text-align: left; margin-top: 15px; margin-bottom: 5px;">Preferált Poszt:</label>
+                <div class="custom-select-wrapper">
+                    <div class="select-button" id="positionSelect" data-selected-value="CS">
+                        <div class="selected-option" data-value="CS"><span>Csatár (CS)</span></div><span>&#9660;</span>
+                    </div>
+                    <div class="select-options hidden" id="positionOptions">
+                        <div class="option" data-value="CS">Csatár (CS)</div>
+                        <div class="option" data-value="KP">Középpályás (KP)</div>
+                        <div class="option" data-value="V">Védő (V)</div>
+                        <div class="option" data-value="K">Kapus (K)</div>
                     </div>
                 </div>
-                <div class="navigation-buttons"><button class="button prev-btn">&larr; Vissza</button><button class="button next-btn">Tovább &rarr;</button></div>
+                
+                <div class="navigation-buttons" style="justify-content: flex-end;">
+                    <button class="button next-btn" id="step1NextBtn">Tovább &rarr;</button>
+                </div>
             </div>
+            
             <div class="form-step">
                 <h2>Válaszd ki a bajnokságot</h2>
                 <p class="form-description">Válassz egy bajnokságot, ahol elindítod a karriered.</p>
                 <div class="league-select-grid" id="leagueSelectGrid">
-                    <!-- Leagues are dynamically generated here -->
+                    </div>
+                <div class="navigation-buttons">
+                    <button class="button prev-btn">&larr; Vissza</button>
+                    <button class="button next-btn" id="step2NextBtn">Tovább &rarr;</button>
                 </div>
-                <div class="navigation-buttons"><button class="button prev-btn">&larr; Vissza</button><button class="button next-btn">Tovább &rarr;</button></div>
             </div>
+            
             <div class="form-step">
                 <h2>Aláírnád a szerződést?</h2>
                 <p style="text-align: center; color: var(--text-muted);">Válassz a két felajánlott csapat közül, és indítsd el a karriered!</p>
                 <div class="contract-offers-container" id="contractOffersContainer">
-                    <!-- Offers are generated here -->
+                    </div>
+                <div class="navigation-buttons" style="justify-content: flex-start;">
+                    <button class="button prev-btn">&larr; Vissza</button>
                 </div>
-                <div class="navigation-buttons" style="justify-content: flex-start;"><button class="button prev-btn">&larr; Vissza</button></div>
             </div>
         </div>
     </div>
     
-    <!-- All other overlays and hub content remain the same -->
     <div class="overlay hidden" id="matchResultOverlay">
         <div class="card">
             <div class="match-result-header">
@@ -100,7 +115,7 @@
         </div>
         <button id="sim-pause-btn" class="sim-pause-btn"><i class="fas fa-pause"></i></button>
     </div>
-    <div class="overlay hidden" Új Karrier="matchGameOverlay">
+    <div class="overlay hidden" id="matchGameOverlay">
         <div class="game-scoreboard-wrapper"><div id="game-scoreboard" class="game-scoreboard">
             <div class="team-info left"><span id="gameHomeName">HOM</span></div>
             <div class="score-info"><div id="gameScore">0 - 0</div><div class="score-timeline"><span id="homeProgress"></span><span id="awayProgress"></span></div></div>
@@ -117,7 +132,6 @@
         </div>
     </div>
     
-    <!-- Main Hub -->
     <div class="main-hub hidden" id="mainHub">
         <nav class="sidebar">
             <button class="nav-btn active" data-screen="dashboardScreen" data-tooltip="Irányítópult"><i class="fas fa-tachometer-alt"></i></button>
@@ -195,7 +209,6 @@
         </nav>
     </div>
 
-    <!-- Confirmation Modal -->
     <div class="overlay hidden" id="confirmationModalOverlay">
         <div class="card" style="max-width: 400px; text-align: center;">
             <h3 id="confirmationModalTitle">Megerősítés</h3>
@@ -207,9 +220,7 @@
         </div>
     </div>
     
-    <!-- A játék logikája modulként töltődik be, ami sokkal tisztább és modernebb megoldás -->
     <script type="module" src="main.js"></script>
 
 </body>
 </html>
-
