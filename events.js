@@ -10,7 +10,7 @@ import {
     updateCarousel, generateContractOffers, showConfirmationModal, hideConfirmationModal,
     getConfirmCallback, showMainHub, showMatchResultUI
 } from './ui.js';
-import { NATIONALITIES } from './nationalITIES.js';
+import { NATIONALITIES } from './nationalities.js'; // Így kell kinéznie
 
 let selectedLeagueName = null;
 let selectedNationality = 'hu'; // Kezdőérték
