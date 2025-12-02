@@ -61,7 +61,9 @@ export function showMainHub(gameState) {
     mainHub.classList.remove('hidden');
 
     const leagueData = getLeagueData(gameState.leagueName);
-    displayedCountry = leagueData.country;
+    displayedCountry = leagueData ? Object.keys(LEAGUES).find(country => 
+        Object.keys(LEAGUES[country]).includes(gameState.leagueName)
+    ) : null;
     displayedLeagueName = gameState.leagueName;
 
     updateUI(gameState);
@@ -73,8 +75,9 @@ export function initializeCharacterCreator() {
     mainMenu.classList.add('hidden');
     characterCreator.classList.remove('hidden');
     currentStep = 0;
-    updateCarousel();
+    updateCarousel(currentStep); // Fontos, hogy a 0. lépéssel induljon
 
+    // 1. NEMZETISÉGEK FELTÖLTÉSE (ez most rendben van)
     const nationalityOptions = document.getElementById('nationalityOptions');
     nationalityOptions.innerHTML = '';
     for (const code in NATIONALITIES) {
@@ -86,6 +89,7 @@ export function initializeCharacterCreator() {
         nationalityOptions.appendChild(optionDiv);
     }
 
+    // 2. LIGÁK FELTÖLTÉSE (ez most rendben van)
     const leagueSelectGrid = document.getElementById('leagueSelectGrid');
     leagueSelectGrid.innerHTML = '';
     for (const country in LEAGUES) {
@@ -101,10 +105,18 @@ export function initializeCharacterCreator() {
     }
 }
 
+// Karusszel mozgását vezérlő függvény JAVÍTVA
 export function updateCarousel(step) {
     currentStep = step;
-    const formCarousel = document.getElementById('formCarousel');
-    formCarousel.style.transform = `translateX(-${currentStep * 100}%)`;
+    // A form-carousel megtalálása a characterCreator konténeren belül, osztály alapján
+    const carouselElement = document.getElementById('characterCreator')?.querySelector('.form-carousel');
+    
+    if (carouselElement) {
+        // Minden lépésnél -100%-ot tolunk el, így láthatóvá válik a következő lépés
+        carouselElement.style.transform = `translateX(-${currentStep * 100}%)`;
+    } else {
+        console.error("Hiba: A '.form-carousel' elem nem található a Character Creator-ben.");
+    }
 }
 
 export function generateContractOffers(selectedLeagueName) {
@@ -115,8 +127,10 @@ export function generateContractOffers(selectedLeagueName) {
     if (!leagueData) return;
 
     const leagueTeams = leagueData.teams;
+    // Kisebb csapatok keresése a reális kezdéshez (erő 75 vagy alatt)
     const smallTeams = leagueTeams.filter(t => t.strength <= 75);
-    const teamPool = smallTeams.length >= 2 ? smallTeams : leagueTeams;
+    // Ha van legalább 2 kisebb csapat, azokat használjuk, különben az összeset
+    const teamPool = smallTeams.length >= 2 ? smallTeams : leagueTeams; 
 
     const offers = new Set();
     while (offers.size < 2 && offers.size < teamPool.length) {
@@ -149,20 +163,16 @@ function updateUI(gameState) {
     updateHeaderUI(gameState);
     updateDashboardUI(gameState);
     updateLeagueTable(gameState);
-    // A többi képernyő frissítése akkor történik, amikor aktívvá válnak
 }
 
 /**
  * Frissíti a meccs eredményét a UI-n. Ezt hívja meg az events.js a meccs lejátszása után.
  * @param {object} matchResult - A lejátszott mérkőzés eredményadatait tartalmazó objektum.
  */
-export function showMatchResultUI(matchResult) { // <-- IDE KERÜLT AZ EXPORTÁLT FÜGGVÉNY!
-    // Ezt a részt ki kell egészítened a tényleges HTML manipulációval, 
-    // hogy megjelenítsd a meccs eredményeit (pl. egy felugró ablakban).
+export function showMatchResultUI(matchResult) { 
     
     console.log("Mérkőzés eredménye megjelenítve:", matchResult); // Konzol log a teszteléshez
 
-    // Példa: Ha van egy modálod az eredményekhez:
     const resultModal = document.getElementById('matchResultModal');
     const resultText = document.getElementById('matchResultText');
 
@@ -173,7 +183,7 @@ export function showMatchResultUI(matchResult) { // <-- IDE KERÜLT AZ EXPORTÁL
         `;
     }
     if (resultModal) {
-        // resultModal.classList.remove('hidden'); // Modál megjelenítése
+        resultModal.classList.remove('hidden'); // Modál megjelenítése
     }
 }
 
@@ -211,8 +221,8 @@ export function displaySaveSlots(allSaves) {
 
 function updateHeaderUI(gameState) {
     document.getElementById('headerPlayerName').textContent = gameState.playerName;
-    document.getElementById('headerPlayerMoney').textContent = (gameState.money || 0).toLocaleString();
-    document.getElementById('headerPlayerCoins').textContent = (gameState.coins || 0).toLocaleString();
+    document.getElementById('headerPlayerMoney').textContent = `€${(gameState.money || 0).toLocaleString('hu-HU')}`;
+    document.getElementById('headerPlayerCoins').textContent = (gameState.coins || 0).toLocaleString('hu-HU');
 }
 
 function updateDashboardUI(gameState) {
