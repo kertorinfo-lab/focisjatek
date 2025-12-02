@@ -8,12 +8,10 @@
 // --- IMPORTÁLT MODULOK ---
 import { LEAGUES } from './leagues.js';
 import { NATIONALITIES } from './nationalities.js';
-import { REAL_PLAYERS } from './names.js'; // Korábban ez volt a névgenerátor adatbázisa
+import { REAL_PLAYERS } from './names.js';
 
 // --- BELSŐ ADATOK ---
 
-// Mivel a names.js most már valós játékosokat tartalmaz, a véletlenszerű
-// névgeneráláshoz itt hozunk létre egy alap név-adatbázist.
 const NAMES = {
     'hu': {
         firstNames: ["Bence", "Máté", "Levente", "Dominik", "Ádám", "Dávid", "Péter", "Gergő"],
@@ -45,13 +43,7 @@ function getRandomElement(arr) {
 
 // --- EXPORTÁLT FÜGGVÉNYEK ---
 
-/**
- * Generál egy véletlenszerű játékosnevet a megadott nemzetiség alapján.
- * @param {string} nationalityCode - A nemzetiség kódja (pl. 'hu', 'en').
- * @returns {string} A generált teljes név.
- */
 export function generatePlayerName(nationalityCode) {
-    // A globális window.NAMES helyett a modulban definiált NAMES objektumot használjuk.
     const nameData = NAMES[nationalityCode] || NAMES['en'];
     const firstName = getRandomElement(nameData.firstNames);
     const lastName = getRandomElement(nameData.lastNames);
@@ -68,9 +60,21 @@ export function generateAllPlayers() {
     const natCodes = Object.keys(NATIONALITIES);
     const playersPerTeam = 22;
 
+    // ✅ JAVÍTÁS: Létrehozunk egy TeamName -> TeamData térképet a gyors és hibamentes kereséshez
+    const teamMap = {};
+    for (const country in LEAGUES) {
+        for (const leagueName in LEAGUES[country]) {
+            LEAGUES[country][leagueName].teams.forEach(team => {
+                teamMap[team.name] = team;
+            });
+        }
+    }
+
     // 1. Valós játékosok betöltése a REAL_PLAYERS objektumból
     for (const teamName in REAL_PLAYERS) {
-        const teamData = getTeamData(teamName); // Csapatadatok lekérdezése a logóhoz
+        // Helyette: teamMap-ből kérjük le az adatot, elkerülve a getTeamData korai hívását
+        const teamData = teamMap[teamName]; 
+        
         if (teamData) {
             REAL_PLAYERS[teamName].forEach(player => {
                 allPlayers.push({
@@ -139,22 +143,29 @@ export function generateRosterForTeam(teamName, gameState) {
     gameState.team.players = roster;
 
     const userPlayer = {
-        id: 'user_player', name: gameState.playerName, position: 'CS',
+        id: 'user_player', name: gameState.playerName, position: gameState.position, // A pozíciót is felhasználjuk
         age: gameState.age, rating: gameState.rating,
         teamName: gameState.team.name, isUser: true
     };
+    
+    // Annak a játékosnak a pozíciója, akit a felhasználó helyettesít
+    const userPosKey = gameState.position; 
+    
+    let playerToReplace = gameState.team.players.find(p => p.position === userPosKey);
 
-    const fwds = gameState.team.players.filter(p => p.position === 'CS');
-    if (fwds.length > 0) {
-        const playerToReplaceIndex = gameState.team.players.findIndex(p => p.id === fwds[0].id);
+    if (playerToReplace) {
+        const playerToReplaceIndex = gameState.team.players.findIndex(p => p.id === playerToReplace.id);
         gameState.team.players[playerToReplaceIndex] = userPlayer;
     } else {
-        const mids = gameState.team.players.filter(p => p.position === 'KP');
-        if (mids.length > 0) {
-            const playerToReplaceIndex = gameState.team.players.findIndex(p => p.id === mids[0].id);
-            gameState.team.players[playerToReplaceIndex] = userPlayer;
+        // Ha nincs a posztján játékos, felveszünk egy támadót vagy középpályást
+        const backupPosKey = (userPosKey === 'V' || userPosKey === 'K') ? 'KP' : 'CS';
+        playerToReplace = gameState.team.players.find(p => p.position === backupPosKey);
+
+        if(playerToReplace) {
+             const playerToReplaceIndex = gameState.team.players.findIndex(p => p.id === playerToReplace.id);
+             gameState.team.players[playerToReplaceIndex] = userPlayer;
         } else {
-            gameState.team.players.push(userPlayer);
+             gameState.team.players.push(userPlayer); // Utolsó esély
         }
     }
 }
@@ -247,15 +258,21 @@ export function generateSchedule(teamNames) {
             const home = teams[i];
             const away = teams[teams.length - 1 - i];
             if (home && away) {
-                roundMatches.push({ home, away });
+                // Az 50%-át felcseréljük, hogy kiegyenlítettebb legyen a hazai/vendég felosztás
+                const isSwapped = Math.random() < 0.5; 
+                roundMatches.push({ home: isSwapped ? away : home, away: isSwapped ? home : away });
             }
         }
         schedule.push(roundMatches);
-        teams.splice(1, 0, teams.pop());
+        // Round-robin forgatás: a 0-t hagyjuk, az utolsót a 1. helyre tesszük
+        teams.splice(1, 0, teams.pop()); 
     }
+    
+    // Második félév: minden meccs felcserélve (oda-vissza vágó)
     const secondHalf = schedule.map(round =>
         round.map(({ home, away }) => ({ home: away, away: home }))
     );
+    
     return [...schedule, ...secondHalf];
 }
 
@@ -276,8 +293,23 @@ export function simulateOtherMatch(homeName, awayName, leagueName) {
     const homeAdvantage = 5;
     const homeStrength = homeTeam.strength + homeAdvantage;
     const awayStrength = awayTeam.strength;
-    const homeScore = Math.floor(Math.random() * (homeStrength / 25));
-    const awayScore = Math.floor(Math.random() * (awayStrength / 28));
+    
+    // A gólok generálása valószínűségi alapon, nem csak a puszta erő alapján
+    const strengthDiff = homeStrength - awayStrength;
+    
+    // Enyhén favorizáljuk a hazai csapatot, különösen, ha az erőviszonyok kiegyenlítettek
+    const baseGoals = 1;
+    let homeScore = 0;
+    let awayScore = 0;
+    
+    // Gólok generálása az erőviszonyok alapján
+    for (let i = 0; i < 4; i++) { // 4 esély a gólra meccsenként
+        const homeChance = 0.15 + strengthDiff / 250;
+        const awayChance = 0.15 - strengthDiff / 250;
+        
+        if (Math.random() < homeChance) homeScore++;
+        if (Math.random() < awayChance) awayScore++;
+    }
 
     return { homeName, awayName, homeScore, awayScore, playerGoals: 0 };
 }
