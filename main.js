@@ -7,8 +7,9 @@
 
 import { loadAllSaves } from './state.js';
 import { generateAllPlayers } from './data.js';
+import { initMatchElements } from './match.js'; 
 import { showMainMenu, initUIElements } from './ui.js';
-import { initEventListeners } from './events.js'; // <-- MÓDOSÍTVA: Az új events.js-ből importálunk
+import { initEventListeners } from './events.js'; 
 
 function main() {
     // 1. Betöltjük a mentéseket a háttértárból
@@ -19,13 +20,14 @@ function main() {
 
     // 3. Előkészítjük a UI elemeket
     initUIElements();
-
-    // 4. Beállítjuk az eseményfigyelőket (gombnyomások, stb.)
+    
+    // 4. Eseményfigyelők beállítása.
     initEventListeners();
-
+    
     // 5. Szimulálunk egy rövid betöltést és megjelenítjük a főmenüt
     const loadingBar = document.getElementById('loadingBar');
     const loadingScreen = document.getElementById('loadingScreen');
+    
     let progress = 0;
     const loadingInterval = setInterval(() => {
         progress += 10;
@@ -41,7 +43,5 @@ function main() {
     }, 50);
 }
 
-// A program futtatása, amint a DOM betöltődött.
-// A 'type="module"' garantálja, hogy a szkript a HTML elemzés után fut le.
-main();
-
+// A program futtatása, csak ha a teljes DOM betöltődött.
+window.addEventListener('DOMContentLoaded', main);
