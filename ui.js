@@ -152,6 +152,32 @@ function updateUI(gameState) {
     // A többi képernyő frissítése akkor történik, amikor aktívvá válnak
 }
 
+/**
+ * Frissíti a meccs eredményét a UI-n. Ezt hívja meg az events.js a meccs lejátszása után.
+ * @param {object} matchResult - A lejátszott mérkőzés eredményadatait tartalmazó objektum.
+ */
+export function showMatchResultUI(matchResult) { // <-- IDE KERÜLT AZ EXPORTÁLT FÜGGVÉNY!
+    // Ezt a részt ki kell egészítened a tényleges HTML manipulációval, 
+    // hogy megjelenítsd a meccs eredményeit (pl. egy felugró ablakban).
+    
+    console.log("Mérkőzés eredménye megjelenítve:", matchResult); // Konzol log a teszteléshez
+
+    // Példa: Ha van egy modálod az eredményekhez:
+    const resultModal = document.getElementById('matchResultModal');
+    const resultText = document.getElementById('matchResultText');
+
+    if (resultText) {
+        resultText.innerHTML = `
+            <h2>${matchResult.homeTeam} ${matchResult.homeScore} - ${matchResult.awayScore} ${matchResult.awayTeam}</h2>
+            <p>A mérkőzés lejátszva!</p>
+        `;
+    }
+    if (resultModal) {
+        // resultModal.classList.remove('hidden'); // Modál megjelenítése
+    }
+}
+
+
 function updateNavButtons(activeScreenId) {
     allNavButtons.forEach(btn => {
         btn.classList.toggle('active', btn.dataset.screen === activeScreenId);
