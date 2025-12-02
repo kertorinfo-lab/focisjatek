@@ -13,7 +13,7 @@ let simPauseBtn, commentaryTimeline, simScoreEl, simTimeEl, simHomeNameEl, simAw
 let pitchEnterBanner, bannerPlayerNameEl, halfTimeBanner;
 let joystickZone, joystickHandle, shootBtn, passBtn;
 
-let currentMatchData, simulationInterval, gameLoop, keys = {}; // Hozzáadva a 'keys = {}' inicializálás a hiba elkerülése érdekében
+let currentMatchData, simulationInterval, gameLoop, keys = {}; 
 let isPaused = false,
     miniGameActive = false;
 let resolveMatchPromise; // A Promise-t tároló változó
@@ -26,7 +26,7 @@ export function initMatchElements() {
     matchResultOverlay = document.getElementById('matchResultOverlay');
     matchGameOverlay = document.getElementById('matchGameOverlay');
     canvas = document.getElementById('gameCanvas');
-    ctx = canvas?.getContext('2d'); // null ellenőrzés hozzáadva
+    ctx = canvas?.getContext('2d'); 
     simPauseBtn = document.getElementById('sim-pause-btn');
     commentaryTimeline = document.getElementById('commentary-timeline');
     simScoreEl = document.getElementById('simScore');
@@ -55,7 +55,6 @@ export function playNextMatch(gameState) {
         
         // Hiba kezelése, ha nincs sorsolás (szezon vége, pihenőhét)
         if (!fixture) {
-            // Megpróbáljuk lejátszani a többi meccset, ha lehetséges
             const fixturesToday = gameState.schedule?.[gameState.currentMatchday] || [];
             const otherResults = fixturesToday
                 .map(f => simulateOtherMatch(f.home, f.away, gameState.leagueName));
@@ -79,10 +78,9 @@ function startMatchSimulator(fixture, gameState) {
     const homeTeam = getTeamData(fixture.home);
     const awayTeam = getTeamData(fixture.away);
 
-    // ✅ JAVÍTÁS: Ellenőrizzük, hogy a csapatadatok léteznek-e
+    // Csapatadat ellenőrzés
     if (!homeTeam || !awayTeam) {
         console.error("Hiba a meccs indításakor: Hiányzó csapatadatok!", fixture.home, awayTeam);
-        // Automatikusan lezárjuk a Promise-t, mintha pihenőhét lenne
         if (resolveMatchPromise) {
             resolveMatchPromise({ playerMatch: null, otherResults: [], isRestDay: true, error: "Hiányzó csapatadat" });
         }
@@ -102,14 +100,27 @@ function startMatchSimulator(fixture, gameState) {
     };
 
     // DOM elemek frissítése
-    // ✅ HIBA ELKERÜLÉSE: A .textContent csak akkor fut le, ha a homeTeam/awayTeam létezik.
-    simHomeNameEl.textContent = homeTeam.name;
-    simAwayNameEl.textContent = awayTeam.name;
-    bannerPlayerNameEl.textContent = gameState.playerName;
+    // ✅ HIBA ELKERÜLÉSE: Biztonsági ellenőrzés a DOM elemekre (simHomeNameEl, simAwayNameEl)
+    if (simHomeNameEl) {
+        simHomeNameEl.textContent = homeTeam.name;
+    } else {
+         console.warn("Hiányzó DOM elem: simHomeNameEl");
+    }
+    
+    if (simAwayNameEl) {
+        simAwayNameEl.textContent = awayTeam.name;
+    } else {
+         console.warn("Hiányzó DOM elem: simAwayNameEl");
+    }
+    
+    if (bannerPlayerNameEl) {
+        bannerPlayerNameEl.textContent = gameState.playerName;
+    }
+    
     updateSimulatorUI();
 
-    document.getElementById('mainHub').classList.add('hidden');
-    matchSimulatorOverlay.classList.remove('hidden');
+    document.getElementById('mainHub')?.classList.add('hidden');
+    matchSimulatorOverlay?.classList.remove('hidden');
     isPaused = false;
     simPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
 
@@ -130,9 +141,9 @@ function runSimulation() {
             currentMatchData.halfTimeReached = true;
             clearInterval(simulationInterval);
             addMatchEvent("FÉLIDŐ!", "fa-coffee");
-            halfTimeBanner.classList.remove('hidden');
+            halfTimeBanner?.classList.remove('hidden');
             setTimeout(() => {
-                halfTimeBanner.classList.add('hidden');
+                halfTimeBanner?.classList.add('hidden');
                 runSimulation();
             }, 4000);
             return;
@@ -142,27 +153,26 @@ function runSimulation() {
         const homeTeam = getTeamData(fixture.home);
         const awayTeam = getTeamData(fixture.away);
         
-        // Biztonsági ellenőrzés (a startMatchSimulator már ellenőrizte, de itt is biztonságos)
         if (!homeTeam || !awayTeam) return endMatch();
 
         const playerIsHome = gameState.team.name === homeTeam.name;
         const opponentTeam = playerIsHome ? awayTeam : homeTeam;
         const chanceModifier = (gameState.team.strength - opponentTeam.strength) / 250;
         
-        // Esély a minijátékra (0.15 + módosító)
+        // Esély a minijátékra
         if (Math.random() < 0.15 + chanceModifier) {
             clearInterval(simulationInterval);
             addMatchEvent("HELYZET! A te csapatod támad!", "fa-star");
-            pitchEnterBanner.classList.remove('hidden');
+            pitchEnterBanner?.classList.remove('hidden');
             setTimeout(() => {
-                matchSimulatorOverlay.classList.add('hidden');
-                pitchEnterBanner.classList.add('hidden');
+                matchSimulatorOverlay?.classList.add('hidden');
+                pitchEnterBanner?.classList.add('hidden');
                 startMatchGame(opponentTeam.strength);
             }, 2500);
             return;
         }
 
-        // Esély az ellenfél góljára (0.04 - módosító)
+        // Esély az ellenfél góljára
         if (Math.random() < 0.04 - chanceModifier) {
             if (playerIsHome) currentMatchData.awayScore++;
             else currentMatchData.homeScore++;
@@ -178,7 +188,7 @@ function endMatch() {
     addMatchEvent("VÉGE A MÉRKŐZÉSNEK!", "fa-stopwatch");
 
     setTimeout(() => {
-        matchSimulatorOverlay.classList.add('hidden');
+        matchSimulatorOverlay?.classList.add('hidden');
         
         const finalResult = {
             homeName: currentMatchData.fixture.home,
@@ -192,13 +202,12 @@ function endMatch() {
         const currentMatchdayFixtures = currentMatchData.gameState.schedule[currentMatchData.gameState.currentMatchday] || [];
 
         const otherFixtures = currentMatchdayFixtures
-            .filter(f => f.home !== finalResult.homeName || f.away !== finalResult.awayName); // Szűrjük, hogy a saját meccs ne szerepeljen kétszer
+            .filter(f => f.home !== finalResult.homeName || f.away !== finalResult.awayName);
 
         const otherResults = otherFixtures.map(fixture =>
             simulateOtherMatch(fixture.home, fixture.away, currentMatchData.gameState.leagueName)
         );
 
-        // Visszaadjuk az eredményt a Promise-on keresztül
         if (resolveMatchPromise) {
             resolveMatchPromise({
                 playerMatch: finalResult,
@@ -222,26 +231,27 @@ function addMatchEvent(comment, icon) {
 
 function updateSimulatorUI() {
     if (!currentMatchData) return;
-    simScoreEl.textContent = `${currentMatchData.homeScore} - ${currentMatchData.awayScore}`;
-    simTimeEl.textContent = `${String(Math.floor(currentMatchData.time)).padStart(2, '0')}:00`;
+    if (simScoreEl) simScoreEl.textContent = `${currentMatchData.homeScore} - ${currentMatchData.awayScore}`;
+    if (simTimeEl) simTimeEl.textContent = `${String(Math.floor(currentMatchData.time)).padStart(2, '0')}:00`;
     
-    commentaryTimeline.innerHTML = '';
-    currentMatchData.events.forEach(event => {
-        const eventDiv = document.createElement('div');
-        eventDiv.className = `event-item`;
-        eventDiv.innerHTML = `<div class="event-icon"><i class="fas ${event.icon}"></i></div><div class="event-text"><span class="time">${String(event.time).padStart(2, '0')}'</span> <span class="comment">${event.comment}</span></div>`;
-        commentaryTimeline.appendChild(eventDiv);
-    });
+    if (commentaryTimeline) {
+        commentaryTimeline.innerHTML = '';
+        currentMatchData.events.forEach(event => {
+            const eventDiv = document.createElement('div');
+            eventDiv.className = `event-item`;
+            eventDiv.innerHTML = `<div class="event-icon"><i class="fas ${event.icon}"></i></div><div class="event-text"><span class="time">${String(event.time).padStart(2, '0')}'</span> <span class="comment">${event.comment}</span></div>`;
+            commentaryTimeline.appendChild(eventDiv);
+        });
+    }
 }
 
 function togglePause() {
     isPaused = !isPaused;
-    simPauseBtn.innerHTML = isPaused ? '<i class="fas fa-play"></i>' : '<i class="fas fa-pause"></i>';
+    if (simPauseBtn) simPauseBtn.innerHTML = isPaused ? '<i class="fas fa-play"></i>' : '<i class="fas fa-pause"></i>';
 }
 
 // --- 2D MINI-JÁTÉK HELYETTESÍTŐ FÜGGVÉNYEK ---
 
-// A 2D-s játék függvényei, amiknek illeszkedniük kell a kódodhoz, ha a logika létezik
 function resizeCanvas() { 
     if (canvas) {
         canvas.width = canvas.clientWidth;
@@ -250,27 +260,21 @@ function resizeCanvas() {
 }
 
 function startMatchGame(opponentStrength) { 
-    // Helyettesítő logika a 2D játék indításához
     miniGameActive = true;
-    
-    // A játék indításakor a mini-játék elemeinek beállítása történik itt.
-    // Mivel a 2D játék kódja nem ismert, egy azonnali eredményt szimulálunk a teszteléshez.
     
     console.log(`Mini-játék indul: Ellenfél erőssége ${opponentStrength}`);
     
-    // Pár másodperc múlva befejezzük a mini-játékot, és szimuláljuk az eredményt.
     setTimeout(() => {
-        const isGoal = Math.random() < 0.5; // 50% esély a gólra
-        keys.shotByPlayer = true; // Teszteléshez feltételezzük, hogy a játékos lőtt
+        const isGoal = Math.random() < 0.5;
+        keys.shotByPlayer = true; 
         endMatchAction(isGoal, isGoal ? 'shot' : 'tackle');
-    }, 3000); // 3 másodperces mini-játék szimuláció
+    }, 3000); 
 }
 
 function endMatchAction(isGoal, reason = 'tackle') {
     if (!miniGameActive) return;
     miniGameActive = false;
     cancelAnimationFrame(gameLoop);
-    // ... event listener-ek eltávolítása ...
 
     const playerIsHome = currentMatchData.gameState.team.name === currentMatchData.fixture.home;
     let eventMessage = "";
@@ -280,7 +284,6 @@ function endMatchAction(isGoal, reason = 'tackle') {
         if (playerIsHome) currentMatchData.homeScore++;
         else currentMatchData.awayScore++;
 
-        // A playerGoals/playerAssists feltételezése a keys objektum alapján.
         if (keys.shotByPlayer) { 
             currentMatchData.playerGoals++;
             eventMessage = `GÓÓÓÓL! Te szerezted a gólt!`;
@@ -296,11 +299,10 @@ function endMatchAction(isGoal, reason = 'tackle') {
     }
 
     addMatchEvent(eventMessage, eventIcon);
-    matchGameOverlay.classList.add('hidden');
-    matchSimulatorOverlay.classList.remove('hidden');
+    matchGameOverlay?.classList.add('hidden');
+    matchSimulatorOverlay?.classList.remove('hidden');
     updateSimulatorUI();
 
-    // Reseteljük a keys-t
     keys = {}; 
 
     setTimeout(() => {
@@ -311,5 +313,3 @@ function endMatchAction(isGoal, reason = 'tackle') {
         }
     }, 1500);
 }
-// Az updateGame és draw függvények elhagyva, mivel a 2D játék logika nem volt elküldve.
-// Ha a játékot teljes egészében futtatni szeretnéd, a teljes 2D kódnak szerepelnie kell itt.
