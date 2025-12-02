@@ -57,11 +57,13 @@ export function initEventListeners() {
     // --- KARAKTERKÉSZÍTŐ ESEMÉNYEK ---
     document.getElementById('characterCreator')?.addEventListener('click', (e) => {
         
-        // 0. NEMZETISÉG LENYITÓ GOMB KEZELÉSE (JAVÍTOTT LOGIKA!)
+        // 0. NEMZETISÉG LENYITÓ GOMB KEZELÉSE
         const optionsContainer = document.getElementById('nationalityOptions');
 
         // Ha a felhasználó a fő választó gombra (select-button) kattint, lenyitjuk/becsukjuk a listát.
         if (e.target.closest('.select-button') && optionsContainer) {
+            // Megakadályozzuk, hogy a Nemzetiség választás is lefusson egyszerre
+            if (e.target.closest('.option[data-value]')) return; 
             optionsContainer.classList.toggle('hidden'); 
         }
         
@@ -106,9 +108,11 @@ export function initEventListeners() {
         }
         
         
-        // 2. NEMZETISÉG VÁLASZTÁS (Kattintás az opcióra)
-        if (e.target.closest('.option[data-value]')) {
-            const value = e.target.closest('.option').dataset.value;
+        // 2. NEMZETISÉG VÁLASZTÁS (Kattintás az opcióra - KORRIGÁLVA)
+        const selectedOption = e.target.closest('.option[data-value]');
+
+        if (selectedOption) {
+            const value = selectedOption.dataset.value;
             selectedNationality = value;
             
             // Frissíti a UI-t
@@ -120,8 +124,6 @@ export function initEventListeners() {
                 
             // Visszarejti a listát a választás után
             document.getElementById('nationalityOptions')?.classList.add('hidden'); 
-            
-            // Ez biztosítja, hogy a kattintás a listán belül megtörténjen, és el is tűnjön.
         }
 
         // 3. LIGA VÁLASZTÁS
