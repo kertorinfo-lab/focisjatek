@@ -20,15 +20,30 @@ export function initEventListeners() {
     // --- FŐ HUB ---
     document.getElementById('playMatchBtn')?.addEventListener('click', async () => {
         const result = await playNextMatch(gameState);
+        
+        // 1. feldolgozzuk az eredményt (ez frissíti a gameState-et és léptet fordulót)
         processMatchDayResult(result);
         
-        if (result.playerMatch) {
-            showMatchResultUI(result.playerMatch); 
+        // 2. Kiírjuk a képernyőre a megfelelő felületet
+        
+        if (result.isRestDay) {
+            // Ha pihenőnap volt, csak visszatérünk a fő Hub-ra
+            console.log("Pihenőnap. Vissza a fő Hub-ra.");
+            showMainHub(gameState); 
+        } else if (result.playerMatch) {
+            // Ha volt meccs, megjelenítjük az eredményt
+            console.log("Meccs befejezve. Eredmény kijelzése.");
+            // Az eredmény behelyezése az UI kártyára:
+            showMatchResultUI(result.playerMatch, result.otherResults); 
+            
         } else {
-            showMainHub(gameState);
+             // Ez elméletileg nem fordulhat elő, ha a sorsolás jó
+             console.error("Hiba: A forduló nem fejeződött be megfelelően.");
+             showMainHub(gameState);
         }
     });
 
+    // 💡 JAVÍTÁS UTÁN: Ez a gomb viszi tovább a játékot a fő hubra az eredmény kártyáról
     document.getElementById('matchResultContinueBtn')?.addEventListener('click', () => showMainHub(gameState));
 
     // --- FŐMENÜ ---
@@ -75,13 +90,12 @@ export function initEventListeners() {
             // Lépés: 0 -> 1 (Név és Pozíció ellenőrzése)
             if (currentStep === 0) {
                 const playerName = document.getElementById('playerName').value.trim();
-                const errorElement = document.getElementById('nameError'); 
+                // A 'nameError' elem ID-je nincs a HTML-ben, feltételezzük, hogy egy alert-et használsz helyette
                 
                 if (playerName.length < 2) {
-                    if (errorElement) errorElement.textContent = 'Kérjük, adja meg a nevét.';
+                    alert('Kérjük, adja meg a nevét (minimum 2 karakter)!');
                     return; 
                 }
-                if (errorElement) errorElement.textContent = ''; 
             }
             
             // Lépés: 1 -> 2 (Liga kiválasztásának ellenőrzése)
@@ -115,9 +129,9 @@ export function initEventListeners() {
             const value = selectedOption.dataset.value;
             selectedNationality = value;
             
-            // Frissíti a UI-t
+            // Frissíti a UI-t - ID KORRIGÁLVA (a HTML alapján a select-button-t kell frissíteni)
             const selectedNation = NATIONALITIES[value];
-            const display = document.getElementById('selectedNationalityDisplay');
+            const display = document.querySelector('#nationalitySelect .selected-option'); // Lecserélve a selectedNationalityDisplay-t a tényleges display elemre
             if (display) {
                 display.innerHTML = `<img src="${selectedNation.flag}" alt="${selectedNation.name} zászló"><span>${selectedNation.name}</span>`;
             }
