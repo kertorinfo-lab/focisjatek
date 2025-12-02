@@ -10,12 +10,11 @@ import {
     updateCarousel, generateContractOffers, showConfirmationModal, hideConfirmationModal,
     getConfirmCallback, showMainHub, showMatchResultUI
 } from './ui.js';
-// Helyes import útvonal: 'nationalities.js' (feltételezve, hogy a fájl neve csupa kisbetűs)
 import { NATIONALITIES } from './nationalities.js'; 
 
 let selectedLeagueName = null;
-let selectedNationality = 'hu'; // Kezdőérték
-let currentStep = 0; // Ez a változó a Karakterkészítő aktuális lépését tárolja
+let selectedNationality = 'hu'; 
+let currentStep = 0; 
 
 export function initEventListeners() {
     // --- FŐ HUB ---
@@ -34,7 +33,7 @@ export function initEventListeners() {
 
     // --- FŐMENÜ ---
     document.getElementById('newGameBtn')?.addEventListener('click', () => {
-        currentStep = 0; // Új játék indításakor reseteljük a lépést
+        currentStep = 0; 
         initializeCharacterCreator();
     });
     
@@ -58,15 +57,12 @@ export function initEventListeners() {
     // --- KARAKTERKÉSZÍTŐ ESEMÉNYEK ---
     document.getElementById('characterCreator')?.addEventListener('click', (e) => {
         
-        // 0. NEMZETISÉG LENYITÓ GOMB KEZELÉSE (Új kiegészítés!)
-        if (e.target.closest('.select-button')) {
-            const options = document.getElementById('nationalityOptions');
-            // Megfordítja a 'hidden' osztályt: ha rejtett, megjeleníti, ha látszik, elrejti.
-            if (options) {
-                options.classList.toggle('hidden'); 
-            }
-            // Fontos: itt térjünk vissza, hogy ne fusson le a többi logika egyidejűleg
-            return; 
+        // 0. NEMZETISÉG LENYITÓ GOMB KEZELÉSE (JAVÍTOTT LOGIKA!)
+        const optionsContainer = document.getElementById('nationalityOptions');
+
+        // Ha a felhasználó a fő választó gombra (select-button) kattint, lenyitjuk/becsukjuk a listát.
+        if (e.target.closest('.select-button') && optionsContainer) {
+            optionsContainer.classList.toggle('hidden'); 
         }
         
         // 1. LÉPÉSEK KÖZÖTTI NAVIGÁCIÓ
@@ -87,14 +83,13 @@ export function initEventListeners() {
             }
             
             // Lépés: 1 -> 2 (Liga kiválasztásának ellenőrzése)
-            // EZ A KÓD KÜLDTE A HIBAÜZENETET, HA NEM LÁTTAD A LIGÁT.
             if (currentStep === 1 && !selectedLeagueName) {
                 alert('Kérjük, válasszon egy induló ligát!'); 
                 return;
             }
 
             currentStep++;
-            updateCarousel(currentStep); // Frissíti a lépést a karusszelen
+            updateCarousel(currentStep); 
             
             // Ha elértük a harmadik lépést (szerződés)
             if (currentStep === 2) { 
@@ -111,7 +106,7 @@ export function initEventListeners() {
         }
         
         
-        // 2. NEMZETISÉG VÁLASZTÁS
+        // 2. NEMZETISÉG VÁLASZTÁS (Kattintás az opcióra)
         if (e.target.closest('.option[data-value]')) {
             const value = e.target.closest('.option').dataset.value;
             selectedNationality = value;
@@ -125,6 +120,8 @@ export function initEventListeners() {
                 
             // Visszarejti a listát a választás után
             document.getElementById('nationalityOptions')?.classList.add('hidden'); 
+            
+            // Ez biztosítja, hogy a kattintás a listán belül megtörténjen, és el is tűnjön.
         }
 
         // 3. LIGA VÁLASZTÁS
