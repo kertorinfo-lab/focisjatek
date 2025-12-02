@@ -5,7 +5,7 @@
  * A meccs végén egy Promise-ban visszaadja a végeredményt.
  */
 
-import { getLeagueData, getTeamData, simulateOtherMatch } from './data.js';
+import { getTeamData, simulateOtherMatch } from './data.js';
 
 // DOM elemek és állapotváltozók a modulon belül maradnak
 let matchSimulatorOverlay, matchResultOverlay, matchGameOverlay, canvas, ctx;
@@ -13,10 +13,12 @@ let simPauseBtn, commentaryTimeline, simScoreEl, simTimeEl, simHomeNameEl, simAw
 let pitchEnterBanner, bannerPlayerNameEl, halfTimeBanner;
 let joystickZone, joystickHandle, shootBtn, passBtn;
 
-let currentMatchData, simulationInterval, gameLoop, keys;
+let currentMatchData, simulationInterval, gameLoop, keys = {}; // Hozzáadva a 'keys = {}' inicializálás a hiba elkerülése érdekében
 let isPaused = false,
     miniGameActive = false;
 let resolveMatchPromise; // A Promise-t tároló változó
+
+// --- MECCS SZIMULÁTOR INICIALIZÁLÁSA ---
 
 // Ezt a függvényt a main.js hívja meg
 export function initMatchElements() {
@@ -24,7 +26,7 @@ export function initMatchElements() {
     matchResultOverlay = document.getElementById('matchResultOverlay');
     matchGameOverlay = document.getElementById('matchGameOverlay');
     canvas = document.getElementById('gameCanvas');
-    ctx = canvas.getContext('2d');
+    ctx = canvas?.getContext('2d'); // null ellenőrzés hozzáadva
     simPauseBtn = document.getElementById('sim-pause-btn');
     commentaryTimeline = document.getElementById('commentary-timeline');
     simScoreEl = document.getElementById('simScore');
@@ -49,11 +51,13 @@ export function playNextMatch(gameState) {
     return new Promise((resolve) => {
         resolveMatchPromise = resolve; // Elmentjük a resolve függvényt, hogy a meccs végén hívhassuk meg
 
-        const fixture = gameState.schedule[gameState.currentMatchday].find(f => f.home === gameState.team.name || f.away === gameState.team.name);
-
+        const fixture = gameState.schedule?.[gameState.currentMatchday]?.find(f => f.home === gameState.team.name || f.away === gameState.team.name);
+        
+        // Hiba kezelése, ha nincs sorsolás (szezon vége, pihenőhét)
         if (!fixture) {
-            // Pihenőhét logikája
-            const otherResults = gameState.schedule[gameState.currentMatchday]
+            // Megpróbáljuk lejátszani a többi meccset, ha lehetséges
+            const fixturesToday = gameState.schedule?.[gameState.currentMatchday] || [];
+            const otherResults = fixturesToday
                 .map(f => simulateOtherMatch(f.home, f.away, gameState.leagueName));
             
             resolve({
@@ -69,9 +73,21 @@ export function playNextMatch(gameState) {
 }
 
 
+// --- MECCS SZIMULÁTOR LOGIKA ---
+
 function startMatchSimulator(fixture, gameState) {
     const homeTeam = getTeamData(fixture.home);
     const awayTeam = getTeamData(fixture.away);
+
+    // ✅ JAVÍTÁS: Ellenőrizzük, hogy a csapatadatok léteznek-e
+    if (!homeTeam || !awayTeam) {
+        console.error("Hiba a meccs indításakor: Hiányzó csapatadatok!", fixture.home, awayTeam);
+        // Automatikusan lezárjuk a Promise-t, mintha pihenőhét lenne
+        if (resolveMatchPromise) {
+            resolveMatchPromise({ playerMatch: null, otherResults: [], isRestDay: true, error: "Hiányzó csapatadat" });
+        }
+        return;
+    }
 
     currentMatchData = {
         fixture,
@@ -85,6 +101,8 @@ function startMatchSimulator(fixture, gameState) {
         halfTimeReached: false
     };
 
+    // DOM elemek frissítése
+    // ✅ HIBA ELKERÜLÉSE: A .textContent csak akkor fut le, ha a homeTeam/awayTeam létezik.
     simHomeNameEl.textContent = homeTeam.name;
     simAwayNameEl.textContent = awayTeam.name;
     bannerPlayerNameEl.textContent = gameState.playerName;
@@ -123,11 +141,15 @@ function runSimulation() {
         const { fixture, gameState } = currentMatchData;
         const homeTeam = getTeamData(fixture.home);
         const awayTeam = getTeamData(fixture.away);
+        
+        // Biztonsági ellenőrzés (a startMatchSimulator már ellenőrizte, de itt is biztonságos)
+        if (!homeTeam || !awayTeam) return endMatch();
+
         const playerIsHome = gameState.team.name === homeTeam.name;
         const opponentTeam = playerIsHome ? awayTeam : homeTeam;
         const chanceModifier = (gameState.team.strength - opponentTeam.strength) / 250;
         
-        // Esély a minijátékra
+        // Esély a minijátékra (0.15 + módosító)
         if (Math.random() < 0.15 + chanceModifier) {
             clearInterval(simulationInterval);
             addMatchEvent("HELYZET! A te csapatod támad!", "fa-star");
@@ -140,7 +162,7 @@ function runSimulation() {
             return;
         }
 
-        // Esély az ellenfél góljára
+        // Esély az ellenfél góljára (0.04 - módosító)
         if (Math.random() < 0.04 - chanceModifier) {
             if (playerIsHome) currentMatchData.awayScore++;
             else currentMatchData.homeScore++;
@@ -167,8 +189,10 @@ function endMatch() {
             playerAssists: currentMatchData.playerAssists,
         };
 
-        const otherFixtures = currentMatchData.gameState.schedule[currentMatchData.gameState.currentMatchday]
-            .filter(f => f.home !== finalResult.homeName);
+        const currentMatchdayFixtures = currentMatchData.gameState.schedule[currentMatchData.gameState.currentMatchday] || [];
+
+        const otherFixtures = currentMatchdayFixtures
+            .filter(f => f.home !== finalResult.homeName || f.away !== finalResult.awayName); // Szűrjük, hogy a saját meccs ne szerepeljen kétszer
 
         const otherResults = otherFixtures.map(fixture =>
             simulateOtherMatch(fixture.home, fixture.away, currentMatchData.gameState.leagueName)
@@ -215,8 +239,32 @@ function togglePause() {
     simPauseBtn.innerHTML = isPaused ? '<i class="fas fa-play"></i>' : '<i class="fas fa-pause"></i>';
 }
 
-// ... A 2D-s játék függvényei (startMatchGame, updateGame, draw, stb.) változatlanok maradnak ...
-// A endMatchAction függvényt kell módosítani:
+// --- 2D MINI-JÁTÉK HELYETTESÍTŐ FÜGGVÉNYEK ---
+
+// A 2D-s játék függvényei, amiknek illeszkedniük kell a kódodhoz, ha a logika létezik
+function resizeCanvas() { 
+    if (canvas) {
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+    }
+}
+
+function startMatchGame(opponentStrength) { 
+    // Helyettesítő logika a 2D játék indításához
+    miniGameActive = true;
+    
+    // A játék indításakor a mini-játék elemeinek beállítása történik itt.
+    // Mivel a 2D játék kódja nem ismert, egy azonnali eredményt szimulálunk a teszteléshez.
+    
+    console.log(`Mini-játék indul: Ellenfél erőssége ${opponentStrength}`);
+    
+    // Pár másodperc múlva befejezzük a mini-játékot, és szimuláljuk az eredményt.
+    setTimeout(() => {
+        const isGoal = Math.random() < 0.5; // 50% esély a gólra
+        keys.shotByPlayer = true; // Teszteléshez feltételezzük, hogy a játékos lőtt
+        endMatchAction(isGoal, isGoal ? 'shot' : 'tackle');
+    }, 3000); // 3 másodperces mini-játék szimuláció
+}
 
 function endMatchAction(isGoal, reason = 'tackle') {
     if (!miniGameActive) return;
@@ -232,7 +280,8 @@ function endMatchAction(isGoal, reason = 'tackle') {
         if (playerIsHome) currentMatchData.homeScore++;
         else currentMatchData.awayScore++;
 
-        if (keys.shotByPlayer) { // feltételezve, hogy ezt valahol beállítod lövéskor
+        // A playerGoals/playerAssists feltételezése a keys objektum alapján.
+        if (keys.shotByPlayer) { 
             currentMatchData.playerGoals++;
             eventMessage = `GÓÓÓÓL! Te szerezted a gólt!`;
         } else if (keys.passedByPlayer) {
@@ -251,6 +300,9 @@ function endMatchAction(isGoal, reason = 'tackle') {
     matchSimulatorOverlay.classList.remove('hidden');
     updateSimulatorUI();
 
+    // Reseteljük a keys-t
+    keys = {}; 
+
     setTimeout(() => {
         if (currentMatchData.time < 90) {
             runSimulation();
@@ -259,7 +311,5 @@ function endMatchAction(isGoal, reason = 'tackle') {
         }
     }, 1500);
 }
-// Itt következne a 2D játék teljes logikája (startMatchGame, resizeCanvas, stb.)
-// A lényeg, hogy a végén az endMatchAction fusson le.
-function resizeCanvas() { /* ... */ }
-function startMatchGame(opponentStrength) { /* ... */ }
+// Az updateGame és draw függvények elhagyva, mivel a 2D játék logika nem volt elküldve.
+// Ha a játékot teljes egészében futtatni szeretnéd, a teljes 2D kódnak szerepelnie kell itt.
