@@ -3,45 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobil Foci Játék - Főmenü</title>
+    <title>Mobil Foci Játék</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <main id="main-menu">
         <div class="menu-container">
-            
+
             <section class="menu-box main-game">
                 <h2>Játék</h2>
-                <div class="kocka-keret">Fő Játék Indítása (Itt lesz a modern keret)</div>
+                <div class="kocka-keret">Kattints a játék indításához</div>
             </section>
 
-            <section class="menu-box">
+            <section class="menu-box" data-screen="profile">
                 <h2>👤 Profil</h2>
                 <p>Játékstatisztikák és eredmények.</p>
             </section>
 
-            <section class="menu-box">
+            <section class="menu-box" data-screen="shop">
                 <h2>💰 Bolt</h2>
                 <p>Vásárlási lehetőségek.</p>
             </section>
 
-            <section class="menu-box">
+            <section class="menu-box" data-screen="trophies">
                 <h2>🏆 Trófeák</h2>
                 <p>Megnyert díjak gyűjteménye.</p>
             </section>
-            
-            <section class="menu-box">
+
+            <section class="menu-box" data-screen="settings">
                 <h2>⚙️ Beállítások</h2>
                 <p>Nyelv, hang, pénznem.</p>
             </section>
 
-            <section class="menu-box">
+            <section class="menu-box" data-screen="contacts">
                 <h2>✉️ Névjegyzék</h2>
                 <p>Elérhetőségek.</p>
             </section>
         </div>
     </main>
+
+    <section id="game-selection" class="screen hidden">
+        <h1>Válassz Játék Módot</h1>
+        <div class="selection-grid">
+            <button class="selection-box" data-mode="club">🏆 Klub Csapat</button>
+            <button class="selection-box" data-mode="national">🌎 Válogatott</button>
+            <div class="selection-box saved-team-slot">
+                <h2>Kiválasztott Csapat</h2>
+                <p id="saved-team-display">Nincs kiválasztva</p>
+                <button id="change-team-btn" class="hidden">Csapat Változtatása</button>
+            </div>
+            <div class="selection-box inactive">Egyéb Mód 1</div>
+            <div class="selection-box inactive">Egyéb Mód 2</div>
+            <div class="selection-box inactive">Egyéb Mód 3</div>
+            <div class="selection-box inactive">Egyéb Mód 4</div>
+            <div class="selection-box inactive">Egyéb Mód 5</div>
+        </div>
+        <button id="back-to-menu" class="back-button">⬅ Vissza a Főmenübe</button>
+    </section>
+
+    <section id="club-selection" class="screen hidden">
+        <h1>Klub Választó</h1>
+        <div id="league-list">
+            </div>
+        <button id="back-to-selection" class="back-button">⬅ Vissza</button>
+    </section>
 
     <script src="script.js"></script>
 </body>
