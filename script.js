@@ -1,4 +1,6 @@
 // 1. ELEM REFERENCIÁK
+// Ez a szekció felelős a HTML elemek azonosításáért.
+// Ellenőrizzük, hogy minden ID pontosan egyezik.
 const mainMenu = document.getElementById('main-menu');
 const gameSelection = document.getElementById('game-selection');
 const difficultySelection = document.getElementById('difficulty-selection');
@@ -11,8 +13,9 @@ const continueBtn = document.getElementById('continue-btn');
 const changeTeamBtn = document.getElementById('change-team-btn');
 const leagueList = document.getElementById('league-list');
 
-const currentClubName = document.getElementById('current-club-name');
-const clubLogo = document.getElementById('club-logo');
+// A HIBÁT OKOZÓ ELEMEK VIZSGÁLATA (Hub)
+const currentClubName = document.getElementById('current-club-name'); // Helyes ID
+const clubLogo = document.getElementById('club-logo'); // Helyes ID
 
 // Elemek a Játék Választóhoz (Karrier lista)
 const savedCareersList = document.getElementById('saved-careers-list');
@@ -54,10 +57,11 @@ const leagues = [
  */
 function updateSavedTeamDisplay() {
     if (selectedTeam) {
-        savedTeamNameSpan.textContent = selectedTeam;
-        savedTeamDisplay.classList.remove('hidden');
+        // Ellenőrizzük, hogy az elem létezik-e mielőtt hozzáférnénk
+        if(savedTeamNameSpan) savedTeamNameSpan.textContent = selectedTeam;
+        if(savedTeamDisplay) savedTeamDisplay.classList.remove('hidden');
     } else {
-        savedTeamDisplay.classList.add('hidden');
+        if(savedTeamDisplay) savedTeamDisplay.classList.add('hidden');
     }
 }
 
@@ -65,12 +69,12 @@ function updateSavedTeamDisplay() {
  * Megjeleníti a főmenüt és elrejti a többit.
  */
 function showMainMenu() {
-    mainMenu.classList.remove('hidden');
-    gameSelection.classList.add('hidden');
-    difficultySelection.classList.add('hidden'); 
-    clubSelection.classList.add('hidden');
-    clubHub.classList.add('hidden');
-    // ... (további képernyők is hidden maradnak)
+    if(mainMenu) mainMenu.classList.remove('hidden');
+    if(gameSelection) gameSelection.classList.add('hidden');
+    if(difficultySelection) difficultySelection.classList.add('hidden'); 
+    if(clubSelection) clubSelection.classList.add('hidden');
+    if(clubHub) clubHub.classList.add('hidden');
+    
     updateSavedTeamDisplay();
 }
 
@@ -78,11 +82,10 @@ function showMainMenu() {
  * Megjeleníti a játékválasztó (karrier választó) képernyőt.
  */
 function showGameSelection() {
-    showMainMenu(); // Elrejti az összes többit
-    mainMenu.classList.add('hidden');
-    gameSelection.classList.remove('hidden');
+    showMainMenu(); 
+    if(mainMenu) mainMenu.classList.add('hidden');
+    if(gameSelection) gameSelection.classList.remove('hidden');
     
-    // Frissítjük a karrier listát
     renderSavedCareers();
 }
 
@@ -90,15 +93,14 @@ function showGameSelection() {
  * Dinamikusan megjeleníti a mentett karriereket a képernyőn.
  */
 function renderSavedCareers() {
-    // Töröljük a korábbi listát, kivéve az 'Új karrier' gombot
     const listContainer = document.getElementById('saved-careers-list');
-    
-    // Megtartjuk az Új karrier gombot, és utána kezdjük a mentéseket
+    if (!listContainer) return;
+
+    // Megtartjuk az Új karrier gombot
     while (listContainer.children.length > 1) {
         listContainer.removeChild(listContainer.lastChild);
     }
     
-    // Rendezés a legújabb mentés szerint (opcionális)
     savedCareers.forEach(career => {
         const row = document.createElement('div');
         row.className = 'career-row';
@@ -107,7 +109,6 @@ function renderSavedCareers() {
         const infoDiv = document.createElement('div');
         infoDiv.className = 'career-info';
         
-        // Zászló (vagy ikon) és Név
         infoDiv.innerHTML = `
             <span class="next-arrow">»</span>
             <span class="career-name">${career.teamName} ${career.flag}</span>
@@ -118,17 +119,14 @@ function renderSavedCareers() {
         
         row.appendChild(infoDiv);
 
-        // JOBB OLDALI GOMBOK (Felhő és Törlés)
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'career-actions';
         
-        // Csak a mentett elemekhez kell a Felhő és Törlés, az "Új karrierhez" nem!
         actionsDiv.innerHTML = `
             <button class="action-button-small cloud-button">☁️</button>
             <button class="action-button-small delete-button">❌</button>
         `;
         
-        // Törlés gomb logika
         actionsDiv.querySelector('.delete-button').addEventListener('click', (e) => {
             e.stopPropagation(); 
             deleteCareer(career.id, career.teamName);
@@ -136,7 +134,6 @@ function renderSavedCareers() {
 
         row.appendChild(actionsDiv);
 
-        // Karrier betöltése, ha a sorra kattintunk
         row.addEventListener('click', () => {
             loadCareer(career.teamName, career.logo);
         });
@@ -149,10 +146,10 @@ function renderSavedCareers() {
  * Megjeleníti a Nehézségi Szint választó képernyőt. (Új Karrier indítása)
  */
 function showDifficultySelection() {
-    gameSelection.classList.add('hidden');
-    difficultySelection.classList.remove('hidden'); 
-    clubSelection.classList.add('hidden');
-    clubHub.classList.add('hidden');
+    if(gameSelection) gameSelection.classList.add('hidden');
+    if(difficultySelection) difficultySelection.classList.remove('hidden'); 
+    if(clubSelection) clubSelection.classList.add('hidden');
+    if(clubHub) clubHub.classList.add('hidden');
 }
 
 
@@ -160,10 +157,12 @@ function showDifficultySelection() {
  * Megjeleníti a Klubválasztó képernyőt (Liga Választó).
  */
 function showClubSelection() {
-    difficultySelection.classList.add('hidden'); 
-    clubSelection.classList.remove('hidden');
-    clubHub.classList.add('hidden');
+    if(difficultySelection) difficultySelection.classList.add('hidden'); 
+    if(clubSelection) clubSelection.classList.remove('hidden');
+    if(clubHub) clubHub.classList.add('hidden');
     
+    if (!leagueList) return; 
+
     // Liga lista generálása
     leagueList.innerHTML = `
         <tr>
@@ -189,7 +188,8 @@ function showClubSelection() {
     });
 
     selectedLeague = null;
-    document.getElementById('continue-club-selection').classList.add('hidden');
+    const continueBtn = document.getElementById('continue-club-selection');
+    if(continueBtn) continueBtn.classList.add('hidden');
 }
 
 /**
@@ -208,7 +208,8 @@ function selectLeague(name) {
         selectedRow.classList.add('selected');
     }
     
-    document.getElementById('continue-club-selection').classList.remove('hidden');
+    const continueBtn = document.getElementById('continue-club-selection');
+    if(continueBtn) continueBtn.classList.remove('hidden');
 }
 
 
@@ -220,8 +221,8 @@ function selectLeague(name) {
 function loadCareer(teamName, teamLogo) {
     selectedTeam = teamName;
     localStorage.setItem('selectedTeam', teamName);
-    localStorage.setItem('selectedTeamLogo', teamLogo); // Mentjük a logót is
-    // alert(`${teamName} karrier betöltve!`);
+    localStorage.setItem('selectedTeamLogo', teamLogo); 
+    
     showClubHub(); 
 }
 
@@ -246,15 +247,16 @@ function deleteCareer(id, teamName) {
  * Megjeleníti a Klub Központot (Club Hub).
  */
 function showClubHub() {
-    clubSelection.classList.add('hidden');
-    gameSelection.classList.add('hidden');
-    difficultySelection.classList.add('hidden');
-    clubHub.classList.remove('hidden');
+    if(clubSelection) clubSelection.classList.add('hidden');
+    if(gameSelection) gameSelection.classList.add('hidden');
+    if(difficultySelection) difficultySelection.classList.add('hidden');
+    if(clubHub) clubHub.classList.remove('hidden');
     
     const teamLogoUrl = localStorage.getItem('selectedTeamLogo') || 'default_logo.png';
     
-    currentClubName.textContent = selectedTeam;
-    clubLogo.src = teamLogoUrl;
+    // BIZTONSÁGI ELLENŐRZÉS: Csak akkor állítjuk be, ha az elem létezik
+    if (currentClubName) currentClubName.textContent = selectedTeam;
+    if (clubLogo) clubLogo.src = teamLogoUrl;
 
     // Alapértelmezett nézet a keret (squad)
     showHubSubScreen('squad');
@@ -286,74 +288,74 @@ function showHubSubScreen(screenId) {
 
 // 4. ESEMÉNYKEZELŐK
 
-// Kezdeti állapot beállítása
-updateSavedTeamDisplay();
-showMainMenu();
+// A kód csak akkor fut le, ha a DOM teljesen betöltődött, így az elemek null hiba esélye minimálisra csökken.
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // Kezdeti állapot beállítása
+    updateSavedTeamDisplay();
+    showMainMenu();
 
+    // Főmenü: Kattintás a "Játék" boxra
+    const mainGameBox = document.querySelector('.main-game');
+    if (mainGameBox) mainGameBox.addEventListener('click', showGameSelection);
 
-// Főmenü: Kattintás a "Játék" boxra
-document.querySelector('.main-game').addEventListener('click', showGameSelection);
-
-// Főmenü: "Folytatás" gomb
-continueBtn.addEventListener('click', () => {
-    // Feltételezve, hogy a logó URL is mentve van
-    const teamLogo = localStorage.getItem('selectedTeamLogo') || 'default_logo.png';
-    if (selectedTeam) {
-        loadCareer(selectedTeam, teamLogo);
-    }
-});
-
-
-// Főmenü: "Csapat változtatása" gomb
-changeTeamBtn.addEventListener('click', showGameSelection);
-
-
-// Játék Választó Képernyő: Vissza a főmenübe
-document.getElementById('back-to-menu-wsc').addEventListener('click', showMainMenu);
-
-// Játék Választó Képernyő: Új karrier opció (Ez hívja meg a Nehézségi Választót)
-document.getElementById('new-career-button').addEventListener('click', showDifficultySelection);
-
-// --- NEHÉZSÉGI SZINT KÉPERNYŐ ESEMÉNYEK ---
-
-// Vissza a Karrier Választóhoz
-document.getElementById('back-to-career-wsc').addEventListener('click', showGameSelection);
-
-// Nehézségi szint kiválasztása
-document.querySelectorAll('.difficulty-box').forEach(box => {
-    box.addEventListener('click', (e) => {
-        const difficulty = e.currentTarget.getAttribute('data-level');
-        // Itt mentheted el a nehézségi szintet a localStorage-ba vagy egy globális változóba
-        // localStorage.setItem('newGameDifficulty', difficulty);
-        
-        // Ezt követi a Liga Választó
-        showClubSelection(); 
+    // Főmenü: "Folytatás" gomb
+    if (continueBtn) continueBtn.addEventListener('click', () => {
+        const teamLogo = localStorage.getItem('selectedTeamLogo') || 'default_logo.png';
+        if (selectedTeam) {
+            loadCareer(selectedTeam, teamLogo);
+        }
     });
-});
 
+    // Főmenü: "Csapat változtatása" gomb
+    if (changeTeamBtn) changeTeamBtn.addEventListener('click', showGameSelection);
 
-// --- KLUB VÁLASZTÓ KÉPERNYŐ ESEMÉNYEK ---
+    // Játék Választó Képernyő: Vissza a főmenübe
+    const backToMenuWsc = document.getElementById('back-to-menu-wsc');
+    if (backToMenuWsc) backToMenuWsc.addEventListener('click', showMainMenu);
 
-// Vissza a Nehézségi Választóhoz
-document.getElementById('back-to-selection-wsc').addEventListener('click', showDifficultySelection);
+    // Játék Választó Képernyő: Új karrier opció
+    if (newCareerButton) newCareerButton.addEventListener('click', showDifficultySelection);
 
-// Folytatás (Liga Kiválasztva) - Ez majd elvisz a csapatlistához, de most egy placeholder
-document.getElementById('continue-club-selection').addEventListener('click', () => {
-    if (selectedLeague) {
-        alert(`Kiválasztott liga: ${selectedLeague}. Itt jönne a csapataid kiválasztása!`);
-        // Ez csak egy placeholder. Később ide jön a Csapatlista képernyő: showTeamSelection(selectedLeague);
-    }
-});
+    // --- NEHÉZSÉGI SZINT KÉPERNYŐ ESEMÉNYEK ---
 
+    // Vissza a Karrier Választóhoz
+    const backToCareerWsc = document.getElementById('back-to-career-wsc');
+    if (backToCareerWsc) backToCareerWsc.addEventListener('click', showGameSelection);
 
-// --- KLUB KÖZPONT (HUB) ESEMÉNYEK ---
-
-// Hub Navigáció (CSAPATOM, ÁTIGAZOLÁSOK, stb.)
-hubNavButtons.forEach(button => {
-    button.addEventListener('click', (e) => {
-        showHubSubScreen(e.currentTarget.getAttribute('data-screen'));
+    // Nehézségi szint kiválasztása
+    document.querySelectorAll('.difficulty-box').forEach(box => {
+        box.addEventListener('click', (e) => {
+            const difficulty = e.currentTarget.getAttribute('data-level');
+            // localStorage.setItem('newGameDifficulty', difficulty);
+            showClubSelection(); 
+        });
     });
-});
 
-// Vissza a Főmenübe a Hub-ról
-document.getElementById('back-to-main-menu-hub').addEventListener('click', showMainMenu);
+    // --- KLUB VÁLASZTÓ KÉPERNYŐ ESEMÉNYEK ---
+
+    // Vissza a Nehézségi Választóhoz
+    const backToSelectionWsc = document.getElementById('back-to-selection-wsc');
+    if (backToSelectionWsc) backToSelectionWsc.addEventListener('click', showDifficultySelection);
+
+    // Folytatás (Liga Kiválasztva) 
+    const continueClubSelection = document.getElementById('continue-club-selection');
+    if (continueClubSelection) continueClubSelection.addEventListener('click', () => {
+        if (selectedLeague) {
+            alert(`Kiválasztott liga: ${selectedLeague}. Itt jönne a csapataid kiválasztása!`);
+        }
+    });
+
+    // --- KLUB KÖZPONT (HUB) ESEMÉNYEK ---
+
+    // Hub Navigáció (CSAPATOM, ÁTIGAZOLÁSOK, stb.)
+    hubNavButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            showHubSubScreen(e.currentTarget.getAttribute('data-screen'));
+        });
+    });
+
+    // Vissza a Főmenübe a Hub-ról
+    const backToMainMenuHub = document.getElementById('back-to-main-menu-hub');
+    if (backToMainMenuHub) backToMainMenuHub.addEventListener('click', showMainMenu);
+});
