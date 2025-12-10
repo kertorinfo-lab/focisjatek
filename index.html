@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mobil Foci Játék</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -141,37 +141,110 @@
     </section>
 
     <section id="squad-screen" class="screen hidden">
-        <h1>📋 Csapat Összeállítás</h1>
+        <div class="header-squad">
+            <div id="team-name-squad">📋 Csapat Összeállítás</div>
+            <div class="top-stats-squad">
+                <span>⚽ 2</span>
+                <span>+ 1</span>
+                <span>💰 $412k</span>
+                <span>⭐ 5</span>
+            </div>
+            <button id="back-to-hub-from-squad-header" class="back-button small-back">VISSZA</button>
+        </div>
         
-        <div class="squad-container">
-            <div class="pitch-display">
-                <h2>Aktuális Formáció: <span id="current-formation">4-4-2</span></h2>
+        <div class="squad-main-grid">
+            <div class="pitch-area">
                 <div id="tactics-pitch">
                     </div>
-            </div>
 
-            <div class="squad-controls">
-                <h3>Válassz Formációt</h3>
-                <select id="formation-selector" class="selection-input">
-                    <option value="4-4-2">4-4-2 Klasszikus</option>
-                    <option value="4-3-3">4-3-3 Támadó</option>
-                    <option value="5-3-2">5-3-2 Védekező</option>
-                </select>
-
-                <h3>Taktikai Utasítások (Placeholder)</h3>
-                <p>Támadó mentalitás / Magas presszing / Kontra</p>
-
-                <button class="action-button full-width" id="save-squad-btn">Mentés és Vissza</button>
-            </div>
-
-            <div class="player-list-box">
-                <h2>Játékosok (Értékelés)</h2>
-                <div id="player-list">
+                <div class="tactics-controls-bottom">
+                    <div class="control-box">
+                        <p>Mentalitás</p>
+                        <select class="selection-input small-select" id="mentality-selector">
+                            <option value="defensive">Védekező</option>
+                            <option value="neutral" selected>Semleges</option>
+                            <option value="attacking">Támadó</option>
+                        </select>
                     </div>
+                    <div class="control-box">
+                        <p>Formáció</p>
+                        <select class="selection-input small-select" id="formation-selector">
+                            <option value="4-4-2">4-4-2</option>
+                            <option value="4-3-3">4-3-3</option>
+                            <option value="5-3-2">5-3-2</option>
+                            <option value="3-4-3">3-4-3</option>
+                        </select>
+                    </div>
+                    <div class="control-box">
+                        <p>Nyomás</p>
+                        <select class="selection-input small-select" id="pressure-selector">
+                            <option value="low">Alacsony</option>
+                            <option value="normal" selected>Normál</option>
+                            <option value="high">Magas</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="substitutes-area">
+                <div class="sub-list-box">
+                    <div class="list-title">CSERÉK</div>
+                    <div id="substitute-list" class="player-slot-container dropzone" data-status-type="sub">
+                        </div>
+                </div>
+
+                <div class="sub-list-box tar-box">
+                    <div class="list-title">TAR</div>
+                    <div id="reserve-list" class="player-slot-container dropzone" data-status-type="reserve">
+                        </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="transfer-screen" class="screen hidden">
+        <h1>💸 Átigazolási Központ</h1>
+        
+        <div class="finance-header">
+            <div class="finance-box">
+                <h4>Pénz Készlet</h4>
+                <span id="current-balance" class="money positive">$50.000.000</span>
+            </div>
+            <div class="finance-box">
+                <h4>Fizetési Keret</h4>
+                <span id="salary-cap">$1.500.000 / $2.000.000</span>
+            </div>
+            <div class="finance-box">
+                <h4>Átigazolási Keret</h4>
+                <span id="transfer-budget">$30.000.000</span>
             </div>
         </div>
 
-        <button id="back-to-hub-from-squad" class="back-button">⬅ Vissza a Klubközpontba</button>
+        <div class="transfer-container">
+            <div class="transfer-list-box">
+                <h2>➡️ Igazolási Célpontok</h2>
+                <div id="scout-list">
+                    <p class="placeholder-text">Kattints a keresés indításához...</p>
+                </div>
+                <button id="search-market-btn" class="action-button full-width">Piac Felkutatása</button>
+            </div>
+
+            <div class="transfer-list-box">
+                <h2>⬅️ Eladható Játékosok</h2>
+                <div id="sell-list">
+                     </div>
+                <button id="sell-player-btn" class="action-button full-width sell-button">Játékos Eladás (Placeholder)</button>
+            </div>
+        </div>
+
+        <div class="log-box">
+            <h4>Tranzakciós Napló</h4>
+            <div id="transfer-log">
+                <p>2025. dec. 10: Rendszer frissítve. ($0)</p>
+            </div>
+        </div>
+
+        <button id="back-to-hub-from-transfer" class="back-button">⬅ Vissza a Klubközpontba</button>
     </section>
 
     <script src="script.js"></script>
