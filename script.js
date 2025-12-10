@@ -18,6 +18,8 @@ const footballData = {
 const mainMenu = document.getElementById('main-menu');
 const gameSelection = document.getElementById('game-selection');
 const clubSelection = document.getElementById('club-selection');
+const clubHub = document.getElementById('club-hub'); // ÚJ
+
 const leagueList = document.getElementById('league-list');
 const savedTeamDisplay = document.getElementById('saved-team-display');
 const changeTeamBtn = document.getElementById('change-team-btn');
@@ -46,7 +48,7 @@ function showMainMenu() {
     mainMenu.classList.remove('hidden');
     gameSelection.classList.add('hidden');
     clubSelection.classList.add('hidden');
-    // Frissítjük, ha visszajöttünk a menübe
+    clubHub.classList.add('hidden');
     updateSavedTeamDisplay();
 }
 
@@ -57,7 +59,28 @@ function showGameSelection() {
     mainMenu.classList.add('hidden');
     gameSelection.classList.remove('hidden');
     clubSelection.classList.add('hidden');
+    clubHub.classList.add('hidden');
     updateSavedTeamDisplay();
+}
+
+/**
+ * Megjeleníti a Klubközpontot és elrejti a többit.
+ */
+function showClubHub() {
+    if (!selectedTeam) {
+        showGameSelection();
+        return; 
+    }
+    
+    mainMenu.classList.add('hidden');
+    gameSelection.classList.add('hidden');
+    clubSelection.classList.add('hidden');
+    clubHub.classList.remove('hidden');
+
+    // Betöltjük a csapat adatait a Hub-ba
+    document.getElementById('club-name-title').textContent = selectedTeam;
+    // (A logó betöltése és a meccs infó frissítése itt történne valós adatból)
+    document.getElementById('next-match-details').textContent = `${selectedTeam} következő meccse a Liga ellen. Készülj!`;
 }
 
 /**
@@ -66,23 +89,21 @@ function showGameSelection() {
 function showClubSelection() {
     gameSelection.classList.add('hidden');
     clubSelection.classList.remove('hidden');
-    leagueList.innerHTML = ''; // Töröljük a korábbi tartalmat
+    clubHub.classList.add('hidden');
+    leagueList.innerHTML = '';
 
     for (const leagueKey in footballData) {
         const league = footballData[leagueKey];
 
-        // Liga cím
         const title = document.createElement('h3');
         title.className = 'league-title';
         title.textContent = league.name;
         leagueList.appendChild(title);
 
-        // Csapat konténer (a gomboknak)
         const teamsContainer = document.createElement('div');
         teamsContainer.style.display = 'flex';
         teamsContainer.style.flexWrap = 'wrap';
 
-        // Csapat gombok
         league.teams.forEach(teamName => {
             const teamButton = document.createElement('button');
             teamButton.className = 'team-button';
@@ -98,21 +119,29 @@ function showClubSelection() {
 }
 
 /**
- * Csapat kiválasztása, mentése és visszatérés a Játék Képernyőre.
+ * Csapat kiválasztása, mentése és visszatérés a Klubközpontba.
  * @param {string} teamName - A kiválasztott csapat neve.
  */
 function selectTeam(teamName) {
     selectedTeam = teamName;
     localStorage.setItem('selectedTeam', teamName); // Mentés a LocalStorage-ba
     alert(`${teamName} sikeresen kiválasztva!`);
-    showGameSelection(); // Vissza a játék választó menübe
+    showClubHub(); // Vissza a Klubközpontba
 }
 
 
 // --- 4. ESEMÉNYKEZELŐK ---
 
 // Főmenü: Kattintás a "Játék" boxra (a nagy zöldre)
-document.querySelector('.main-game').addEventListener('click', showGameSelection);
+document.querySelector('.main-game').addEventListener('click', () => {
+    if (selectedTeam) {
+        // Ha VAN mentett csapat, egyből a Hub-ba dobja
+        showClubHub();
+    } else {
+        // Ha NINCS mentett csapat, játék/klub választásra dobja
+        showGameSelection();
+    }
+});
 
 // Játék Választó Képernyő: Vissza a főmenübe
 document.getElementById('back-to-menu').addEventListener('click', showMainMenu);
@@ -120,19 +149,26 @@ document.getElementById('back-to-menu').addEventListener('click', showMainMenu);
 // Játék Választó Képernyő: Klub Csapat opció
 document.querySelector('[data-mode="club"]').addEventListener('click', showClubSelection);
 
-// Játék Választó Képernyő: Válogatott opció (jelenleg csak alert)
+// Játék Választó Képernyő: Válogatott opció (tesztelés)
 document.querySelector('[data-mode="national"]').addEventListener('click', () => {
-    alert("Válogatott mód fejlesztés alatt!");
+    alert("Válogatott mód fejlesztés alatt. Menjünk inkább a klubválasztóra!");
+    showClubSelection();
 });
 
 // Klub Választó Képernyő: Vissza a játék választóba
 document.getElementById('back-to-selection').addEventListener('click', showGameSelection);
 
-// Csapat Változtatása Gomb
-changeTeamBtn.addEventListener('click', showClubSelection);
+// Klubközpont: Vissza a játék választóba
+document.getElementById('back-to-game-selection').addEventListener('click', showGameSelection);
 
+// Csapat Változtatása Gomb (a Játékválasztón)
+changeTeamBtn.addEventListener('click', showClubSelection);
 
 // --- 5. INDÍTÁS ---
 
-// Amikor az oldal betöltődik, megjelenítjük a főmenüt és betöltjük a mentett adatokat.
-showMainMenu();
+// Amikor az oldal betöltődik, megnézzük, hogy van-e mentett csapat.
+if (selectedTeam) {
+    showClubHub();
+} else {
+    showMainMenu();
+}
