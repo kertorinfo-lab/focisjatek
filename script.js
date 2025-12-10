@@ -1,4 +1,5 @@
-// --- 1. ADATMODELL: Ligák és Csapatok ---
+// --- 1. ADATMODELL: Ligák, Csapatok és Taktika ---
+
 const footballData = {
     premierLeague: {
         name: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League",
@@ -14,16 +15,66 @@ const footballData = {
     }
 };
 
+// Példa játékos adatok (Egyszerűsített)
+const squadPlayers = [
+    { name: "Kovács", pos: "K", rating: 85 },
+    { name: "Nagy", pos: "V", rating: 78 },
+    { name: "Tóth", pos: "V", rating: 80 },
+    { name: "Kiss", pos: "V", rating: 75 },
+    { name: "Szabó", pos: "V", rating: 82 },
+    { name: "Varga", pos: "KP", rating: 88 },
+    { name: "Molnár", pos: "KP", rating: 79 },
+    { name: "Papp", pos: "KP", rating: 84 },
+    { name: "Juhász", pos: "KP", rating: 76 },
+    { name: "Fekete", pos: "CS", rating: 90 },
+    { name: "Fehér", pos: "CS", rating: 85 },
+    { name: "Zöld", pos: "V", rating: 70 },
+    { name: "Piros", pos: "KP", rating: 65 },
+];
+
+// Formáció adatok (egyszerűsített pozíció koordináták)
+const formations = {
+    '4-4-2': {
+        name: '4-4-2 Klasszikus',
+        gk: [{ top: '90%', left: '50%' }],
+        def: [{ top: '75%', left: '15%' }, { top: '80%', left: '35%' }, { top: '80%', left: '65%' }, { top: '75%', left: '85%' }],
+        mid: [{ top: '50%', left: '15%' }, { top: '55%', left: '35%' }, { top: '55%', left: '65%' }, { top: '50%', left: '85%' }],
+        att: [{ top: '20%', left: '40%' }, { top: '20%', left: '60%' }]
+    },
+    '4-3-3': {
+        name: '4-3-3 Támadó',
+        gk: [{ top: '90%', left: '50%' }],
+        def: [{ top: '75%', left: '15%' }, { top: '80%', left: '35%' }, { top: '80%', left: '65%' }, { top: '75%', left: '85%' }],
+        mid: [{ top: '60%', left: '30%' }, { top: '65%', left: '50%' }, { top: '60%', left: '70%' }],
+        att: [{ top: '20%', left: '20%' }, { top: '15%', left: '50%' }, { top: '20%', left: '80%' }]
+    },
+    '5-3-2': {
+        name: '5-3-2 Védekező',
+        gk: [{ top: '90%', left: '50%' }],
+        def: [{ top: '80%', left: '10%' }, { top: '85%', left: '30%' }, { top: '85%', left: '50%' }, { top: '85%', left: '70%' }, { top: '80%', left: '90%' }],
+        mid: [{ top: '50%', left: '30%' }, { top: '55%', left: '50%' }, { top: '50%', left: '70%' }],
+        att: [{ top: '25%', left: '40%' }, { top: '25%', left: '60%' }]
+    }
+};
+
+
 // --- 2. ÁLLANDÓK ÉS KEZDŐ ÉRTÉKEK ---
 const mainMenu = document.getElementById('main-menu');
 const gameSelection = document.getElementById('game-selection');
 const clubSelection = document.getElementById('club-selection');
 const clubHub = document.getElementById('club-hub');
-const matchScreen = document.getElementById('match-screen'); // ÚJ
+const matchScreen = document.getElementById('match-screen');
+const squadScreen = document.getElementById('squad-screen'); // ÚJ
 
 const leagueList = document.getElementById('league-list');
 const savedTeamDisplay = document.getElementById('saved-team-display');
 const changeTeamBtn = document.getElementById('change-team-btn');
+
+// ÚJ ELEMEK A SQUAD SCREEN-hez
+const formationSelector = document.getElementById('formation-selector');
+const currentFormationDisplay = document.getElementById('current-formation');
+const tacticsPitch = document.getElementById('tactics-pitch');
+const playerListElement = document.getElementById('player-list');
 
 let selectedTeam = localStorage.getItem('selectedTeam');
 
@@ -31,7 +82,8 @@ let homeScore = 0;
 let awayScore = 0;
 let matchTime = 0;
 let isMatchActive = false;
-const opponentTeam = "Amatőr FC"; // Egyszerű ellenfél placeholder
+const opponentTeam = "Amatőr FC"; 
+let currentFormation = '4-4-2'; // Kezdő formáció
 
 
 // --- 3. FÜGGVÉNYEK ---
@@ -57,7 +109,8 @@ function showMainMenu() {
     gameSelection.classList.add('hidden');
     clubSelection.classList.add('hidden');
     clubHub.classList.add('hidden');
-    matchScreen.classList.add('hidden'); // ÚJ
+    matchScreen.classList.add('hidden');
+    squadScreen.classList.add('hidden'); // ÚJ
     updateSavedTeamDisplay();
 }
 
@@ -69,7 +122,8 @@ function showGameSelection() {
     gameSelection.classList.remove('hidden');
     clubSelection.classList.add('hidden');
     clubHub.classList.add('hidden');
-    matchScreen.classList.add('hidden'); // ÚJ
+    matchScreen.classList.add('hidden');
+    squadScreen.classList.add('hidden'); // ÚJ
     updateSavedTeamDisplay();
 }
 
@@ -86,7 +140,8 @@ function showClubHub() {
     gameSelection.classList.add('hidden');
     clubSelection.classList.add('hidden');
     clubHub.classList.remove('hidden');
-    matchScreen.classList.add('hidden'); // ÚJ
+    matchScreen.classList.add('hidden');
+    squadScreen.classList.add('hidden'); // ÚJ
 
     // Betöltjük a csapat adatait a Hub-ba
     document.getElementById('club-name-title').textContent = selectedTeam;
@@ -94,13 +149,14 @@ function showClubHub() {
 }
 
 /**
- * Generálja és megjeleníti a klubválasztó listát (Ligák és Csapatok).
+ * Megjeleníti a Klubválasztó képernyőt.
  */
 function showClubSelection() {
     gameSelection.classList.add('hidden');
     clubSelection.classList.remove('hidden');
     clubHub.classList.add('hidden');
-    matchScreen.classList.add('hidden'); // ÚJ
+    matchScreen.classList.add('hidden');
+    squadScreen.classList.add('hidden'); // ÚJ
     leagueList.innerHTML = '';
 
     for (const leagueKey in footballData) {
@@ -135,9 +191,9 @@ function showClubSelection() {
  */
 function selectTeam(teamName) {
     selectedTeam = teamName;
-    localStorage.setItem('selectedTeam', teamName); // Mentés a LocalStorage-ba
+    localStorage.setItem('selectedTeam', teamName); 
     alert(`${teamName} sikeresen kiválasztva!`);
-    showClubHub(); // Vissza a Klubközpontba
+    showClubHub(); 
 }
 
 
@@ -155,6 +211,7 @@ function showMatchScreen() {
     clubSelection.classList.add('hidden');
     clubHub.classList.add('hidden');
     matchScreen.classList.remove('hidden');
+    squadScreen.classList.add('hidden'); // ÚJ
     
     // Meccs előkészítése:
     document.getElementById('match-title').textContent = `${selectedTeam} vs. ${opponentTeam}`;
@@ -171,12 +228,11 @@ function showMatchScreen() {
 }
 
 /**
- * Szimulál egy eseményt (gól, félidő, befejezés).
+ * Szimulál egy eseményt.
  */
 function simulateEvent() {
     if (!isMatchActive) return;
 
-    // Minden eseménynél növeljük az időt.
     matchTime += 10;
     
     let message = '';
@@ -184,10 +240,9 @@ function simulateEvent() {
     const log = document.getElementById('match-log');
 
     if (matchTime <= 90) {
-        // --- Eseménygenerálás (Egyszerű Random Logika) ---
         const eventChance = Math.random();
 
-        if (eventChance < 0.2) { // 20% esély a gólra
+        if (eventChance < 0.2) { 
             const scoringTeam = Math.random() < 0.5 ? selectedTeam : opponentTeam;
             
             if (scoringTeam === selectedTeam) {
@@ -201,10 +256,7 @@ function simulateEvent() {
             }
             eventType = 'event-goal';
 
-        } else if (matchTime === 40 || matchTime === 80) {
-            // Módosítottam 40 és 80 percre, hogy elkerüljük a 45 és 90 perces ütközést.
-             message = `${matchTime}'. perc: Játékvezetői döntés. Csere!`;
-        } else if (matchTime === 50) { // A szimuláció félideje 50-nél van, a 90-es mező a vége.
+        } else if (matchTime === 50) { 
             message = "FÉLIDŐ! Eredmény: " + homeScore + " - " + awayScore;
             eventType = 'event-whistle';
         } else if (matchTime === 90) {
@@ -216,23 +268,20 @@ function simulateEvent() {
         }
         
     } else {
-        // Ha túlléptük a 90 percet (ha valaki mégis kattint), vége.
         endMatch();
         return;
     }
 
-    // Üzenet hozzáadása a loghoz
     const p = document.createElement('p');
     p.className = `event-message ${eventType}`;
     p.textContent = message;
     log.appendChild(p);
 
-    // Görgetés az aljára
     log.scrollTop = log.scrollHeight;
 }
 
 /**
- * Befejezi a meccset és mutatja a Vissza gombot.
+ * Befejezi a meccset.
  */
 function endMatch() {
     isMatchActive = false;
@@ -241,9 +290,99 @@ function endMatch() {
 }
 
 
+/**
+ * Megjeleníti a Csapat Összeállítás képernyőt.
+ */
+function showSquadScreen() {
+    if (!selectedTeam) {
+        showClubHub();
+        return;
+    }
+
+    mainMenu.classList.add('hidden');
+    gameSelection.classList.add('hidden');
+    clubSelection.classList.add('hidden');
+    clubHub.classList.add('hidden');
+    matchScreen.classList.add('hidden');
+    squadScreen.classList.remove('hidden');
+    
+    // Betöltjük a jelenlegi formációt és a játékosokat
+    formationSelector.value = currentFormation;
+    renderFormation(currentFormation);
+    renderPlayerList();
+}
+
+/**
+ * Frissíti a pályát az adott formáció alapján.
+ * @param {string} formationKey - A formáció kulcsa.
+ */
+function renderFormation(formationKey) {
+    const formation = formations[formationKey];
+    if (!formation) return;
+
+    currentFormation = formationKey;
+    currentFormationDisplay.textContent = formationKey;
+    tacticsPitch.innerHTML = ''; 
+
+    // Összevonjuk a pozíciókat egy könnyebben kezelhető objektumba
+    const positions = {
+        'K': formation.gk,
+        'V': formation.def,
+        'KP': formation.mid,
+        'CS': formation.att
+    };
+    
+    // Poszt nevek a pozíciókhoz
+    const posNames = { 'K': 'K', 'V': 'V', 'KP': 'KP', 'CS': 'CS' };
+
+    // Dinamikusan hozzáadjuk a pozíciós boxokat
+    Object.keys(positions).forEach(posGroup => {
+        const coords = positions[posGroup];
+        if (coords) {
+            coords.forEach((coord, index) => {
+                const playerPos = document.createElement('div');
+                playerPos.className = `player-position ${posGroup.toLowerCase()}`;
+                playerPos.textContent = posNames[posGroup]; // Pl.: K, V, KP, CS
+                playerPos.style.top = coord.top;
+                playerPos.style.left = coord.left;
+                playerPos.style.transform = 'translate(-50%, -50%)'; 
+                playerPos.setAttribute('data-pos-key', `${posGroup}-${index}`); // Egyedi azonosító
+                
+                tacticsPitch.appendChild(playerPos);
+            });
+        }
+    });
+}
+
+/**
+ * Betölti az összes játékost a listába.
+ */
+function renderPlayerList() {
+    playerListElement.innerHTML = '';
+    squadPlayers.sort((a, b) => b.rating - a.rating);
+
+    squadPlayers.forEach(player => {
+        const card = document.createElement('div');
+        card.className = 'player-card';
+        card.setAttribute('data-player-name', player.name);
+        card.setAttribute('data-player-pos', player.pos);
+        card.innerHTML = `
+            <strong>${player.name}</strong> 
+            (${player.pos}) Ért: ${player.rating}
+        `;
+        
+        card.addEventListener('click', () => {
+             alert(`${player.name} kiválasztva! (Később itt tudod behúzni a pályára)`);
+        });
+
+        playerListElement.appendChild(card);
+    });
+}
+
+
 // --- 4. ESEMÉNYKEZELŐK ---
 
-// Főmenü: Kattintás a "Játék" boxra (a nagy zöldre)
+// Főmenü: Kattintás a "Játék" boxra
 document.querySelector('.main-game').addEventListener('click', () => {
     if (selectedTeam) {
         showClubHub();
@@ -267,20 +406,44 @@ document.querySelector('[data-mode="national"]').addEventListener('click', () =>
 // Klub Választó Képernyő: Vissza a játék választóba
 document.getElementById('back-to-selection').addEventListener('click', showGameSelection);
 
-// Klubközpont: Vissza a játék választóba
-document.getElementById('back-to-game-selection').addEventListener('click', showGameSelection);
-
 // Csapat Változtatása Gomb (a Játékválasztón)
 changeTeamBtn.addEventListener('click', showClubSelection);
 
+// --- KLUBKÖZPONT ESEMÉNYEK ---
+
+// KLUBKÖZPONT: Vissza a játék választóba
+document.getElementById('back-to-game-selection').addEventListener('click', showGameSelection);
+
 // KLUBKÖZPONT: Meccs Kezdése gomb
 document.getElementById('start-match-btn').addEventListener('click', showMatchScreen);
+
+// KLUBKÖZPONT: Csapat Összeállítás gomb
+document.querySelector('.squad-box button').addEventListener('click', showSquadScreen);
+
+// --- MECCSKÉPERNYŐ ESEMÉNYEK ---
 
 // MECCSKÉPERNYŐ: Következő Esemény gomb
 document.getElementById('next-event-btn').addEventListener('click', simulateEvent);
 
 // MECCSKÉPERNYŐ: Vissza a Klubközpontba gomb
 document.getElementById('end-match-btn').addEventListener('click', showClubHub);
+
+
+// --- CSAPAT ÖSSZEÁLLÍTÁS ESEMÉNYEK ---
+
+// CSAPAT ÖSSZEÁLLÍTÁS: Formációváltó
+formationSelector.addEventListener('change', (e) => {
+    renderFormation(e.target.value);
+});
+
+// CSAPAT ÖSSZEÁLLÍTÁS: Mentés és Vissza
+document.getElementById('save-squad-btn').addEventListener('click', () => {
+    alert("Formáció mentve!");
+    showClubHub();
+});
+
+// CSAPAT ÖSSZEÁLLÍTÁS: Vissza a Hubba
+document.getElementById('back-to-hub-from-squad').addEventListener('click', showClubHub);
 
 
 // --- 5. INDÍTÁS ---
