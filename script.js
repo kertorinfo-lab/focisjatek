@@ -1,4 +1,4 @@
-// --- 1. ADATMODELL: Ligák, Csapatok és Taktika ---
+// --- 1. ADATMODELL: Ligák, Csapatok, Játékosok és Taktika ---
 
 const footballData = {
     premierLeague: {
@@ -15,47 +15,81 @@ const footballData = {
     }
 };
 
-// Példa játékos adatok (Egyszerűsített)
-const squadPlayers = [
-    { name: "Kovács", pos: "K", rating: 85 },
-    { name: "Nagy", pos: "V", rating: 78 },
-    { name: "Tóth", pos: "V", rating: 80 },
-    { name: "Kiss", pos: "V", rating: 75 },
-    { name: "Szabó", pos: "V", rating: 82 },
-    { name: "Varga", pos: "KP", rating: 88 },
-    { name: "Molnár", pos: "KP", rating: 79 },
-    { name: "Papp", pos: "KP", rating: 84 },
-    { name: "Juhász", pos: "KP", rating: 76 },
-    { name: "Fekete", pos: "CS", rating: 90 },
-    { name: "Fehér", pos: "CS", rating: 85 },
-    { name: "Zöld", pos: "V", rating: 70 },
-    { name: "Piros", pos: "KP", rating: 65 },
+// Példa játékos adatok (Készülünk a Drag and Drop-ra)
+let squadPlayers = [
+    // Kezdő 11 (Kiválasztva) - Alapértelmezett 4-4-2-höz elég 11
+    { id: 1, name: "Kovács (K)", pos: "K", rating: 89, currentStatus: "start", slotId: "k-0" },
+    { id: 2, name: "Nagy (V)", pos: "V", rating: 88, currentStatus: "start", slotId: "v-0" },
+    { id: 3, name: "Tóth (V)", pos: "V", rating: 88, currentStatus: "start", slotId: "v-1" },
+    { id: 4, name: "Kiss (V)", pos: "V", rating: 89, currentStatus: "start", slotId: "v-2" },
+    { id: 5, name: "Szabó (V)", pos: "V", rating: 89, currentStatus: "start", slotId: "v-3" },
+    { id: 6, name: "Varga (KP)", pos: "KP", rating: 91, currentStatus: "start", slotId: "kp-0" },
+    { id: 7, name: "Molnár (KP)", pos: "KP", rating: 88, currentStatus: "start", slotId: "kp-1" },
+    { id: 8, name: "Papp (KP)", pos: "KP", rating: 87, currentStatus: "start", slotId: "kp-2" },
+    { id: 9, name: "Juhász (KP)", pos: "KP", rating: 82, currentStatus: "start", slotId: "kp-3" },
+    { id: 10, name: "Fekete (CS)", pos: "CS", rating: 81, currentStatus: "start", slotId: "cs-0" },
+    { id: 11, name: "Fehér (CS)", pos: "CS", rating: 89, currentStatus: "start", slotId: "cs-1" },
+    
+    // Cserék (Substitute)
+    { id: 12, name: "Zöld (KP)", pos: "KP", rating: 81, currentStatus: "sub", slotId: null },
+    { id: 13, name: "Piros (K)", pos: "K", rating: 82, currentStatus: "sub", slotId: null },
+    { id: 14, name: "Sárga (V)", pos: "V", rating: 84, currentStatus: "sub", slotId: null },
+    { id: 15, name: "Barna (V)", pos: "V", rating: 81, currentStatus: "sub", slotId: null },
+    { id: 16, name: "Kék (V)", pos: "V", rating: 89, currentStatus: "sub", slotId: null },
+    { id: 17, name: "Lila (KP)", pos: "KP", rating: 81, currentStatus: "sub", slotId: null },
+    { id: 18, name: "Fűzöld (KP)", pos: "KP", rating: 85, currentStatus: "sub", slotId: null },
+
+    // Tartalékok (Reserve)
+    { id: 19, name: "Sötétkék (V)", pos: "V", rating: 83, currentStatus: "reserve", slotId: null },
+    { id: 20, name: "Narancs (CS)", pos: "CS", rating: 81, currentStatus: "reserve", slotId: null },
+    { id: 21, name: "Szürke (KP)", pos: "KP", rating: 72, currentStatus: "reserve", slotId: null },
+    { id: 22, name: "Bézs (V)", pos: "V", rating: 84, currentStatus: "reserve", slotId: null },
 ];
 
-// Formáció adatok (egyszerűsített pozíció koordináták)
+// Formáció adatok (koordináták a 0-100% tartományban)
 const formations = {
     '4-4-2': {
-        name: '4-4-2 Klasszikus',
+        name: '4-4-2',
         gk: [{ top: '90%', left: '50%' }],
-        def: [{ top: '75%', left: '15%' }, { top: '80%', left: '35%' }, { top: '80%', left: '65%' }, { top: '75%', left: '85%' }],
-        mid: [{ top: '50%', left: '15%' }, { top: '55%', left: '35%' }, { top: '55%', left: '65%' }, { top: '50%', left: '85%' }],
+        def: [{ top: '75%', left: '15%' }, { top: '75%', left: '35%' }, { top: '75%', left: '65%' }, { top: '75%', left: '85%' }],
+        mid: [{ top: '50%', left: '15%' }, { top: '50%', left: '35%' }, { top: '50%', left: '65%' }, { top: '50%', left: '85%' }],
         att: [{ top: '20%', left: '40%' }, { top: '20%', left: '60%' }]
     },
     '4-3-3': {
-        name: '4-3-3 Támadó',
+        name: '4-3-3',
         gk: [{ top: '90%', left: '50%' }],
         def: [{ top: '75%', left: '15%' }, { top: '80%', left: '35%' }, { top: '80%', left: '65%' }, { top: '75%', left: '85%' }],
         mid: [{ top: '60%', left: '30%' }, { top: '65%', left: '50%' }, { top: '60%', left: '70%' }],
         att: [{ top: '20%', left: '20%' }, { top: '15%', left: '50%' }, { top: '20%', left: '80%' }]
     },
     '5-3-2': {
-        name: '5-3-2 Védekező',
+        name: '5-3-2',
         gk: [{ top: '90%', left: '50%' }],
         def: [{ top: '80%', left: '10%' }, { top: '85%', left: '30%' }, { top: '85%', left: '50%' }, { top: '85%', left: '70%' }, { top: '80%', left: '90%' }],
         mid: [{ top: '50%', left: '30%' }, { top: '55%', left: '50%' }, { top: '50%', left: '70%' }],
         att: [{ top: '25%', left: '40%' }, { top: '25%', left: '60%' }]
+    },
+    '3-4-3': {
+        name: '3-4-3', 
+        gk: [{ top: '90%', left: '50%' }],
+        def: [{ top: '75%', left: '25%' }, { top: '70%', left: '50%' }, { top: '75%', left: '75%' }],
+        mid: [{ top: '50%', left: '15%' }, { top: '55%', left: '35%' }, { top: '55%', left: '65%' }, { top: '50%', left: '85%' }],
+        att: [{ top: '25%', left: '15%' }, { top: '15%', left: '40%' }, { top: '15%', left: '60%' }, { top: '25%', left: '85%' }]
     }
 };
+
+// --- PÉLDA ADATOK: Pénzügyek és Igazolások ---
+let clubBalance = 50000000; // $50 millió
+let transferBudget = 30000000; // $30 millió
+let totalSalary = 1500000; // $1.5 millió
+const salaryCap = 2000000; // $2 millió
+
+// Egyszerűsített igazolási célpontok
+const marketPlayers = [
+    { name: "Új Tehetség 1", pos: "KP", rating: 70, price: 5000000, wage: 15000 },
+    { name: "Rutinos Csapás", pos: "CS", rating: 88, price: 45000000, wage: 100000 },
+    { name: "Fiatal Védő", pos: "V", rating: 65, price: 1000000, wage: 5000 }
+];
 
 
 // --- 2. ÁLLANDÓK ÉS KEZDŐ ÉRTÉKEK ---
@@ -64,17 +98,26 @@ const gameSelection = document.getElementById('game-selection');
 const clubSelection = document.getElementById('club-selection');
 const clubHub = document.getElementById('club-hub');
 const matchScreen = document.getElementById('match-screen');
-const squadScreen = document.getElementById('squad-screen'); // ÚJ
+const squadScreen = document.getElementById('squad-screen');
+const transferScreen = document.getElementById('transfer-screen');
 
 const leagueList = document.getElementById('league-list');
 const savedTeamDisplay = document.getElementById('saved-team-display');
 const changeTeamBtn = document.getElementById('change-team-btn');
 
-// ÚJ ELEMEK A SQUAD SCREEN-hez
-const formationSelector = document.getElementById('formation-selector');
-const currentFormationDisplay = document.getElementById('current-formation');
+// SQUAD SCREEN
 const tacticsPitch = document.getElementById('tactics-pitch');
-const playerListElement = document.getElementById('player-list');
+const formationSelector = document.getElementById('formation-selector');
+const substituteList = document.getElementById('substitute-list');
+const reserveList = document.getElementById('reserve-list');
+
+// TRANSFER SCREEN
+const currentBalanceDisplay = document.getElementById('current-balance');
+const transferBudgetDisplay = document.getElementById('transfer-budget');
+const salaryCapDisplay = document.getElementById('salary-cap');
+const scoutList = document.getElementById('scout-list');
+const sellList = document.getElementById('sell-list');
+const transferLogElement = document.getElementById('transfer-log');
 
 let selectedTeam = localStorage.getItem('selectedTeam');
 
@@ -85,8 +128,12 @@ let isMatchActive = false;
 const opponentTeam = "Amatőr FC"; 
 let currentFormation = '4-4-2'; // Kezdő formáció
 
+let draggedItem = null; // Drag and Drop változó
+
 
 // --- 3. FÜGGVÉNYEK ---
+
+// --- 3.1. Képernyő Navigáció és Betöltés ---
 
 /**
  * Frissíti a mentett csapat megjelenítését a Játék Képernyőn.
@@ -110,7 +157,8 @@ function showMainMenu() {
     clubSelection.classList.add('hidden');
     clubHub.classList.add('hidden');
     matchScreen.classList.add('hidden');
-    squadScreen.classList.add('hidden'); // ÚJ
+    squadScreen.classList.add('hidden');
+    transferScreen.classList.add('hidden');
     updateSavedTeamDisplay();
 }
 
@@ -123,7 +171,8 @@ function showGameSelection() {
     clubSelection.classList.add('hidden');
     clubHub.classList.add('hidden');
     matchScreen.classList.add('hidden');
-    squadScreen.classList.add('hidden'); // ÚJ
+    squadScreen.classList.add('hidden');
+    transferScreen.classList.add('hidden');
     updateSavedTeamDisplay();
 }
 
@@ -141,7 +190,8 @@ function showClubHub() {
     clubSelection.classList.add('hidden');
     clubHub.classList.remove('hidden');
     matchScreen.classList.add('hidden');
-    squadScreen.classList.add('hidden'); // ÚJ
+    squadScreen.classList.add('hidden');
+    transferScreen.classList.add('hidden');
 
     // Betöltjük a csapat adatait a Hub-ba
     document.getElementById('club-name-title').textContent = selectedTeam;
@@ -156,7 +206,8 @@ function showClubSelection() {
     clubSelection.classList.remove('hidden');
     clubHub.classList.add('hidden');
     matchScreen.classList.add('hidden');
-    squadScreen.classList.add('hidden'); // ÚJ
+    squadScreen.classList.add('hidden');
+    transferScreen.classList.add('hidden');
     leagueList.innerHTML = '';
 
     for (const leagueKey in footballData) {
@@ -196,7 +247,6 @@ function selectTeam(teamName) {
     showClubHub(); 
 }
 
-
 /**
  * Megjeleníti a Meccs Szimulációs Képernyőt.
  */
@@ -211,7 +261,8 @@ function showMatchScreen() {
     clubSelection.classList.add('hidden');
     clubHub.classList.add('hidden');
     matchScreen.classList.remove('hidden');
-    squadScreen.classList.add('hidden'); // ÚJ
+    squadScreen.classList.add('hidden');
+    transferScreen.classList.add('hidden');
     
     // Meccs előkészítése:
     document.getElementById('match-title').textContent = `${selectedTeam} vs. ${opponentTeam}`;
@@ -226,6 +277,57 @@ function showMatchScreen() {
     matchTime = 0;
     isMatchActive = true;
 }
+
+/**
+ * Megjeleníti a Csapat Összeállítás képernyőt.
+ */
+function showSquadScreen() {
+    if (!selectedTeam) {
+        showClubHub();
+        return;
+    }
+
+    mainMenu.classList.add('hidden');
+    gameSelection.classList.add('hidden');
+    clubSelection.classList.add('hidden');
+    clubHub.classList.add('hidden');
+    matchScreen.classList.add('hidden');
+    squadScreen.classList.remove('hidden');
+    transferScreen.classList.add('hidden');
+    
+    // Kezdő formáció betöltése
+    formationSelector.value = currentFormation;
+    // renderFormation hívása, amely a formációt és a listákat is létrehozza
+    renderFormation(currentFormation);
+    
+    // D&D eseménykezelők bekapcsolása (újra, ha megváltozott a tartalom)
+    addDropListeners();
+}
+
+/**
+ * Megjeleníti az Átigazolási Központ képernyőt.
+ */
+function showTransferScreen() {
+    if (!selectedTeam) {
+        showClubHub();
+        return;
+    }
+
+    mainMenu.classList.add('hidden');
+    gameSelection.classList.add('hidden');
+    clubSelection.classList.add('hidden');
+    clubHub.classList.add('hidden');
+    matchScreen.classList.add('hidden');
+    squadScreen.classList.add('hidden');
+    transferScreen.classList.remove('hidden');
+    
+    updateFinanceDisplays();
+    renderMarketList(marketPlayers); 
+    renderSellList(); 
+}
+
+
+// --- 3.2. Meccs Szimuláció ---
 
 /**
  * Szimulál egy eseményt.
@@ -289,31 +391,10 @@ function endMatch() {
     document.getElementById('end-match-btn').classList.remove('hidden');
 }
 
+// --- 3.3. Taktikai Képernyő (Squad) Logika és Drag and Drop ---
 
 /**
- * Megjeleníti a Csapat Összeállítás képernyőt.
- */
-function showSquadScreen() {
-    if (!selectedTeam) {
-        showClubHub();
-        return;
-    }
-
-    mainMenu.classList.add('hidden');
-    gameSelection.classList.add('hidden');
-    clubSelection.classList.add('hidden');
-    clubHub.classList.add('hidden');
-    matchScreen.classList.add('hidden');
-    squadScreen.classList.remove('hidden');
-    
-    // Betöltjük a jelenlegi formációt és a játékosokat
-    formationSelector.value = currentFormation;
-    renderFormation(currentFormation);
-    renderPlayerList();
-}
-
-/**
- * Frissíti a pályát az adott formáció alapján.
+ * Frissíti a pályát az adott formáció alapján, és a játékosokat a slotokba helyezi.
  * @param {string} formationKey - A formáció kulcsa.
  */
 function renderFormation(formationKey) {
@@ -321,10 +402,8 @@ function renderFormation(formationKey) {
     if (!formation) return;
 
     currentFormation = formationKey;
-    currentFormationDisplay.textContent = formationKey;
     tacticsPitch.innerHTML = ''; 
 
-    // Összevonjuk a pozíciókat egy könnyebben kezelhető objektumba
     const positions = {
         'K': formation.gk,
         'V': formation.def,
@@ -332,51 +411,268 @@ function renderFormation(formationKey) {
         'CS': formation.att
     };
     
-    // Poszt nevek a pozíciókhoz
-    const posNames = { 'K': 'K', 'V': 'V', 'KP': 'KP', 'CS': 'CS' };
-
-    // Dinamikusan hozzáadjuk a pozíciós boxokat
+    // Dinamikusan hozzáadjuk a pozíciós SLOT-okat
     Object.keys(positions).forEach(posGroup => {
         const coords = positions[posGroup];
         if (coords) {
             coords.forEach((coord, index) => {
-                const playerPos = document.createElement('div');
-                playerPos.className = `player-position ${posGroup.toLowerCase()}`;
-                playerPos.textContent = posNames[posGroup]; // Pl.: K, V, KP, CS
-                playerPos.style.top = coord.top;
-                playerPos.style.left = coord.left;
-                playerPos.style.transform = 'translate(-50%, -50%)'; 
-                playerPos.setAttribute('data-pos-key', `${posGroup}-${index}`); // Egyedi azonosító
+                const slotId = `${posGroup.toLowerCase()}-${index}`;
                 
-                tacticsPitch.appendChild(playerPos);
+                const playerSlot = document.createElement('div');
+                playerSlot.className = `player-slot dropzone`;
+                playerSlot.setAttribute('data-slot-id', slotId);
+                playerSlot.setAttribute('data-pos-type', posGroup);
+                playerSlot.style.top = coord.top;
+                playerSlot.style.left = coord.left;
+                
+                // Megkeressük a játékost, aki jelenleg ebben a slotban van
+                const assignedPlayer = squadPlayers.find(p => p.slotId === slotId && p.currentStatus === 'start');
+
+                if (assignedPlayer) {
+                    playerSlot.appendChild(createPlayerCard(assignedPlayer));
+                }
+                
+                tacticsPitch.appendChild(playerSlot);
             });
         }
+    });
+
+    renderPlayerLists(); // Frissítjük a cseréket és tartalékokat is
+    addDropListeners(); // Új slotokhoz adjuk a drop eseményeket
+}
+
+/**
+ * Létrehoz egy vizuális játékos kártyát.
+ * @param {object} player - Játékos adat objektum.
+ * @param {boolean} isSub - Ha a csere/tartalék listához készül.
+ * @returns {HTMLElement} A létrehozott kártya elem.
+ */
+function createPlayerCard(player, isSub = false) {
+    const card = document.createElement('div');
+    card.className = isSub ? 'sub-player-card drag-item' : 'player-card-squad drag-item';
+    card.setAttribute('draggable', 'true');
+    card.setAttribute('data-player-id', player.id);
+    card.setAttribute('data-player-pos', player.pos);
+
+    card.innerHTML = `
+        <span class="player-pos-label">${player.pos}</span>
+        <span class="player-rating">${player.rating}</span>
+        <span class="player-name-squad">${player.name}</span>
+    `;
+    
+    addDragListeners(card);
+
+    return card;
+}
+
+/**
+ * Betölti a Cserék és Tartalékok listáját.
+ */
+function renderPlayerLists() {
+    substituteList.innerHTML = '';
+    reserveList.innerHTML = '';
+
+    // Filterezzük és rendereljük azokat, akik még nincsenek a pályán (slotId === null)
+    const subs = squadPlayers.filter(p => p.currentStatus === 'sub');
+    const reserves = squadPlayers.filter(p => p.currentStatus === 'reserve');
+
+    subs.forEach(player => {
+        substituteList.appendChild(createPlayerCard(player, true));
+    });
+
+    reserves.forEach(player => {
+        reserveList.appendChild(createPlayerCard(player, true));
     });
 }
 
 /**
- * Betölti az összes játékost a listába.
+ * Hozzáadja az eseménykezelőket a húzható elemhez.
+ * @param {HTMLElement} item - A játékos kártya elem.
  */
-function renderPlayerList() {
-    playerListElement.innerHTML = '';
-    squadPlayers.sort((a, b) => b.rating - a.rating);
+function addDragListeners(item) {
+    item.addEventListener('dragstart', (e) => {
+        draggedItem = e.target;
+        setTimeout(() => e.target.classList.add('dragging'), 0);
+    });
 
-    squadPlayers.forEach(player => {
+    item.addEventListener('dragend', (e) => {
+        e.target.classList.remove('dragging');
+        // A draggedItem-et NE nullázzuk itt, a drop fogja kezelni
+    });
+}
+
+/**
+ * Hozzáadja az eseménykezelőket az ejtési zónákhoz (slotokhoz és listákhoz).
+ */
+function addDropListeners() {
+    // 1. Pálya slotok
+    const pitchSlots = document.querySelectorAll('#tactics-pitch .player-slot');
+    pitchSlots.forEach(slot => addDropEventHandlers(slot));
+
+    // 2. Csere listák (ezek a konténerek is dropzone-ok)
+    addDropEventHandlers(substituteList);
+    addDropEventHandlers(reserveList);
+}
+
+/**
+ * Hozzáadja a drop eseményeket a konténerhez/slot-hoz.
+ */
+function addDropEventHandlers(container) {
+    // Először távolítsuk el az esetleges régi listenereket, hogy ne duplikálódjanak
+    container.removeEventListener('dragover', preventDefault);
+    container.removeEventListener('drop', handleDrop);
+
+    // Adjunk hozzá újakat
+    container.addEventListener('dragover', preventDefault);
+    container.addEventListener('drop', handleDrop);
+}
+
+function preventDefault(e) {
+     e.preventDefault(); 
+     e.dataTransfer.dropEffect = 'move';
+}
+
+/**
+ * Kezeli az ejtési eseményt.
+ * @param {Event} e - Az ejtési esemény.
+ */
+function handleDrop(e) {
+    e.preventDefault();
+    if (!draggedItem) return;
+
+    let targetSlot = e.target.closest('.dropzone');
+    if (!targetSlot) return; // Nem dropzone-ra ejtettünk
+    
+    // Annak az elemnek, akire ejtettünk (ha volt rajta kártya)
+    const existingCard = targetSlot.querySelector('.drag-item');
+    
+    const draggedPlayerId = parseInt(draggedItem.getAttribute('data-player-id'));
+    const draggedPlayer = squadPlayers.find(p => p.id === draggedPlayerId);
+    
+    // Mentjük az eredeti helyzetet
+    const originalStatus = draggedPlayer.currentStatus;
+    const originalSlotId = draggedPlayer.slotId;
+    
+    // Frissítjük a húzott játékos helyzetét
+    let newStatus, newSlotId;
+    
+    if (targetSlot.classList.contains('player-slot')) {
+        // --- Ejtés a Pálya slotba (Kezdő 11-be) ---
+        newStatus = 'start';
+        newSlotId = targetSlot.getAttribute('data-slot-id');
+    } else {
+        // --- Ejtés a Csere/Tartalék listába ---
+        newStatus = targetSlot.getAttribute('data-status-type'); // 'sub' vagy 'reserve'
+        newSlotId = null; 
+    }
+
+    // 1. Frissítjük a húzott játékos (draggedPlayer) helyét
+    draggedPlayer.currentStatus = newStatus;
+    draggedPlayer.slotId = newSlotId;
+
+    if (existingCard) {
+        // 2. Cserélünk: Frissítjük az ejtési zónán lévő játékos (existingPlayer) helyét
+        const existingPlayerId = parseInt(existingCard.getAttribute('data-player-id'));
+        const existingPlayer = squadPlayers.find(p => p.id === existingPlayerId);
+        
+        // Az eredeti helyére kerül, ahonnan a húzott játékos jött
+        existingPlayer.currentStatus = originalStatus;
+        existingPlayer.slotId = originalSlotId;
+    }
+    
+    // 3. Végül újrarajzoljuk az egészet
+    renderFormation(currentFormation);
+    addDropListeners(); // Új slotokhoz újra adjuk a listenereket
+
+    draggedItem = null; // Befejeztük a műveletet
+}
+
+
+// --- 3.4. Átigazolási Központ Logika ---
+
+/**
+ * Frissíti a pénzügyi kijelzőket a tetején.
+ */
+function updateFinanceDisplays() {
+    // Formázás: $X.XXX.XXX
+    const formatMoney = (amount) => {
+        return '$' + amount.toLocaleString('en-US');
+    }
+
+    currentBalanceDisplay.textContent = formatMoney(clubBalance);
+    transferBudgetDisplay.textContent = formatMoney(transferBudget);
+    salaryCapDisplay.textContent = `${formatMoney(totalSalary)} / ${formatMoney(salaryCap)}`;
+    
+    // Színkódolás a pénznek
+    currentBalanceDisplay.classList.toggle('positive', clubBalance > 0);
+    currentBalanceDisplay.classList.toggle('negative', clubBalance < 0);
+}
+
+/**
+ * Megjeleníti az igazolási célpontokat a listában.
+ */
+function renderMarketList(players) {
+    scoutList.innerHTML = '';
+
+    if (players.length === 0) {
+        scoutList.innerHTML = '<p class="placeholder-text">Jelenleg nincs játékos a piacon. Próbálja meg újra felkutatni a piacot.</p>';
+        return;
+    }
+
+    players.forEach(player => {
         const card = document.createElement('div');
-        card.className = 'player-card';
-        card.setAttribute('data-player-name', player.name);
-        card.setAttribute('data-player-pos', player.pos);
+        card.className = 'transfer-player-card';
         card.innerHTML = `
-            <strong>${player.name}</strong> 
-            (${player.pos}) Ért: ${player.rating}
+            <strong>${player.name}</strong> (${player.pos}, Ért: ${player.rating})<br>
+            Ár: <span class="money positive">${(player.price/1000000).toFixed(1)}M</span> | 
+            Fizetés: <span class="money">${(player.wage/1000).toFixed(0)}k/hét</span>
         `;
         
         card.addEventListener('click', () => {
-             alert(`${player.name} kiválasztva! (Később itt tudod behúzni a pályára)`);
+             alert(`Játékos ajánlattétel: ${player.name} - ${player.price} értékben. (Placeholder)`);
+             // Később itt hívnánk meg a buyPlayer() logikát
         });
 
-        playerListElement.appendChild(card);
+        scoutList.appendChild(card);
     });
+}
+
+/**
+ * Megjeleníti a saját játékosainkat eladásra.
+ */
+function renderSellList() {
+    sellList.innerHTML = '';
+    
+    if (squadPlayers.length === 0) {
+        sellList.innerHTML = '<p class="placeholder-text">A kereted üres.</p>';
+        return;
+    }
+
+    squadPlayers.forEach(player => {
+        const estimatedValue = player.rating * 100000; // Egyszerű becslés
+        
+        const card = document.createElement('div');
+        card.className = 'transfer-player-card';
+        card.innerHTML = `
+            <strong>${player.name}</strong> (${player.pos})<br>
+            Becsült Eladási Ár: <span class="money positive">${(estimatedValue/1000000).toFixed(1)}M</span>
+        `;
+        
+        card.addEventListener('click', () => {
+             alert(`Játékos eladás felkínálása: ${player.name} - Becsült ár: ${estimatedValue}. (Placeholder)`);
+             // Később itt hívnánk meg a sellPlayer() logikát
+        });
+
+        sellList.appendChild(card);
+    });
+}
+
+/**
+ * Keresés indítása a piacon (Placeholder).
+ */
+function searchMarket() {
+    transferLogElement.innerHTML += `<p>${new Date().toLocaleTimeString()}: Piac felkutatása elindítva. (Később ez időbe telik)</p>`;
+    alert("Új játékosok keresése a piacon...");
 }
 
 
@@ -420,6 +716,12 @@ document.getElementById('start-match-btn').addEventListener('click', showMatchSc
 // KLUBKÖZPONT: Csapat Összeállítás gomb
 document.querySelector('.squad-box button').addEventListener('click', showSquadScreen);
 
+// KLUBKÖZPONT: Igazolások gomb
+document.querySelector('.transfer-box.incoming').addEventListener('click', showTransferScreen);
+
+// KLUBKÖZPONT: Távozók gomb
+document.querySelector('.transfer-box.outgoing').addEventListener('click', showTransferScreen);
+
 // --- MECCSKÉPERNYŐ ESEMÉNYEK ---
 
 // MECCSKÉPERNYŐ: Következő Esemény gomb
@@ -431,19 +733,27 @@ document.getElementById('end-match-btn').addEventListener('click', showClubHub);
 
 // --- CSAPAT ÖSSZEÁLLÍTÁS ESEMÉNYEK ---
 
-// CSAPAT ÖSSZEÁLLÍTÁS: Formációváltó
+// A VISSZA gomb a fejlécben van
+document.getElementById('back-to-hub-from-squad-header').addEventListener('click', showClubHub);
+
+// Formációváltó
 formationSelector.addEventListener('change', (e) => {
     renderFormation(e.target.value);
+    // addDropListeners automatikusan hívódik a renderFormation-ből
 });
 
-// CSAPAT ÖSSZEÁLLÍTÁS: Mentés és Vissza
-document.getElementById('save-squad-btn').addEventListener('click', () => {
-    alert("Formáció mentve!");
-    showClubHub();
-});
+// --- ÁTIGAZOLÁSI KÖZPONT ESEMÉNYEK ---
 
-// CSAPAT ÖSSZEÁLLÍTÁS: Vissza a Hubba
-document.getElementById('back-to-hub-from-squad').addEventListener('click', showClubHub);
+// Piac Felkutatása gomb
+document.getElementById('search-market-btn').addEventListener('click', searchMarket);
+
+// Vissza a Hubba
+document.getElementById('back-to-hub-from-transfer').addEventListener('click', showClubHub);
+
+// Játékos Eladása gomb (Placeholder)
+document.getElementById('sell-player-btn').addEventListener('click', () => {
+    alert("Játékos eladás felkínálása elindult.");
+});
 
 
 // --- 5. INDÍTÁS ---
