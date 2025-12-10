@@ -179,45 +179,157 @@ body {
     color: #f0b347;
 }
 
-/* --- KLUB VÁLASZTÓ LISTA --- */
-#league-list {
-    max-height: 70vh;
-    overflow-y: auto;
-    width: 90%;
-    max-width: 800px;
-    padding: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    margin-bottom: 20px;
+/* --- WORLD SOCCER CHAMPS (WSC) FEJLÉC ÉS GOMB STÍLUSOK --- */
+
+.header-wsc {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background: #47b29a; /* Türkiz/Zöld felső sáv */
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+    z-index: 20;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
 
-.league-title {
-    color: #94a3b8;
-    font-size: 1.4em;
-    margin-top: 15px;
-    margin-bottom: 8px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 5px;
-    font-weight: 600;
+.header-left {
+    display: flex;
+    align-items: center;
 }
 
-.team-button {
-    background: #1e293b;
-    color: #e2e8f0;
-    padding: 8px 12px;
-    margin: 4px;
-    border-radius: 6px;
+.header-menu-btn {
+    background: none;
     border: none;
+    color: white;
+    font-size: 2em;
+    padding: 0 10px;
     cursor: pointer;
-    transition: background 0.15s;
 }
 
-.team-button:hover {
+.header-title-wsc {
+    font-family: 'Inter', sans-serif; 
+    font-size: 1.5em;
+    font-weight: 700;
+    margin-left: 10px;
+}
+
+.wsc-button {
+    padding: 8px 15px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.wsc-button.green-button {
+    background: #10b981; /* Sötétzöld, mint a VISSZA gomb */
+    color: white;
+}
+
+.wsc-button.green-button:hover {
+    background: #059669;
+}
+
+.back-arrow::before {
+    content: '◀️ ';
+}
+
+.wsc-subtitle {
+    font-size: 1.4em;
+    font-weight: 600;
+    color: #e2e8f0;
+    padding: 15px 0;
+    margin: 0;
+    text-align: center;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* --- KLUBVÁLASZTÓ KÉPERNYŐ HÁTTÉR ÉS LISTA STÍLUS --- */
+
+#club-selection.club-selection-bg {
+    background: #020617;
+    /* Pontozott térkép effektus */
+    background-image: radial-gradient(#334155 1px, transparent 1px), radial-gradient(#334155 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 0; /* Ne legyen alap padding */
+}
+
+.selection-container {
+    width: 95%;
+    max-width: 800px;
+    margin-top: 60px; /* Hely a fejlécnek */
+}
+
+#league-list {
+    max-height: 75vh;
+    overflow-y: auto;
+    width: 100%;
+    padding: 0; 
+    border: none; 
+    border-radius: 0;
+}
+
+/* Új Stílus: Egy Sor (Ország/Zászló/Csillag/Gomb) */
+.league-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1e293b; 
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.league-row:hover {
     background: #334155;
 }
 
+.league-info {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+}
 
-/* --- KLUBKÖZPONT (CLUB HUB) STÍLUSOK --- */
+.country-name {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: white;
+    margin-left: 15px; /* Hely a zászló emojinak */
+}
+
+.difficulty-stars {
+    margin-left: 20px;
+    color: #f0b347; /* Sárga csillagok */
+}
+
+.star-empty {
+    color: #475569; /* Üres csillagok szürkébbek */
+}
+
+.select-league-btn {
+    background: none;
+    border: none;
+    color: #38bdf8; 
+    font-size: 1.5em;
+    font-weight: 900;
+    padding: 0 10px;
+    cursor: pointer;
+}
+
+
+/* --- KLUBKÖZPONT (CLUB HUB) STÍLUSOK (TÖBBI KÉPERNYŐ) --- */
 
 #club-hub {
     justify-content: flex-start;
@@ -538,341 +650,3 @@ body {
 /* Apró poszt jelölő a kártya tetején */
 .player-pos-label {
     position: absolute;
-    top: -8px; 
-    padding: 1px 4px;
-    border-radius: 4px;
-    background: #f0b347; /* Sárga */
-    color: #020617;
-    font-size: 0.6em;
-}
-
-.player-rating {
-    font-size: 1.1em;
-    font-weight: 900;
-    line-height: 1;
-}
-
-.player-name-squad {
-    font-size: 0.7em;
-    font-weight: normal;
-    text-align: center;
-    width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* --- Taktikai Kontrollok (ALUL) --- */
-.tactics-controls-bottom {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    width: 100%;
-    padding-top: 15px;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 8px;
-}
-
-.control-box {
-    text-align: center;
-}
-
-.control-box p {
-    margin: 0 0 5px 0;
-    font-size: 0.8em;
-    color: #94a3b8;
-}
-
-.small-select {
-    padding: 5px;
-    font-size: 0.9em;
-    background: #334155;
-    color: #e2e8f0;
-    border-radius: 4px;
-    border: 1px solid #475569;
-}
-
-
-/* --- JOBB: CSERÉK / TARTALÉKOK --- */
-.substitutes-area {
-    width: 300px; /* Fix szélesség a jobb oldali panelnek */
-    background: #1e293b; 
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    flex-direction: column;
-}
-
-.sub-list-box {
-    padding: 10px;
-    background: #0f172a;
-    flex-basis: 50%;
-    overflow-y: hidden;
-    border-bottom: 2px solid #020617;
-}
-
-.tar-box {
-    background: #0f172a;
-    border-bottom: none;
-}
-
-.list-title {
-    background: #334155;
-    padding: 5px;
-    text-align: center;
-    font-weight: bold;
-    font-size: 1.1em;
-    margin-bottom: 10px;
-    border-radius: 4px;
-}
-
-.player-slot-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    max-height: 90%;
-    overflow-y: auto;
-    padding-right: 5px;
-}
-
-/* Kártya a cserék/tartalékok listájában (mini verzió) */
-.sub-player-card {
-    width: 85px; 
-    height: 85px;
-    padding: 5px;
-    border-radius: 8px;
-    background: #38bdf8;
-    color: #020617;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.7em;
-    font-weight: bold;
-    border: 1px solid white;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
-    cursor: grab;
-    position: relative; /* Poszt jelölőhöz */
-}
-
-
-/* --- ÁTIGAZOLÁSI KÖZPONT STÍLUSOK --- */
-
-#transfer-screen {
-    justify-content: flex-start;
-    padding-top: 20px;
-}
-
-.finance-header {
-    display: flex;
-    justify-content: space-around;
-    width: 95%;
-    max-width: 1000px;
-    margin-bottom: 20px;
-    padding: 10px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-}
-
-.finance-box {
-    text-align: center;
-    padding: 0 10px;
-}
-
-.finance-box h4 {
-    margin: 0;
-    font-size: 0.9em;
-    color: #94a3b8;
-}
-
-.money {
-    font-size: 1.4em;
-    font-weight: bold;
-}
-
-.positive {
-    color: #10b981; /* Zöld */
-}
-
-.transfer-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    width: 95%;
-    max-width: 1000px;
-}
-
-.transfer-list-box {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    padding: 15px;
-    height: 450px;
-    display: flex;
-    flex-direction: column;
-}
-
-.transfer-list-box h2 {
-    color: #f0b347;
-    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
-    padding-bottom: 10px;
-    margin-top: 0;
-}
-
-#scout-list, #sell-list {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding-right: 5px;
-    margin-bottom: 10px;
-}
-
-.log-box {
-    width: 95%;
-    max-width: 1000px;
-    margin-top: 20px;
-    background: rgba(0, 0, 0, 0.15);
-    border-radius: 8px;
-    padding: 10px;
-}
-
-#transfer-log {
-    max-height: 80px;
-    overflow-y: auto;
-    font-size: 0.85em;
-    color: #94a3b8;
-}
-
-.log-box h4 {
-    color: #38bdf8;
-    margin: 0 0 5px 0;
-}
-
-.placeholder-text {
-    text-align: center;
-    color: #475569;
-    margin-top: 50px;
-    font-style: italic;
-}
-
-.sell-button {
-    background: #ef4444; /* Piros a távozókhoz */
-}
-
-.sell-button:hover {
-    background: #dc2626;
-}
-
-.transfer-player-card {
-    background: #1e293b;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.9em;
-    margin-bottom: 6px;
-    border-left: 4px solid #f0b347;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.transfer-player-card:hover {
-    background: #334155;
-}
-
-/* Mobil optimalizáció: Portré (Módosítás) */
-@media screen and (orientation: portrait) {
-    /* Főmenü álló tájolásban */
-    .menu-container {
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: auto;
-        gap: 14px;
-        width: 90%;
-        max-width: 400px;
-    }
-
-    .main-game {
-        grid-column: span 2;
-        grid-row: span 1;
-        min-height: 180px;
-    }
-
-    /* Játékválasztó álló tájolásban */
-    .selection-grid {
-        grid-template-columns: repeat(2, 1fr);
-        max-width: 400px;
-    }
-
-    .saved-team-slot {
-        grid-column: span 2;
-    }
-
-    #league-list {
-        max-height: 50vh;
-    }
-    
-    /* Klubközpont álló tájolásban */
-    #club-hub {
-        padding-top: 20px;
-    }
-    
-    .hub-container {
-        grid-template-columns: 1fr;
-        height: auto;
-        max-height: 90vh;
-        overflow-y: auto;
-    }
-
-    .hub-main-col, .hub-side-col {
-        gap: 15px;
-    }
-
-    .transfer-grid {
-        height: auto;
-        margin-bottom: 15px;
-    }
-
-    /* Meccs képernyő álló tájolásban */
-    #match-log, .match-header {
-        max-width: 100%;
-        width: 100%;
-    }
-
-    /* Csapat összeállítás álló tájolásban */
-    .squad-main-grid {
-        flex-direction: column;
-        height: auto;
-    }
-    .pitch-area {
-        height: 400px; /* Fix magasság a pályának */
-        padding: 10px;
-    }
-    .substitutes-area {
-        width: 100%;
-        min-height: 400px;
-        flex-direction: row; /* Cserék és Tartalékok egymás mellett */
-    }
-    .sub-list-box {
-        flex-basis: 50%;
-        max-height: 400px;
-    }
-    .player-slot-container {
-        justify-content: center;
-    }
-    
-    /* Átigazolási Központ álló tájolásban */
-    .finance-header {
-        flex-wrap: wrap;
-        width: 100%;
-    }
-    .finance-box {
-        width: 50%;
-        margin: 5px 0;
-    }
-    .transfer-container {
-        grid-template-columns: 1fr;
-        height: auto;
-    }
-    .transfer-list-box {
-        height: 300px;
-        width: 100%;
-    }
-    .log-box {
-        width: 100%;
-    }
-}
