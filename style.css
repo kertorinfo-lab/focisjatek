@@ -1,18 +1,26 @@
+/* Globális beállítás: Box-sizing mindenhol */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
 /* Alap beállítások */
 body {
     margin: 0;
     padding: 0;
+    /* Inter betűtípust preferáljuk, ha elérhető */
     font-family: 'Inter', 'Segoe UI', sans-serif;
+    /* Modern, sötét, finom sugárirányú háttérgradiens */
     background: radial-gradient(circle at top, #0f172a, #020617);
     color: #e2e8f0;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    overflow: hidden; /* Ne lehessen görgetni a fő felületet */
 }
 
-/* Fő konténer */
-#main-menu {
+/* Fő konténer (biztosítja, hogy a főmenü kitöltse a mobil képernyőt) */
+#main-menu, .screen {
     width: 100vw;
     height: 100vh;
     display: flex;
@@ -20,19 +28,27 @@ body {
     align-items: center;
 }
 
-/* ÚJ, kisebb, modernebb grid */
+/* Eltünteti a nem használt képernyőket */
+.hidden {
+    display: none !important;
+}
+
+/* --- FŐMENÜ (3x2 GRIDSZERKEZET) --- */
 .menu-container {
     display: grid;
+    /* Fix méretek a kompakt megjelenéshez, fekvő tájolásra optimalizálva */
     grid-template-columns: repeat(3, 180px);
     grid-template-rows: repeat(2, 140px);
-    gap: 16px;
+    gap: 16px; /* Távolság a sablonok között */
     padding: 20px;
+    max-width: 900px; /* Limitálja a méretet nagyobb képernyőn */
 }
 
 /* Minden kártya alap stílusa */
 .menu-box {
-    background: rgba(255, 255, 255, 0.06); 
-    backdrop-filter: blur(6px);
+    /* Modern üveg (Glassmorphism) hatás */
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(6px); /* Elmosás effekt */
     border-radius: 14px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     padding: 10px 12px;
@@ -44,17 +60,17 @@ body {
     justify-content: center;
 }
 
-/* Hover – modern glow */
+/* Hover – modern glow és mozgás */
 .menu-box:hover {
     transform: translateY(-4px) scale(1.04);
-    box-shadow: 0 8px 22px rgba(0, 150, 255, 0.35);
+    box-shadow: 0 8px 22px rgba(0, 150, 255, 0.35); /* Kék fény */
     cursor: pointer;
     border-color: rgba(0, 150, 255, 0.4);
 }
 
 /* Cím */
 .menu-box h2 {
-    color: #38bdf8;
+    color: #38bdf8; /* Kék kiemelés */
     margin: 0;
     font-size: 1.05em;
     font-weight: 600;
@@ -67,16 +83,17 @@ body {
     opacity: 0.8;
 }
 
-/* Kiemelt – de kompaktabb, modernebb JÁTÉK gomb */
+/* Kiemelt – JÁTÉK gomb */
 .main-game {
     grid-column: span 2;
     grid-row: span 2;
+    /* Zöld gradiens (Foci pálya hangulat) */
     background: linear-gradient(135deg, #10b981aa, #059669aa);
     border: 2px solid #34d399;
-    box-shadow: 0 0 22px rgba(16, 185, 129, 0.45);
+    box-shadow: 0 0 22px rgba(16, 185, 129, 0.45); /* Zöld fény */
 }
 
-/* Külön keretes rész (ha használod) */
+/* Külön keretes rész (a Játék boxban) */
 .kocka-keret {
     margin-top: 10px;
     padding: 10px;
@@ -86,16 +103,154 @@ body {
     font-weight: 600;
 }
 
-/* Mobil optimalizáció (PORTRÉ) */
+/* --- ÁLTALÁNOS KÉPERNYŐ STÍLUSOK (Játék/Klub választó) --- */
+.screen {
+    position: fixed; /* Fix pozíció */
+    z-index: 10;
+    /* Nincs blur, tiszta háttér */
+    background: #020617;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.screen h1 {
+    color: #e2e8f0;
+    margin-bottom: 25px;
+}
+
+.back-button {
+    padding: 10px 20px;
+    margin-top: 20px;
+    background: #334155;
+    color: #e2e8f0;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.back-button:hover {
+    background: #475569;
+}
+
+/* --- JÁTÉK VÁLASZTÓ GRID --- */
+.selection-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 oszlop */
+    gap: 12px;
+    width: 100%;
+    max-width: 900px;
+}
+
+.selection-box {
+    padding: 15px;
+    border-radius: 10px;
+    background: rgba(56, 189, 248, 0.1);
+    color: #38bdf8;
+    border: 1px solid #38bdf8;
+    transition: all 0.2s;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.selection-box:hover {
+    background: rgba(56, 189, 248, 0.2);
+    transform: scale(1.03);
+}
+
+.selection-box.inactive {
+    opacity: 0.4;
+    cursor: default;
+    border-color: #475569;
+    color: #475569;
+}
+
+/* Mentett csapat slot kiemelése */
+.saved-team-slot {
+    grid-column: span 2; /* Ez 2 oszlopot foglal el */
+    background: linear-gradient(45deg, #f0b34744, #e2e8f01a);
+    border-color: #f0b347;
+    color: #f0b347;
+}
+
+#saved-team-display {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin: 5px 0;
+    color: #f0b347;
+}
+
+/* --- KLUB VÁLASZTÓ LISTA --- */
+#league-list {
+    max-height: 70vh;
+    overflow-y: auto; /* Görgethető lista */
+    width: 90%;
+    max-width: 800px;
+    padding: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.league-title {
+    color: #94a3b8;
+    font-size: 1.4em;
+    margin-top: 15px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 5px;
+    font-weight: 600;
+}
+
+.team-button {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 8px 12px;
+    margin: 4px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.team-button:hover {
+    background: #334155;
+}
+
+/* --- MOBIL OPTIMALIZÁCIÓ (PORTRÉ ÁLLÁS) --- */
 @media screen and (orientation: portrait) {
+    /* Főmenü álló tájolásban */
     .menu-container {
-        grid-template-columns: repeat(2, 150px);
-        grid-template-rows: repeat(3, 120px);
+        /* Álló tájolásban 2 oszlopos elrendezés */
+        grid-template-columns: repeat(2, 1fr); /* 1fr, mert nincs fix szélesség */
+        grid-template-rows: auto;
         gap: 14px;
+        width: 90%;
+        max-width: 400px;
     }
 
     .main-game {
         grid-column: span 2;
-        grid-row: span 1;
+        grid-row: span 1; /* Már csak 1 sort foglal el, hogy ne legyen túl nagy */
+        min-height: 180px;
+    }
+
+    /* Játékválasztó álló tájolásban */
+    .selection-grid {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 400px;
+    }
+
+    .saved-team-slot {
+        grid-column: span 2;
+    }
+
+    #league-list {
+        max-height: 50vh;
     }
 }
