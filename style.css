@@ -114,9 +114,10 @@ body {
 /* WSC FEJLÉC ÉS HÁTTÉR (Játék/Klub VÁLASZTÓ) */
 /* ------------------------------------- */
 
+/* Visszaállítva az eredeti, egyszerűbb WSC stílusra, eltávolítva a komplexebb térkép effekteket. */
 .wsc-background {
     background: #020617;
-    /* Kék, pontozott térképes háttér stílus (mint a 1000003196.jpg) */
+    /* Egyszerű pontozott háttér */
     background-image: 
         radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
         radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
@@ -124,7 +125,7 @@ body {
     background-position: 0 0, 10px 10px;
     
     position: relative;
-    overflow: auto; /* Lehetővé tesszük a görgetést, ha szükséges */
+    overflow: auto; 
     padding: 0; 
     justify-content: flex-start;
 }
@@ -205,12 +206,12 @@ body {
 /* WSC Tartalom Konténer (A fejléc alatt) */
 .selection-container-wsc {
     width: 95%;
-    max-width: 600px; /* Szűkebb, mint a liga lista */
+    max-width: 600px; 
     margin-top: 60px; /* Hely a fejlécnek */
     padding-bottom: 20px;
 }
 
-/* --- Mentett Karrier Lista Stílus (image_fa54fc.jpg) --- */
+/* --- Mentett Karrier Lista Stílus --- */
 
 #saved-careers-list {
     margin-top: 20px;
@@ -237,16 +238,16 @@ body {
     background: #cbd5e1;
 }
 
-/* Kis háromszög a jobb oldalon, mint az eredeti WSC-ben */
+/* Kis háromszög a jobb oldalon */
 .career-row::after {
     content: '';
     position: absolute;
     top: 0;
-    right: 70px; /* Hagyunk helyet az akció gomboknak */
+    right: 70px; 
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 0 0 50px 50px; /* Állítsd be a magasságot, szélességet */
+    border-width: 0 0 50px 50px; 
     border-color: transparent transparent #0ea5e9 transparent;
     transform: rotate(-90deg) translateX(100%);
     opacity: 0.8;
@@ -301,7 +302,7 @@ body {
     display: flex;
     gap: 8px;
     align-items: center;
-    z-index: 10; /* A gombok legyenek a háromszög felett */
+    z-index: 10;
 }
 
 /* Felhő és X gombok */
@@ -323,13 +324,13 @@ body {
 }
 
 .delete-button {
-    background: #ef4444; /* Piros a törléshez */
+    background: #ef4444; 
 }
 .delete-button:hover {
     background: #dc2626;
 }
 
-/* --- LIGA VÁLASZTÓ TÁBLÁZAT STÍLUSOK (1000003197.jpg) --- */
+/* --- LIGA VÁLASZTÓ TÁBLÁZAT STÍLUSOK --- */
 
 .wsc-table {
     width: 100%;
@@ -389,7 +390,7 @@ body {
 }
 
 /* ------------------------------------- */
-/* 2.5 NEHÉZSÉGI SZINT KÉPERNYŐ STÍLUSOK (image_fa4e5a.jpg) */
+/* 2.5 NEHÉZSÉGI SZINT KÉPERNYŐ STÍLUSOK */
 /* ------------------------------------- */
 
 #difficulty-selection {
@@ -399,7 +400,7 @@ body {
 .difficulty-container {
     width: 95%;
     max-width: 1200px;
-    margin-top: 60px; /* Hely a fejlécnek */
+    margin-top: 60px; 
     text-align: center;
 }
 
@@ -454,7 +455,7 @@ body {
     line-height: 1.4;
     opacity: 0.85;
     margin-top: 15px;
-    min-height: 100px; /* Egyforma méret */
+    min-height: 100px; 
 }
 
 /* Színkódolás */
@@ -584,7 +585,7 @@ body {
     display: flex;
     justify-content: flex-start;
     position: fixed;
-    top: 60px; /* A header alatt */
+    top: 60px; 
     z-index: 40;
     overflow-x: auto;
 }
@@ -608,7 +609,7 @@ body {
 .hub-sub-screen {
     width: 90%;
     max-width: 1000px;
-    margin-top: 120px; /* Hely a headernek és a nav barnaak */
+    margin-top: 120px; 
     padding: 20px;
     background: white;
     border-radius: 8px;
@@ -634,10 +635,10 @@ body {
     }
     
     .difficulty-grid {
-        grid-template-columns: 1fr; /* Egy oszlopban */
+        grid-template-columns: 1fr; 
         gap: 15px;
     }
     .difficulty-box p {
-        min-height: auto; /* Kikapcsoljuk a fix magasságot */
+        min-height: auto; 
     }
 }
