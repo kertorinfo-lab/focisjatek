@@ -27,7 +27,7 @@ const hubSubScreens = document.querySelectorAll('.hub-sub-screen');
 let selectedTeam = localStorage.getItem('selectedTeam');
 let selectedLeague = null;
 
-// Új: Mentett Karrierek (Demó adatok, a képek alapján)
+// Mentett Karrierek (Demó adatok, a képek alapján)
 let savedCareers = [
     { id: 101, teamName: "Real Madrid", type: "Club", year: 2, season: '26/27', week: 27, flag: '🇪🇸', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/800px-Real_Madrid_CF.svg.png' },
     { id: 102, teamName: "Marseille", type: "Club", year: 7, season: '31/32', week: 1, flag: '🇫🇷', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/4/43/Olympique_de_Marseille_logo.svg/800px-Olympique_de_Marseille_logo.svg.png' },
