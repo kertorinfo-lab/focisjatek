@@ -2,223 +2,47 @@
 <html lang="hu">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Football Crazy - A Karrier</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobil Foci Játék - Főmenü</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
 
-    <div class="loading-screen" id="loadingScreen">
-        <svg class="football-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#ffffff" d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM152 352h32v32c0 17.7-14.3 32-32 32s-32-14.3-32-32V320c0-17.7 14.3-32 32-32h64c17.7 0 32 14.3 32 32v64c0 17.7-14.3 32-32 32s-32-14.3-32-32V352H152zM280 288c-17.7 0-32 14.3-32 32v96c0 17.7 14.3 32 32 32h96c17.7 0 32-14.3 32-32V320c0-17.7-14.3-32-32-32H280zm64-224c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32h64c17.7 0 32-14.3 32-32V96c0-17.7-14.3-32-32-32H344zM120 96c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32s32-14.3 32-32V128c0-17.7-14.3-32-32-32zm88 64c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32h64c17.7 0 32-14.3 32-32V192c0-17.7-14.3-32-32-32H208z"/></svg>
-        <h1 class="loading-title">Football Crazy</h1>
-        <div class="loading-bar-container">
-            <div class="loading-bar" id="loadingBar"></div>
-        </div>
-    </div>
-
-    <div class="main-menu-container hidden" id="mainMenu">
-        <h1 class="menu-title">Football Crazy</h1>
-        <div class="menu-buttons">
-            <button class="button next-btn" id="newGameBtn">Új Karrier</button>
-        </div>
-        <div id="saveSlotsContainer" class="save-slots-container">
-            </div>
-    </div>
-
-    <div class="character-creator-container hidden" id="characterCreator">
-        <div class="form-carousel" id="formCarousel">
+    <main id="main-menu">
+        <div class="menu-container">
             
-            <div class="form-step">
-                <h2>Indítsd el a karriered!</h2>
-                <p class="form-description">Add meg a neved, nemzetiséged és posztod.</p>
-                
-                <label for="playerName" style="display: block; text-align: left; margin-top: 15px; margin-bottom: 5px;">Játékos neve:</label>
-                <input type="text" id="playerName" placeholder="pl. Minta János" required>
+            <section class="menu-box main-game">
+                <h2>Játék</h2>
+                <div class="kocka-keret">Fő Játék Indítása (Itt lesz a modern keret)</div>
+            </section>
 
-                <label for="nationalitySelect" style="display: block; text-align: left; margin-top: 15px; margin-bottom: 5px;">Nemzetiség:</label>
-                <div class="custom-select-wrapper">
-                    <div class="select-button" id="nationalitySelect" data-selected-value="hu">
-                        <div class="selected-option" data-value="hu"><img src="https://flagcdn.com/w40/hu.png" alt="Magyar zászló"><span>Magyar</span></div><span>&#9660;</span>
-                    </div>
-                    <div class="select-options hidden" id="nationalityOptions">
-                        </div>
-                </div>
+            <section class="menu-box">
+                <h2>👤 Profil</h2>
+                <p>Játékstatisztikák és eredmények.</p>
+            </section>
 
-                <label for="positionSelect" style="display: block; text-align: left; margin-top: 15px; margin-bottom: 5px;">Preferált Poszt:</label>
-                <div class="custom-select-wrapper">
-                    <div class="select-button" id="positionSelect" data-selected-value="CS">
-                        <div class="selected-option" data-value="CS"><span>Csatár (CS)</span></div><span>&#9660;</span>
-                    </div>
-                    <div class="select-options hidden" id="positionOptions">
-                        <div class="option" data-value="CS">Csatár (CS)</div>
-                        <div class="option" data-value="KP">Középpályás (KP)</div>
-                        <div class="option" data-value="V">Védő (V)</div>
-                        <div class="option" data-value="K">Kapus (K)</div>
-                    </div>
-                </div>
-                
-                <div class="navigation-buttons" style="justify-content: flex-end;">
-                    <button class="button next-btn" id="step1NextBtn">Tovább &rarr;</button>
-                </div>
-            </div>
+            <section class="menu-box">
+                <h2>💰 Bolt</h2>
+                <p>Vásárlási lehetőségek.</p>
+            </section>
+
+            <section class="menu-box">
+                <h2>🏆 Trófeák</h2>
+                <p>Megnyert díjak gyűjteménye.</p>
+            </section>
             
-            <div class="form-step">
-                <h2>Válaszd ki a bajnokságot</h2>
-                <p class="form-description">Válassz egy bajnokságot, ahol elindítod a karriered.</p>
-                <div class="league-select-grid" id="leagueSelectGrid">
-                    </div>
-                <div class="navigation-buttons">
-                    <button class="button prev-btn">&larr; Vissza</button>
-                    <button class="button next-btn" id="step2NextBtn">Tovább &rarr;</button>
-                </div>
-            </div>
-            
-            <div class="form-step">
-                <h2>Aláírnád a szerződést?</h2>
-                <p style="text-align: center; color: var(--text-muted);">Válassz a két felajánlott csapat közül, és indítsd el a karriered!</p>
-                <div class="contract-offers-container" id="contractOffersContainer">
-                    </div>
-                <div class="navigation-buttons" style="justify-content: flex-start;">
-                    <button class="button prev-btn">&larr; Vissza</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="overlay hidden" id="matchResultOverlay">
-        <div class="card">
-            <div class="match-result-header">
-                <div class="match-result-team"><img id="resultHomeLogo" src="" alt="Hazai csapat logó"><h3 id="resultHomeName">Hazai</h3></div>
-                <div class="match-result-score" id="resultScore">0 - 0</div>
-                <div class="match-result-team"><img id="resultAwayLogo" src="" alt="Vendég csapat logó"><h3 id="resultAwayName">Vendég</h3></div>
-            </div>
-            <div class="match-summary">
-                <h4>Teljesítményed</h4><p id="resultPlayerPerformance">Gólok: 0, Gólpasszok: 0</p>
-                <h4>Jutalom</h4><p id="resultEarnings">Fizetés: €0, Bónusz: €0</p>
-            </div>
-            <button class="button continue-btn" id="matchResultContinueBtn">Tovább</button>
-        </div>
-    </div>
-    <div class="overlay hidden" id="offerModalOverlay"><div class="card" id="offerModalCard"></div></div>
-    <div class="overlay hidden" id="playerSwapModalOverlay"><div class="card" id="playerSwapModalCard"></div></div>
-    
-    <div id="matchSimulatorOverlay" class="overlay hidden">
-        <div class="simulator-container">
-            <div class="sim-header">
-                <div class="sim-team sim-team-home"><span id="simHomeName">Hazai</span></div> <div class="sim-score-time"><span id="simScore">0 - 0</span><span id="simTime">00:00</span></div>
-                <div class="sim-team sim-team-away"><span id="simAwayName">Vendég</span></div> </div>
-            <div id="commentary-timeline" class="commentary-timeline"></div>
-            <div id="pitch-enter-banner" class="pitch-enter-banner hidden"><i class="fas fa-running"></i><span id="bannerPlayerName"></span> is on the pitch!</div> <div id="half-time-banner" class="pitch-enter-banner hidden"><i class="fas fa-coffee"></i><span>Félidő</span></div>
-        </div>
-        <button id="sim-pause-btn" class="sim-pause-btn"><i class="fas fa-pause"></i></button> </div>
-    
-    <div class="overlay hidden" id="matchGameOverlay">
-        <div class="game-scoreboard-wrapper"><div id="game-scoreboard" class="game-scoreboard">
-            <div class="team-info left"><span id="gameHomeName">HOM</span></div>
-            <div class="score-info"><div id="gameScore">0 - 0</div><div class="score-timeline"><span id="homeProgress"></span><span id="awayProgress"></span></div></div>
-            <div class="team-info right"><span id="gameAwayName">AWY</span></div>
-            <div id="gameTime" style="display:none;">00:00</div>
-        </div></div>
-        <canvas id="gameCanvas"></canvas>
-        <div class="mobile-controls">
-            <div id="joystick-zone" class="joystick-zone"><div id="joystick-handle" class="joystick-handle"></div></div>
-            <div class="action-buttons">
-                <button id="pass-btn" class="action-btn pass-btn"><i class="fas fa-exchange-alt"></i><span>Passz</span></button>
-                <button id="shoot-btn" class="action-btn shoot-btn"><i class="fas fa-futbol"></i><span>Lövés</span></button>
-            </div>
-        </div>
-    </div>
-    
-    <div class="main-hub hidden" id="mainHub">
-        <nav class="sidebar">
-            <button class="nav-btn active" data-screen="dashboardScreen" data-tooltip="Irányítópult"><i class="fas fa-tachometer-alt"></i></button>
-            <button class="nav-btn" data-screen="squadScreen" data-tooltip="Csapat"><i class="fas fa-users"></i></button>
-            <button class="nav-btn" data-screen="leagueScreen" data-tooltip="Bajnokság"><i class="fas fa-trophy"></i></button>
-            <button class="nav-btn" data-screen="playerTransferScreen" data-tooltip="Saját Ajánlatok"><i class="fas fa-arrows-alt-h"></i></button>
-            <button class="nav-btn" data-screen="globalTransferScreen" data-tooltip="Igazolások"><i class="fas fa-globe-europe"></i></button>
-        </nav>
-        <div class="hub-content-wrapper">
-            <header class="top-bar">
-                <button id="profileBtn" class="profile-btn"><i class="fas fa-user"></i> <span id="headerPlayerName">Játékos Neve</span></button>
-                <div class="currency-display">
-                    <div class="currency-item"><i class="fas fa-money-bill-wave" style="color: #2ecc71;"></i><span id="headerPlayerMoney">0</span></div>
-                    <div class="currency-item"><i class="fas fa-coins" style="color: #f1c40f;"></i><span id="headerPlayerCoins">0</span></div>
-                </div>
-            </header>
-            <main class="main-content">
-                <div id="dashboardScreen" class="screen">
-                    <div class="dashboard-grid">
-                        <div class="dashboard-card player-profile-card" id="dashboardProfileCard">
-                            <div class="card-header"><img id="hubPlayerTeamLogo" class="team-logo" src="" alt="Csapat Logó"><div class="player-info"><h4 id="hubPlayerName">Játékos Neve</h4><p id="hubPlayerTeamName">Csapat Neve</p></div></div>
-                            <p><strong>Értékelés:</strong> <span id="hubPlayerRating">85</span></p><p><strong>Életkor:</strong> <span id="hubPlayerAge">17</span></p>
-                        </div>
-                        <div class="dashboard-card">
-                            <div class="card-header"><i class="fas fa-calendar-alt"></i><h3>Következő Meccs</h3></div>
-                            <p><strong>Ellenfél:</strong> <span id="hubNextOpponent">Nincs sorsolás</span></p><button class="button next-btn" style="width: 100%;" id="playMatchBtn">Meccs Indítása</button>
-                        </div>
-                        <div class="dashboard-card">
-                            <div class="card-header"><i class="fas fa-list-ol"></i><h3>Bajnokság</h3></div>
-                            <p><strong>Helyezés:</strong> <span id="hubLeaguePosition">-.</span></p><p><strong>Forduló:</strong> <span id="hubMatchday">0 / 14</span></p>
-                        </div>
-                    </div>
-                </div>
-                <div id="squadScreen" class="screen hidden">
-                    <h2 id="squadTeamName">Csapatom</h2>
-                    <div class="pitch"><div class="pitch-lines"></div><div class="formation" id="formation-forwards"></div><div class="formation" id="formation-midfielders"></div><div class="formation" id="formation-defenders"></div><div class="formation" id="formation-goalkeeper"></div></div>
-                </div>
-                <div id="leagueScreen" class="screen hidden">
-                    <div class="league-header"><i id="leagueNavPrev" class="fas fa-chevron-left nav-arrow"></i><h2 id="leagueTitle">Bajnoki Tabella</h2><i id="leagueNavNext" class="fas fa-chevron-right nav-arrow"></i></div>
-                    <div class="stats-tabs">
-                        <button class="stat-tab active" data-content="leagueTableContainer">Tabella</button><button class="stat-tab" data-content="scorersContainer">Góllövők</button><button class="stat-tab" data-content="assistsContainer">Asszisztok</button>
-                    </div>
-                    <div id="leagueTableContainer" class="stats-content">
-                        <table class="league-table"><thead><tr><th>#</th><th>Csapat</th><th class="hide-on-mobile">M</th><th class="hide-on-mobile">Gy</th><th class="hide-on-mobile">D</th><th class="hide-on-mobile">V</th><th>GK</th><th>P</th></tr></thead><tbody id="leagueTableBody"></tbody></table>
-                    </div>
-                    <div id="scorersContainer" class="stats-content hidden"><p style="text-align: center; color: var(--text-muted); padding: 20px;">A góllövőlista a következő frissítésben érkezik!</p></div>
-                    <div id="assistsContainer" class="stats-content hidden"><p style="text-align: center; color: var(--text-muted); padding: 20px;">Az asszisztlista a következő frissítésben érkezik!</p></div>
-                </div>
-                <div id="profileScreen" class="screen hidden profile-screen">
-                    <h2 id="profilePlayerName">Játékos Profilja</h2>
-                    <div class="stats-grid">
-                        <div class="stat-card"><div class="stat-value" id="profileGoals">0</div><div class="stat-label">Gólok</div></div><div class="stat-card"><div class="stat-value" id="profileAssists">0</div><div class="stat-label">Gólpasszok</div></div>
-                        <div class="stat-card"><div class="stat-value" id="profileMatches">0</div><div class="stat-label">Játszott Meccsek</div></div><div class="stat-card"><div class="stat-value" id="profileTrophies">0</div><div class="stat-label">Trófeák</div></div>
-                    </div>
-                    <div class="transfer-card" style="margin-top: 25px;"><h2>Képességfejlesztés</h2><p style="text-align: center; color: var(--text-muted);">Gyémántokért fejlesztheted a játékosod képességeit. A funkció a következő frissítésben érkezik!</p></div>
-                </div>
-                <div id="playerTransferScreen" class="screen hidden">
-                    <div class="transfer-card"><h2>Saját átigazolási ajánlatok</h2><div id="transferOffers"><p style="text-align: center; color: var(--text-muted);">Jelenleg nincsenek ajánlatok.</p></div></div>
-                </div>
-                <div id="globalTransferScreen" class="screen hidden">
-                    <h2>Igazolási Piac</h2>
-                    <div class="transfer-filters">
-                        <input type="text" id="playerNameSearch" placeholder="Játékos keresése..."><select id="positionFilter"><option value="">Minden poszt</option><option value="CS">Csatár (CS)</option><option value="KP">Középpályás (KP)</option><option value="V">Védő (V)</option><option value="K">Kapus (K)</option></select>
-                    </div>
-                    <div class="transfer-market-results" id="transferMarketResults"></div>
-                </div>
-            </main>
-        </div>
-        <nav class="bottom-bar">
-            <button class="nav-btn active" data-screen="dashboardScreen"><i class="fas fa-tachometer-alt"></i></button>
-            <button class="nav-btn" data-screen="squadScreen"><i class="fas fa-users"></i></button>
-            <button class="nav-btn" data-screen="leagueScreen"><i class="fas fa-trophy"></i></button>
-            <button class="nav-btn" data-screen="playerTransferScreen"><i class="fas fa-arrows-alt-h"></i></button>
-            <button class="nav-btn" data-screen="globalTransferScreen"><i class="fas fa-globe-europe"></i></button>
-        </nav>
-    </div>
+            <section class="menu-box">
+                <h2>⚙️ Beállítások</h2>
+                <p>Nyelv, hang, pénznem.</p>
+            </section>
 
-    <div class="overlay hidden" id="confirmationModalOverlay">
-        <div class="card" style="max-width: 400px; text-align: center;">
-            <h3 id="confirmationModalTitle">Megerősítés</h3>
-            <p id="confirmationModalText" style="margin: 20px 0;">Biztosan végrehajtod a műveletet?</p>
-            <div class="navigation-buttons" style="justify-content: center;">
-                <button class="button cancel-btn" id="cancelBtn">Mégsem</button>
-                <button class="button submit-btn" id="confirmBtn">Igen</button>
-            </div>
+            <section class="menu-box">
+                <h2>✉️ Névjegyzék</h2>
+                <p>Elérhetőségek.</p>
+            </section>
         </div>
-    </div>
-    
-    <script type="module" src="main.js"></script>
+    </main>
 
+    <script src="script.js"></script>
 </body>
 </html>
