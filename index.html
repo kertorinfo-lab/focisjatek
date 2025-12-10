@@ -70,6 +70,58 @@
         <button id="back-to-selection" class="back-button">⬅ Vissza</button>
     </section>
 
+    <section id="club-hub" class="screen hidden">
+        <div class="hub-container">
+            <div class="hub-main-col">
+                <div class="club-info-box">
+                    <div id="current-club-display">
+                        <img id="club-logo" src="placeholder.png" alt="Csapat logó">
+                        <h2 id="club-name-title">Csapat Név</h2>
+                    </div>
+                    <div class="match-info">
+                        <h3>Következő Mérkőzés</h3>
+                        <p id="next-match-details">Barátságos mérkőzés: X vs. Y</p>
+                        <button id="start-match-btn" class="action-button">▶️ Meccs Kezdése</button>
+                    </div>
+                </div>
+
+                <div class="schedule-box">
+                    <h2>🗓️ Menetrend</h2>
+                    <ul id="schedule-list">
+                        <li>2025. dec. 15: Edzőmérkőzés vs. Amatőr FC</li>
+                        <li>2025. dec. 22: Liga meccs vs. Rivális SC</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="hub-side-col">
+                
+                <div class="squad-box">
+                    <h2>📋 Csapat Összeállítás</h2>
+                    <p>Kezdő 11, Taktika beállítása.</p>
+                    <button class="action-button">Beállítás</button>
+                </div>
+
+                <div class="transfer-grid">
+                    <div class="transfer-box incoming">
+                        <h2>➡️ Igazolások</h2>
+                        <p>Felvehetsz új játékosokat.</p>
+                    </div>
+                    <div class="transfer-box outgoing">
+                        <h2>⬅️ Távozók</h2>
+                        <p>Eladhatod a felesleges játékosokat.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="news-ticker">
+            📰 Hírek: <span id="ticker-content">Átigazolási pletykák... Német óriás lecsapott...</span>
+        </div>
+
+        <button id="back-to-game-selection" class="back-button">⬅ Mód választás</button>
+    </section>
+
     <script src="script.js"></script>
 </body>
 </html>
