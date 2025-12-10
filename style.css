@@ -114,7 +114,7 @@ body {
 /* WSC FEJLÉC ÉS HÁTTÉR (Játék/Klub VÁLASZTÓ) */
 /* ------------------------------------- */
 
-/* Visszaállítva az eredeti, egyszerűbb WSC stílusra, eltávolítva a komplexebb térkép effekteket. */
+/* Visszaállítva az egyszerű, pöttyös WSC stílusra */
 .wsc-background {
     background: #020617;
     /* Egyszerű pontozott háttér */
