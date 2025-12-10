@@ -362,6 +362,64 @@ body {
     overflow: hidden;
 }
 
+/* --- MECCS KÉPERNYŐ STÍLUSOK --- */
+
+#match-screen {
+    justify-content: flex-start;
+    padding: 20px;
+}
+
+.match-header {
+    width: 90%;
+    max-width: 600px;
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.match-header h1 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+.score-display {
+    font-size: 3em;
+    font-weight: 700;
+    color: #f0b347; /* Sárga kiemelés */
+}
+
+#match-log {
+    width: 90%;
+    max-width: 600px;
+    height: 350px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.event-message {
+    padding: 5px 0;
+    border-bottom: 1px dotted rgba(255, 255, 255, 0.1);
+    font-size: 0.95em;
+    line-height: 1.4;
+}
+
+.event-goal {
+    color: #10b981; /* Zöld Gól */
+    font-weight: bold;
+}
+
+.event-whistle {
+    color: #38bdf8; /* Kék Félidő */
+    text-align: center;
+    border-bottom: none;
+    font-style: italic;
+}
+
+
 /* --- MOBIL OPTIMALIZÁCIÓ (PORTRÉ ÁLLÁS) --- */
 @media screen and (orientation: portrait) {
     /* Főmenü álló tájolásban */
@@ -412,5 +470,11 @@ body {
     .transfer-grid {
         height: auto;
         margin-bottom: 15px;
+    }
+
+    /* Meccs képernyő álló tájolásban */
+    #match-log, .match-header {
+        max-width: 100%;
+        width: 100%;
     }
 }
