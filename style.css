@@ -7,16 +7,14 @@
 body {
     margin: 0;
     padding: 0;
-    /* Inter betűtípust preferáljuk, ha elérhető */
     font-family: 'Inter', 'Segoe UI', sans-serif;
-    /* Modern, sötét, finom sugárirányú háttérgradiens */
     background: radial-gradient(circle at top, #0f172a, #020617);
     color: #e2e8f0;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    overflow: hidden; /* Ne lehessen görgetni a fő felületet */
+    overflow: hidden;
 }
 
 /* Fő konténer (biztosítja, hogy a főmenü kitöltse a mobil képernyőt) */
@@ -36,19 +34,17 @@ body {
 /* --- FŐMENÜ (3x2 GRIDSZERKEZET) --- */
 .menu-container {
     display: grid;
-    /* Fix méretek a kompakt megjelenéshez, fekvő tájolásra optimalizálva */
     grid-template-columns: repeat(3, 180px);
     grid-template-rows: repeat(2, 140px);
-    gap: 16px; /* Távolság a sablonok között */
+    gap: 16px;
     padding: 20px;
-    max-width: 900px; /* Limitálja a méretet nagyobb képernyőn */
+    max-width: 900px;
 }
 
 /* Minden kártya alap stílusa */
 .menu-box {
-    /* Modern üveg (Glassmorphism) hatás */
     background: rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(6px); /* Elmosás effekt */
+    backdrop-filter: blur(6px);
     border-radius: 14px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     padding: 10px 12px;
@@ -63,14 +59,14 @@ body {
 /* Hover – modern glow és mozgás */
 .menu-box:hover {
     transform: translateY(-4px) scale(1.04);
-    box-shadow: 0 8px 22px rgba(0, 150, 255, 0.35); /* Kék fény */
+    box-shadow: 0 8px 22px rgba(0, 150, 255, 0.35);
     cursor: pointer;
     border-color: rgba(0, 150, 255, 0.4);
 }
 
 /* Cím */
 .menu-box h2 {
-    color: #38bdf8; /* Kék kiemelés */
+    color: #38bdf8;
     margin: 0;
     font-size: 1.05em;
     font-weight: 600;
@@ -87,10 +83,9 @@ body {
 .main-game {
     grid-column: span 2;
     grid-row: span 2;
-    /* Zöld gradiens (Foci pálya hangulat) */
     background: linear-gradient(135deg, #10b981aa, #059669aa);
     border: 2px solid #34d399;
-    box-shadow: 0 0 22px rgba(16, 185, 129, 0.45); /* Zöld fény */
+    box-shadow: 0 0 22px rgba(16, 185, 129, 0.45);
 }
 
 /* Külön keretes rész (a Játék boxban) */
@@ -105,9 +100,8 @@ body {
 
 /* --- ÁLTALÁNOS KÉPERNYŐ STÍLUSOK (Játék/Klub választó) --- */
 .screen {
-    position: fixed; /* Fix pozíció */
+    position: fixed;
     z-index: 10;
-    /* Nincs blur, tiszta háttér */
     background: #020617;
     flex-direction: column;
     padding: 20px;
@@ -136,7 +130,7 @@ body {
 /* --- JÁTÉK VÁLASZTÓ GRID --- */
 .selection-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 oszlop */
+    grid-template-columns: repeat(4, 1fr);
     gap: 12px;
     width: 100%;
     max-width: 900px;
@@ -172,7 +166,7 @@ body {
 
 /* Mentett csapat slot kiemelése */
 .saved-team-slot {
-    grid-column: span 2; /* Ez 2 oszlopot foglal el */
+    grid-column: span 2;
     background: linear-gradient(45deg, #f0b34744, #e2e8f01a);
     border-color: #f0b347;
     color: #f0b347;
@@ -188,7 +182,7 @@ body {
 /* --- KLUB VÁLASZTÓ LISTA --- */
 #league-list {
     max-height: 70vh;
-    overflow-y: auto; /* Görgethető lista */
+    overflow-y: auto;
     width: 90%;
     max-width: 800px;
     padding: 15px;
@@ -222,12 +216,157 @@ body {
     background: #334155;
 }
 
+
+/* --- KLUBKÖZPONT (CLUB HUB) STÍLUSOK --- */
+
+#club-hub {
+    justify-content: flex-start;
+    padding-top: 50px;
+}
+
+.hub-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr; 
+    gap: 20px;
+    width: 95%;
+    max-width: 1000px;
+    height: 75vh;
+}
+
+/* Bal oszlop stílusa (Csapat infó + Menetrend) */
+.hub-main-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Jobb oszlop stílusa (Taktika, Átigazolások) */
+.hub-side-col {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Egyedi box stílus a Hub-ban */
+.club-info-box, .schedule-box, .squad-box, .transfer-box {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.club-info-box {
+    flex-grow: 1;
+}
+
+#current-club-display {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+}
+
+#club-logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 15px;
+    background-color: #38bdf8;
+}
+
+#club-name-title {
+    color: #e2e8f0;
+    margin: 0;
+    font-size: 1.8em;
+}
+
+.match-info h3 {
+    color: #10b981;
+    margin-top: 5px;
+}
+
+/* Menetrend lista */
+#schedule-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#schedule-list li {
+    padding: 5px 0;
+    border-bottom: 1px dotted rgba(255, 255, 255, 0.1);
+    font-size: 0.9em;
+}
+
+/* Összeállítás és Igazolások */
+.squad-box {
+    height: 40%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.transfer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    height: 60%;
+}
+
+.transfer-box {
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.transfer-box.incoming {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: #10b981;
+}
+
+.transfer-box.outgoing {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: #ef4444;
+}
+
+/* Akció gomb (Pl. Meccs Kezdése) */
+.action-button {
+    background: #38bdf8;
+    color: #020617;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    margin-top: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.action-button:hover {
+    background: #0ea5e9;
+}
+
+/* Hírek Futószalag (Legalsó sáv) */
+#news-ticker {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #1f2937;
+    color: #fcd34d;
+    padding: 8px 20px;
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
 /* --- MOBIL OPTIMALIZÁCIÓ (PORTRÉ ÁLLÁS) --- */
 @media screen and (orientation: portrait) {
     /* Főmenü álló tájolásban */
     .menu-container {
-        /* Álló tájolásban 2 oszlopos elrendezés */
-        grid-template-columns: repeat(2, 1fr); /* 1fr, mert nincs fix szélesség */
+        grid-template-columns: repeat(2, 1fr);
         grid-template-rows: auto;
         gap: 14px;
         width: 90%;
@@ -236,7 +375,7 @@ body {
 
     .main-game {
         grid-column: span 2;
-        grid-row: span 1; /* Már csak 1 sort foglal el, hogy ne legyen túl nagy */
+        grid-row: span 1;
         min-height: 180px;
     }
 
@@ -252,5 +391,26 @@ body {
 
     #league-list {
         max-height: 50vh;
+    }
+    
+    /* Klubközpont álló tájolásban */
+    #club-hub {
+        padding-top: 20px;
+    }
+    
+    .hub-container {
+        grid-template-columns: 1fr;
+        height: auto;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .hub-main-col, .hub-side-col {
+        gap: 15px;
+    }
+
+    .transfer-grid {
+        height: auto;
+        margin-bottom: 15px;
     }
 }
