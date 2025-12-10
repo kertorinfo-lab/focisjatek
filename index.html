@@ -140,6 +140,40 @@
         <button id="end-match-btn" class="back-button hidden">Vissza a Klubközpontba</button>
     </section>
 
+    <section id="squad-screen" class="screen hidden">
+        <h1>📋 Csapat Összeállítás</h1>
+        
+        <div class="squad-container">
+            <div class="pitch-display">
+                <h2>Aktuális Formáció: <span id="current-formation">4-4-2</span></h2>
+                <div id="tactics-pitch">
+                    </div>
+            </div>
+
+            <div class="squad-controls">
+                <h3>Válassz Formációt</h3>
+                <select id="formation-selector" class="selection-input">
+                    <option value="4-4-2">4-4-2 Klasszikus</option>
+                    <option value="4-3-3">4-3-3 Támadó</option>
+                    <option value="5-3-2">5-3-2 Védekező</option>
+                </select>
+
+                <h3>Taktikai Utasítások (Placeholder)</h3>
+                <p>Támadó mentalitás / Magas presszing / Kontra</p>
+
+                <button class="action-button full-width" id="save-squad-btn">Mentés és Vissza</button>
+            </div>
+
+            <div class="player-list-box">
+                <h2>Játékosok (Értékelés)</h2>
+                <div id="player-list">
+                    </div>
+            </div>
+        </div>
+
+        <button id="back-to-hub-from-squad" class="back-button">⬅ Vissza a Klubközpontba</button>
+    </section>
+
     <script src="script.js"></script>
 </body>
 </html>
