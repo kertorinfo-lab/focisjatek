@@ -2,260 +2,189 @@
 <html lang="hu">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobil Foci Játék</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WSC Manager</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <main id="main-menu">
+    <section id="main-menu" class="screen">
         <div class="menu-container">
-
-            <section class="menu-box main-game">
-                <h2>Játék</h2>
-                <div class="kocka-keret">Kattints a játék indításához</div>
-            </section>
-
-            <section class="menu-box" data-screen="profile">
-                <h2>👤 Profil</h2>
-                <p>Játékstatisztikák és eredmények.</p>
-            </section>
-
-            <section class="menu-box" data-screen="shop">
-                <h2>💰 Bolt</h2>
-                <p>Vásárlási lehetőségek.</p>
-            </section>
-
-            <section class="menu-box" data-screen="trophies">
-                <h2>🏆 Trófeák</h2>
-                <p>Megnyert díjak gyűjteménye.</p>
-            </section>
-
-            <section class="menu-box" data-screen="settings">
-                <h2>⚙️ Beállítások</h2>
-                <p>Nyelv, hang, pénznem.</p>
-            </section>
-
-            <section class="menu-box" data-screen="contacts">
-                <h2>✉️ Névjegyzék</h2>
-                <p>Elérhetőségek.</p>
-            </section>
-        </div>
-    </main>
-
-    <section id="game-selection" class="screen hidden">
-        <h1>Válassz Játék Módot</h1>
-        <div class="selection-grid">
-            <button class="selection-box" data-mode="club">🏆 Klub Csapat</button>
-            <button class="selection-box" data-mode="national">🌎 Válogatott</button>
-            <div class="selection-box saved-team-slot">
-                <h2>Kiválasztott Csapat</h2>
-                <p id="saved-team-display">Nincs kiválasztva</p>
-                <button id="change-team-btn" class="hidden">Csapat Változtatása</button>
+            <h1 class="main-title">WORLD SOCCER ⚽ Champs</h1>
+            <div class="menu-options">
+                <div class="menu-box main-game">
+                    <h2>JÁTÉK</h2>
+                    <p>Karrier indítása, vagy mentés betöltése.</p>
+                </div>
+                <div class="menu-box">
+                    <h2>BEÁLLÍTÁSOK</h2>
+                    <p>Játék és nyelvi beállítások.</p>
+                </div>
+                <div class="menu-box">
+                    <h2>CREDITS</h2>
+                    <p>A játék készítői.</p>
+                </div>
             </div>
-            <div class="selection-box inactive">Egyéb Mód 1</div>
-            <div class="selection-box inactive">Egyéb Mód 2</div>
-            <div class="selection-box inactive">Egyéb Mód 3</div>
-            <div class="selection-box inactive">Egyéb Mód 4</div>
-            <div class="selection-box inactive">Egyéb Mód 5</div>
+            
+            <div id="saved-team-display" class="saved-team-slot hidden">
+                <span id="saved-team-name"></span>
+                <button id="continue-btn" class="menu-button">FOLYTATÁS »</button>
+                <button id="change-team-btn" class="menu-button grey-button">CSAPAT VÁLTOZTATÁSA</button>
+            </div>
         </div>
-        <button id="back-to-menu" class="back-button">⬅ Vissza a Főmenübe</button>
     </section>
 
-    <section id="club-selection" class="screen hidden club-selection-bg">
+    <section id="game-selection" class="screen hidden wsc-background">
         <div class="header-wsc">
             <div class="header-left">
                 <button class="header-menu-btn">≡</button>
                 <div class="header-title-wsc">WORLD SOCCER ⚽ Champs</div>
             </div>
             <div class="header-right">
-                 <button id="back-to-selection-wsc" class="wsc-button green-button back-arrow">VISSZA</button> 
+                <button id="back-to-menu-wsc" class="wsc-button green-button back-arrow">VISSZA</button>
             </div>
         </div>
 
-        <div class="selection-container">
-            <h1 class="wsc-subtitle">Új karrier / Válassz ligát</h1>
-            <div id="league-list">
-                </div>
-        </div>
-    </section>
-
-    <section id="club-hub" class="screen hidden">
-        <div class="hub-container">
-            <div class="hub-main-col">
-                <div class="club-info-box">
-                    <div id="current-club-display">
-                        <img id="club-logo" src="placeholder.png" alt="Csapat logó">
-                        <h2 id="club-name-title">Csapat Név</h2>
-                    </div>
-                    <div class="match-info">
-                        <h3>Következő Mérkőzés</h3>
-                        <p id="next-match-details">Barátságos mérkőzés: X vs. Y</p>
-                        <button id="start-match-btn" class="action-button">▶️ Meccs Kezdése</button>
-                    </div>
-                </div>
-
-                <div class="schedule-box">
-                    <h2>🗓️ Menetrend</h2>
-                    <ul id="schedule-list">
-                        <li>2025. dec. 15: Edzőmérkőzés vs. Amatőr FC</li>
-                        <li>2025. dec. 22: Liga meccs vs. Rivális SC</li>
-                    </ul>
-                </div>
-            </div>
+        <div class="selection-container-wsc">
+            <h1 class="wsc-subtitle">Válassz Karriert</h1>
             
-            <div class="hub-side-col">
+            <div id="saved-careers-list">
+                <div id="new-career-button" class="career-row new-career-row">
+                    <div class="career-info">
+                         <span class="next-arrow">»</span>
+                         <span class="career-name">Új karrier</span>
+                    </div>
+                </div>
                 
-                <div class="squad-box">
-                    <h2>📋 Csapat Összeállítás</h2>
-                    <p>Kezdő 11, Taktika beállítása.</p>
-                    <button class="action-button">Beállítás</button>
                 </div>
-
-                <div class="transfer-grid">
-                    <div class="transfer-box incoming">
-                        <h2>➡️ Igazolások</h2>
-                        <p>Felvehetsz új játékosokat.</p>
-                    </div>
-                    <div class="transfer-box outgoing">
-                        <h2>⬅️ Távozók</h2>
-                        <p>Eladhatod a felesleges játékosokat.</p>
-                    </div>
-                </div>
-            </div>
         </div>
-
-        <div id="news-ticker">
-            📰 Hírek: <span id="ticker-content">Átigazolási pletykák... Német óriás lecsapott...</span>
-        </div>
-
-        <button id="back-to-game-selection" class="back-button">⬅ Mód választás</button>
     </section>
 
-    <section id="match-screen" class="screen hidden">
-        <div class="match-header">
-            <h1 id="match-title">Barátságos Mérkőzés</h1>
-            <div class="score-display">
-                <span id="home-team-score">0</span>
-                -
-                <span id="away-team-score">0</span>
+    <section id="difficulty-selection" class="screen hidden wsc-background">
+        <div class="header-wsc">
+            <div class="header-left">
+                <button class="header-menu-btn">≡</button>
+                <div class="header-title-wsc">WORLD SOCCER ⚽ Champs</div>
+            </div>
+            <div class="header-right">
+                <button id="back-to-career-wsc" class="wsc-button green-button back-arrow">VISSZA</button>
             </div>
         </div>
 
-        <div id="match-log">
-            <p class="event-message">A meccs mindjárt kezdődik...</p>
-        </div>
-
-        <button id="next-event-btn" class="action-button">Következő Esemény (10') ▶️</button>
-        <button id="end-match-btn" class="back-button hidden">Vissza a Klubközpontba</button>
-    </section>
-
-    <section id="squad-screen" class="screen hidden">
-        <div class="header-squad">
-            <div id="team-name-squad">📋 Csapat Összeállítás</div>
-            <div class="top-stats-squad">
-                <span>⚽ 2</span>
-                <span>+ 1</span>
-                <span>💰 $412k</span>
-                <span>⭐ 5</span>
-            </div>
-            <button id="back-to-hub-from-squad-header" class="back-button small-back">VISSZA</button>
-        </div>
-        
-        <div class="squad-main-grid">
-            <div class="pitch-area">
-                <div id="tactics-pitch">
+        <div class="difficulty-container">
+            <h1 class="wsc-subtitle">Válassz nehézségi szintet</h1>
+            
+            <div class="difficulty-grid">
+                <div class="difficulty-box beginner-level" data-level="beginner">
+                    <div class="level-header">
+                        <span class="ball-icon">⚽</span>
+                        <h2>KEZDŐ</h2>
+                        <span class="forward-arrow">»</span>
                     </div>
-
-                <div class="tactics-controls-bottom">
-                    <div class="control-box">
-                        <p>Mentalitás</p>
-                        <select class="selection-input small-select" id="mentality-selector">
-                            <option value="defensive">Védekező</option>
-                            <option value="neutral" selected>Semleges</option>
-                            <option value="attacking">Támadó</option>
-                        </select>
+                    <div class="stats-bar-group">
+                        <h3>CPU Tudása</h3>
+                        <div class="stats-bar"></div><div class="stats-bar"></div><div class="stats-bar empty"></div><div class="stats-bar empty"></div>
+                        <h3>Sérülések & Kiállítások</h3>
+                        <div class="stats-bar"></div><div class="stats-bar"></div><div class="stats-bar empty"></div><div class="stats-bar empty"></div>
+                        <h3>Átfogó Kihívás</h3>
+                        <div class="stats-bar"></div><div class="stats-bar"></div><div class="stats-bar empty"></div><div class="stats-bar empty"></div>
                     </div>
-                    <div class="control-box">
-                        <p>Formáció</p>
-                        <select class="selection-input small-select" id="formation-selector">
-                            <option value="4-4-2">4-4-2</option>
-                            <option value="4-3-3">4-3-3</option>
-                            <option value="5-3-2">5-3-2</option>
-                            <option value="3-4-3">3-4-3</option>
-                        </select>
-                    </div>
-                    <div class="control-box">
-                        <p>Nyomás</p>
-                        <select class="selection-input small-select" id="pressure-selector">
-                            <option value="low">Alacsony</option>
-                            <option value="normal" selected>Normál</option>
-                            <option value="high">Magas</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="substitutes-area">
-                <div class="sub-list-box">
-                    <div class="list-title">CSERÉK</div>
-                    <div id="substitute-list" class="player-slot-container dropzone" data-status-type="sub">
-                        </div>
+                    <p>Tökéletes kezdőknek! Élvezd az egyszerűbb játékmenetet, lassabb, kevésbé kihívó ellenfelekkel és kapusokkal. Tapasztalj kevesebb sérülést és ritka kiállításokat. Ideális az alapok elsajátításához.</p>
                 </div>
 
-                <div class="sub-list-box tar-box">
-                    <div class="list-title">TAR</div>
-                    <div id="reserve-list" class="player-slot-container dropzone" data-status-type="reserve">
-                        </div>
+                <div class="difficulty-box semi-pro-level" data-level="semi-pro">
+                    <div class="level-header">
+                        <span class="ball-icon">⚽</span>
+                        <h2>FÉLPROFI</h2>
+                        <span class="forward-arrow">»</span>
+                    </div>
+                    <div class="stats-bar-group">
+                         <h3>CPU Tudása</h3>
+                        <div class="stats-bar"></div><div class="stats-bar"></div><div class="stats-bar"></div><div class="stats-bar empty"></div>
+                        <h3>Sérülések & Kiállítások</h3>
+                        <div class="stats-bar"></div><div class="stats-bar"></div><div class="stats-bar"></div><div class="stats-bar empty"></div>
+                        <h3>Átfogó Kihívás</h3>
+                        <div class="stats-bar"></div><div class="stats-bar"></div><div class="stats-bar"></div><div class="stats-bar empty"></div>
+                    </div>
+                    <p>Egy kiegyensúlyozott kihívás! Szállj szembe közepesen ügyes ellenfelekkel és kapusokkal. Számíts időnként sérülésekre és sárga vagy piros lapokra. Középhálózóknak ajánlott.</p>
+                </div>
+
+                <div class="difficulty-box pro-level" data-level="pro">
+                    <div class="level-header">
+                        <span class="ball-icon">⚽</span>
+                        <h2>PROFI</h2>
+                        <span class="forward-arrow">»</span>
+                    </div>
+                    <div class="stats-bar-group">
+                        <h3>CPU Tudása</h3>
+                        <div class="stats-bar"></div><div class="stats-bar"></div><div class="stats-bar"></div><div class="stats-bar"></div>
+                        <h3>Sérülések & Kiállítások</h3>
+                        <div class="stats-bar"></div><div class="stats-bar"></div><div class="stats-bar"></div><div class="stats-bar"></div>
+                        <h3>Átfogó Kihívás</h3>
+                        <div class="stats-bar"></div><div class="stats-bar"></div><div class="stats-bar"></div><div class="stats-bar"></div>
+                    </div>
+                    <p>Próbáld ki a képességed! Versenyezz okosabb és gyorsabb ellenfelekkel és kapusokkal. Tapasztald az olyan sérüléseket és sárga kártyákat, amik valóságban ritkábbak. Tapasztalt játékosoknak ajánlott!</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="transfer-screen" class="screen hidden">
-        <h1>💸 Átigazolási Központ</h1>
-        
-        <div class="finance-header">
-            <div class="finance-box">
-                <h4>Pénz Készlet</h4>
-                <span id="current-balance" class="money positive">$50.000.000</span>
+    <section id="club-selection" class="screen hidden wsc-background">
+        <div class="header-wsc">
+            <div class="header-left">
+                <button class="header-menu-btn">≡</button>
+                <div class="header-title-wsc">WORLD SOCCER ⚽ Champs</div>
             </div>
-            <div class="finance-box">
-                <h4>Fizetési Keret</h4>
-                <span id="salary-cap">$1.500.000 / $2.000.000</span>
-            </div>
-            <div class="finance-box">
-                <h4>Átigazolási Keret</h4>
-                <span id="transfer-budget">$30.000.000</span>
+            <div class="header-right">
+                <button id="back-to-selection-wsc" class="wsc-button green-button back-arrow">VISSZA</button>
+                <button id="continue-club-selection" class="wsc-button green-button forward-arrow hidden">FOLYTATÁS ▸</button>
             </div>
         </div>
 
-        <div class="transfer-container">
-            <div class="transfer-list-box">
-                <h2>➡️ Igazolási Célpontok</h2>
-                <div id="scout-list">
-                    <p class="placeholder-text">Kattints a keresés indításához...</p>
-                </div>
-                <button id="search-market-btn" class="action-button full-width">Piac Felkutatása</button>
-            </div>
+        <div class="selection-container-wsc">
+            <h1 class="wsc-subtitle">Új karrier/ Válassz ligát</h1>
+            
+            <table id="league-list" class="wsc-table">
+                </table>
+        </div>
+    </section>
 
-            <div class="transfer-list-box">
-                <h2>⬅️ Eladható Játékosok</h2>
-                <div id="sell-list">
-                     </div>
-                <button id="sell-player-btn" class="action-button full-width sell-button">Játékos Eladás (Placeholder)</button>
+    <section id="club-hub" class="screen hidden club-hub-background">
+        <div class="hub-header">
+            <div class="hub-title-section">
+                <img id="club-logo" src="" alt="Club Logo" class="club-logo">
+                <h1 id="current-club-name"></h1>
+            </div>
+            <div class="hub-info-section">
+                <span class="info-stat">🏆 1</span>
+                <span class="info-stat">❤️ 1</span>
+                <span class="info-stat">💲 412e</span>
+                <span class="info-stat">💰 5</span>
+                <button id="back-to-main-menu-hub" class="hub-button blue-button">VISSZA</button>
             </div>
         </div>
 
-        <div class="log-box">
-            <h4>Tranzakciós Napló</h4>
-            <div id="transfer-log">
-                <p>2025. dec. 10: Rendszer frissítve. ($0)</p>
-            </div>
+        <div class="hub-nav">
+            <button class="hub-nav-button active" data-screen="squad">CSAPATOM</button>
+            <button class="hub-nav-button" data-screen="tactics">SZEREPKÖDÉS</button>
+            <button class="hub-nav-button" data-screen="calendar">NAPTÁR</button>
+            <button class="hub-nav-button" data-screen="finance">PÉNZÜGYEK</button>
+            <button class="hub-nav-button" data-screen="league">LIGA</button>
+            <button class="hub-nav-button" data-screen="transfer">ÁTIGAZOLÁSOK</button>
         </div>
 
-        <button id="back-to-hub-from-transfer" class="back-button">⬅ Vissza a Klubközpontba</button>
+        <div id="squad-screen" class="hub-sub-screen">
+            <h2>Csapat összeállítás</h2>
+            <p>Itt látható a csapat taktikai felállása és a játékosok.</p>
+        </div>
+
+        <div id="transfer-screen" class="hub-sub-screen hidden">
+            <h2>Átigazolási piac</h2>
+            <p>Itt vásárolhatsz és adhatsz el játékosokat.</p>
+        </div>
+
+        <div id="match-screen" class="hub-sub-screen hidden"></div>
     </section>
 
     <script src="script.js"></script>
