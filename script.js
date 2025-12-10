@@ -2,16 +2,52 @@
 
 const footballData = {
     premierLeague: {
-        name: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League",
+        name: "Anglia",
+        flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+        difficulty: 5, // 5 csillag
         teams: ["Arsenal", "Liverpool", "Manchester City", "Manchester United", "Chelsea"]
     },
     laLiga: {
-        name: "🇪🇸 La Liga",
+        name: "Spanyolország",
+        flag: "🇪🇸",
+        difficulty: 4, 
         teams: ["Real Madrid", "FC Barcelona", "Atlético Madrid"]
     },
     serieA: {
-        name: "🇮🇹 Serie A",
+        name: "Olaszország",
+        flag: "🇮🇹",
+        difficulty: 4, 
         teams: ["Juventus", "Inter Milan", "AC Milan"]
+    },
+    bundesliga: {
+        name: "Németország",
+        flag: "🇩🇪",
+        difficulty: 4, 
+        teams: ["Bayern München", "Bayer Leverkusen", "Dortmund"]
+    },
+    ligue1: {
+        name: "Franciaország",
+        flag: "🇫🇷",
+        difficulty: 3, 
+        teams: ["PSG", "Monaco", "Marseille"]
+    },
+    saudi: {
+        name: "Szaúd-Arábia",
+        flag: "🇸🇦",
+        difficulty: 3, 
+        teams: ["Al-Nassr", "Al-Hilal", "Al-Ittihad"]
+    },
+    brazil: {
+        name: "Brazília",
+        flag: "🇧🇷",
+        difficulty: 3, 
+        teams: ["Flamengo", "Palmeiras"]
+    },
+    portugal: {
+        name: "Portugália",
+        flag: "🇵🇹",
+        difficulty: 2, 
+        teams: ["Porto", "Benfica"]
     }
 };
 
@@ -200,6 +236,7 @@ function showClubHub() {
 
 /**
  * Megjeleníti a Klubválasztó képernyőt.
+ * Frissített WSC stílusú ligalista megjelenítéssel.
  */
 function showClubSelection() {
     gameSelection.classList.add('hidden');
@@ -208,31 +245,67 @@ function showClubSelection() {
     matchScreen.classList.add('hidden');
     squadScreen.classList.add('hidden');
     transferScreen.classList.add('hidden');
-    leagueList.innerHTML = '';
+    leagueList.innerHTML = ''; // Kiürítjük a listát
 
     for (const leagueKey in footballData) {
         const league = footballData[leagueKey];
 
-        const title = document.createElement('h3');
-        title.className = 'league-title';
-        title.textContent = league.name;
-        leagueList.appendChild(title);
+        const leagueRow = document.createElement('div');
+        leagueRow.className = 'league-row';
+        leagueRow.setAttribute('data-league-key', leagueKey);
+        
+        // Zászló, Ország neve és Nehézségi csillagok
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'league-info';
 
-        const teamsContainer = document.createElement('div');
-        teamsContainer.style.display = 'flex';
-        teamsContainer.style.flexWrap = 'wrap';
+        // Zászló
+        const flagSpan = document.createElement('span');
+        flagSpan.textContent = league.flag;
+        infoDiv.appendChild(flagSpan);
 
-        league.teams.forEach(teamName => {
-            const teamButton = document.createElement('button');
-            teamButton.className = 'team-button';
-            teamButton.textContent = teamName;
-            teamButton.addEventListener('click', () => {
-                selectTeam(teamName);
-            });
-            teamsContainer.appendChild(teamButton);
+        // Ország neve
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'country-name';
+        nameSpan.textContent = league.name;
+        infoDiv.appendChild(nameSpan);
+        
+        // Csillagok generálása
+        const starsDiv = document.createElement('div');
+        starsDiv.className = 'difficulty-stars';
+        
+        const maxStars = 5;
+        for (let i = 1; i <= maxStars; i++) {
+            const star = document.createElement('span');
+            star.textContent = '⭐';
+            star.classList.add(i <= league.difficulty ? 'star-filled' : 'star-empty');
+            starsDiv.appendChild(star);
+        }
+        infoDiv.appendChild(starsDiv);
+        
+        leagueRow.appendChild(infoDiv);
+
+        // JOBB OLDALI GOMB
+        const selectButton = document.createElement('button');
+        selectButton.className = 'select-league-btn';
+        selectButton.textContent = '»'; 
+        
+        // Eseménykezelő a gombra
+        selectButton.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+             // Csapatválasztás a listában lévő első csapattal (Demó)
+             const firstTeam = league.teams[0]; 
+             selectTeam(firstTeam); 
         });
 
-        leagueList.appendChild(teamsContainer);
+        leagueRow.appendChild(selectButton);
+
+        // Eseménykezelő a sorra (ugyanaz, mint a gomb)
+        leagueRow.addEventListener('click', () => {
+             const firstTeam = league.teams[0]; 
+             selectTeam(firstTeam); 
+        });
+
+        leagueList.appendChild(leagueRow);
     }
 }
 
@@ -699,8 +772,8 @@ document.querySelector('[data-mode="national"]').addEventListener('click', () =>
     showClubSelection();
 });
 
-// Klub Választó Képernyő: Vissza a játék választóba
-document.getElementById('back-to-selection').addEventListener('click', showGameSelection);
+// Klub Választó Képernyő (WSC): Vissza a játék választóba
+document.getElementById('back-to-selection-wsc').addEventListener('click', showGameSelection);
 
 // Csapat Változtatása Gomb (a Játékválasztón)
 changeTeamBtn.addEventListener('click', showClubSelection);
