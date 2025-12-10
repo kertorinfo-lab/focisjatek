@@ -1,18 +1,17 @@
-/* Alap beállítások, nullázás */
+/* Alap beállítások */
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modernebb betűtípus */
-    background-color: #0d1117; /* Sötét, 'GitHub-szerű' háttér */
-    color: #c9d1d9; /* Világos szöveg */
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    background: radial-gradient(circle at top, #0f172a, #020617);
+    color: #e2e8f0;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    overflow: hidden;
 }
 
-/* KÉPERNYŐ OPTIMALIZÁLÁS FEKVŐ TÁJOLÁSHOZ */
+/* Fő konténer */
 #main-menu {
     width: 100vw;
     height: 100vh;
@@ -21,79 +20,82 @@ body {
     align-items: center;
 }
 
-/* A menü konténer, ami most kompakt és középre igazított */
+/* ÚJ, kisebb, modernebb grid */
 .menu-container {
     display: grid;
-    /* Megtartjuk a 3x2 elrendezést fekvő tájoláshoz */
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    gap: 10px; /* Kisebb távolság a sablonok között (kompaktabb) */
-    padding: 10px;
-    max-width: 950px; /* Kicsit nagyobb maximális szélesség, de a gap kisebb */
-    width: 95%; /* Jobban kitölti a rendelkezésre álló helyet */
-    height: 95%;
+    grid-template-columns: repeat(3, 180px);
+    grid-template-rows: repeat(2, 140px);
+    gap: 16px;
+    padding: 20px;
 }
 
-/* A kocka/sablon keretek stílusa */
+/* Minden kártya alap stílusa */
 .menu-box {
-    background-color: #161b22; /* Kicsit sötétebb, elegáns háttér */
-    border-radius: 8px; /* Lekerekítettebb élek */
-    padding: 10px; /* Kisebb belső padding (kompaktabb) */
+    background: rgba(255, 255, 255, 0.06); 
+    backdrop-filter: blur(6px);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 10px 12px;
     text-align: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); /* Erősebb, modern árnyék */
-    transition: transform 0.2s, box-shadow 0.2s;
-    border: 1px solid #30363d; /* Nagyon finom, sötét keret */
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    transition: all 0.25s ease;
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
 
+/* Hover – modern glow */
 .menu-box:hover {
-    transform: translateY(-2px) scale(1.02); /* Finom felugró hatás */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.7);
+    transform: translateY(-4px) scale(1.04);
+    box-shadow: 0 8px 22px rgba(0, 150, 255, 0.35);
     cursor: pointer;
+    border-color: rgba(0, 150, 255, 0.4);
 }
 
+/* Cím */
 .menu-box h2 {
-    color: #58a6ff; /* Kék kiemelő szín (modern) */
-    margin-top: 0;
-    margin-bottom: 5px;
-    font-size: 1.1em;
+    color: #38bdf8;
+    margin: 0;
+    font-size: 1.05em;
+    font-weight: 600;
 }
 
+/* Leírás */
 .menu-box p {
-    font-size: 0.8em; /* Kicsit kisebb leírás szöveg */
-    color: #8b949e;
+    margin-top: 6px;
+    font-size: 0.78em;
+    opacity: 0.8;
 }
 
-/* Külön stílus a "Játék" szekciónak (kiemeljük) */
+/* Kiemelt – de kompaktabb, modernebb JÁTÉK gomb */
 .main-game {
-    grid-column: 1 / span 2; /* A Játék szekció továbbra is 2 oszlopot foglal el */
-    grid-row: 1 / span 2; /* És 2 sort, így a legnagyobb */
-    background-color: #238636; /* Élénk zöld (Foci pálya) */
-    border: 3px solid #f0b347; /* Trófea arany keret */
+    grid-column: span 2;
+    grid-row: span 2;
+    background: linear-gradient(135deg, #10b981aa, #059669aa);
+    border: 2px solid #34d399;
+    box-shadow: 0 0 22px rgba(16, 185, 129, 0.45);
 }
 
+/* Külön keretes rész (ha használod) */
 .kocka-keret {
     margin-top: 10px;
-    padding: 15px;
-    border: 1px dashed #ffffff70; /* Halvány, elegáns szaggatott keret */
-    width: 90%;
-    text-align: center;
-    font-weight: bold;
-    background-color: rgba(0, 0, 0, 0.3); /* Áttetsző réteg a szöveg mögött */
-    border-radius: 4px;
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+    font-weight: 600;
 }
 
-/* Media Query: Ha az eszköz álló tájolású (portré) */
+/* Mobil optimalizáció (PORTRÉ) */
 @media screen and (orientation: portrait) {
     .menu-container {
-        /* Álló tájolásban 2 oszlopos elrendezés */
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
+        grid-template-columns: repeat(2, 150px);
+        grid-template-rows: repeat(3, 120px);
+        gap: 14px;
     }
 
     .main-game {
-        grid-column: 1 / span 2;
+        grid-column: span 2;
+        grid-row: span 1;
     }
 }
